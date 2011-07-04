@@ -126,6 +126,10 @@ Hope you have fun with this!
 
 \NewDocumentCommand\chickenize{}{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
+  %% We want to “chickenize” figures, too. So …
+  \DeclareDocumentCommand\includegraphics{O{}m}{
+     \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
+  }
 }
 \NewDocumentCommand\uppercasecolor{}{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
@@ -133,8 +137,12 @@ Hope you have fun with this!
 \NewDocumentCommand\randomuclc{}{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
 }
+
 \NewDocumentCommand\colorstretch{}{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
+}
+\NewDocumentCommand\leetspeak{}{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
 }
 %    \end{macrocode}
 % \section{Definition of Macros}
@@ -196,28 +204,27 @@ function chickenize(head)
 
     chicken = {}
     chicken[0] = node.new(37,1)
-    for i = 1,8 do 
+    for i = 1,7 do 
       chicken[i] = node.new(37,1)
       chicken[i].font = font.current()
     end
     node.insert_before(head,i,chicken[1])
 
-    chicken[8].char = 67
-    chicken[7].char = 104
-    chicken[6].char = 105
-    chicken[5]  = node.new(7,3)
-    hyphennode = node.new(37,1)
-    hyphennode.char = 67
-    hyphennode.font = font.current()
-    chicken[5].pre = hyphennode
-    chicken[5].post = hyphennode
-    chicken[5] = node.new(37.1)
+  -- randomize upper/lower case to get a more natural output. 
+  -- however, this may make break points inconsistent!
+if (math.random() > 0.8) then
+    chicken[7].char = 67  else
+    chicken[7].char = 99
+end
+ 
+    chicken[6].char = 104
+    chicken[5].char = 105
     chicken[4].char = 99
     chicken[3].char = 107
     chicken[2].char = 101
     chicken[1].char = 110
-
-    for k = 1,7 do 
+lang.hyphenate(chicken[1])
+    for k = 1,6 do 
       node.insert_before(head,chicken[k],chicken[k+1])
     end
     chicken[1].next = i.next
@@ -225,6 +232,34 @@ function chickenize(head)
 
   return head
 end
+
+leettable = {
+  [101] = 51, -- e
+  [105] = 49, -- i
+  [108] = 49, -- l
+  [111] = 48, -- o
+  [115] = 53, -- s
+  [116] = 55, -- t
+
+  [101-32] = 51, -- e
+  [105-32] = 49, -- i
+  [108-32] = 49, -- l
+  [111-32] = 48, -- o
+  [115-32] = 53, -- s
+  [116-32] = 55, -- t
+}
+
+function leet(head)
+  for line in node.traverse_id(HLIST,head) do 
+    for i in node.traverse_id(GLYPH,line.list) do
+      if leettable[i.char] then 
+        i.char = leettable[i.char]
+      end
+    end
+  end
+  return head
+end
+
 
 -- The good parts of the following function are written by Paul Isambert.
 -- I merely copied it and changed a few parameters. Thanks for the code 
