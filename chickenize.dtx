@@ -24,6 +24,7 @@ Do not distribute a modified version of this file under the same name.
 \askforoverwritefalse
 
 \generate{\file{chickenize.sty}{\from{chickenize.dtx}{package}}}
+\generate{\file{chickenize.tex}{\from{chickenize.dtx}{tex}}}
 \def\MetaPrefix{-- }
 \def\luapostamble{%
   \MetaPrefix^^J%
@@ -87,6 +88,7 @@ There surely will be some options etc.
 % \fi
 This is the README file that should contain some important information. So far I can only tell you to run the file chickenize.dtx to produce the three files
   chickenize.pdf  (documentation)
+  chickenize.tex  (low-level commands; plainTeX)
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code)
 
@@ -98,57 +100,75 @@ arno dot trautmann at gmx dot de
 Hope you have fun with this!
 % \iffalse
 %</readme>
-%
+%<*tex>
+% \fi
+%    \begin{macrocode}
+\input{luatexbase.sty}
+\directlua{dofile("chickenize.lua")}
+
+\def\chickenize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
+}
+\def\uppercasecolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
+}
+\def\randomuclc{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
+}
+
+\def\colorstretch{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
+}
+\def\leetspeak{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
+}
+%    \end{macrocode}
+% \iffalse
+%</tex>
 %<*package>
 % \fi
 % \section{Preparation}
 % Loading of packages and defition of constants. Will change somewhat when migrating to expl3 (?)
 %    \begin{macrocode}
+\input{chickenize}
 \RequirePackage{
   expl3,
-  luatexbase,
   xkeyval,
   xparse
 }
-%% So far, no keys are needed.
+%% So far, no keys are defined. This will change …
 \ExplSyntaxOn
 \keys_define:nn {chick} {
-  columns.tl_gset:N = \chick_cards_colums,
-  columns.default:n = 2,
-  printonly.code:n = \tl_set:Nn\chick_print_only{#1}\bool_set_true:N\chick_print_only_true,
-  sectionsoncards.bool_set:N = \chick_sectionsoncards_true,
-  german.tl_set:N = \chick_language,
 }
 \NewDocumentCommand\chicksetup{m}{
   \keys_set:nn{chick}{#1}
 }
-\directlua{dofile("chickenize.lua")}
 %    \end{macrocode}
 % \section{Definition of User-Level Macros}
 %    \begin{macrocode}
-\NewDocumentCommand\chickenize{}{
+\DeclareDocumentCommand\chickenize{}{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
   %% We want to “chickenize” figures, too. So …
   \DeclareDocumentCommand\includegraphics{O{}m}{
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
 }
-\NewDocumentCommand\uppercasecolor{}{
+\DeclareDocumentCommand\uppercasecolor{}{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
 }
-\NewDocumentCommand\randomuclc{}{
+\DeclareDocumentCommand\randomuclc{}{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
 }
 
-\NewDocumentCommand\colorstretch{}{
+\DeclareDocumentCommand\colorstretch{}{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
 }
-\NewDocumentCommand\leetspeak{}{
+\DeclareDocumentCommand\leetspeak{}{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
 }
 
 %% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
- (most probable only available for \LaTeX)
+%%           (most probable only available for \LaTeX)
 
 \ExplSyntaxOff  %% because of the : in the domain …
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
