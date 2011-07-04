@@ -1,0 +1,229 @@
+% \iffalse
+%% File: chickenize.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
+%<*driver>
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+\input docstrip.tex
+\keepsilent
+\let\MetaPrefix\relax
+\preamble
+
+EXPERIMENTAL CODE
+
+Do not distribute this file without also distributing the
+source files specified above.
+
+Do not distribute a modified version of this file under the same name.
+
+\endpreamble
+\let\MetaPrefix\DoubleperCent
+\postamble
+\endpostamble
+\askforoverwritefalse
+
+\generate{\file{chickenize.sty}{\from{chickenize.dtx}{package}}}
+\def\MetaPrefix{-- }
+\def\luapostamble{%
+  \MetaPrefix^^J%
+  \MetaPrefix\space End of File `\outFileName'.%
+}
+\def\currentpostamble{\luapostamble}%
+
+\generate{\file{chickenize.lua}{\from{chickenize.dtx}{lua}}}
+\nopreamble\nopostamble
+\generate{\file{readme.markdown}{\from{chickenize.dtx}{readme}}}
+
+
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+\ProvidesFile{chickenize.sty}
+  [v0.0 chickenize package]
+\documentclass[english]{ltxdoc}
+\usepackage{
+  babel,
+  fontspec,
+  graphicx,
+  hyperref
+}
+\hypersetup{
+  pdfborder= 0 0 0,
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=blue,
+  urlcolor=blue
+}
+
+\setmainfont{TeX Gyre Pagella}
+
+\title{chickenize}
+\author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+\begin{document}
+\maketitle
+\begin{abstract}
+This is the documentation of the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document.\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.} You have e.\,g. the possibility to substitute every word of a document with the word “chicken”, translate it into chi speak, make it totally colorfull or use upper/lowercase all randomly. Of course this package is \emph{not} meant for any serious document, but only for fun and – because we can!
+
+If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
+\end{abstract}
+\tableofcontents
+\section{Usage}
+This package should be useable some time …
+
+\section{Working Principle}
+We make use of Lua\TeX s callbacks, especially the |pre_linebreak_filter| and the |post_linebreak_filter|. Hooking a function into these, we can chanke the input (into “chicken”) or add/transform the input (putting color in, changing lower/uppercase).
+
+\subsection{Package Options}
+There surely will be some options etc.
+
+\section{Implementation}
+\DocInput{chickenize.dtx}
+\end{document}
+%</driver>
+%<*readme>
+% \fi
+This is the README file that should contain some important information. So far I can only tell you to run the file chickenize.dtx to produce the three files
+  chickenize.pdf  (documentation)
+  chickenize.sty  (LaTeX user interface)
+  chickenize.lua  (Lua package code)
+
+You need an up-to-date TeX Live (2011, if possible) to use this package.
+
+For any comments or suggestions, contact me:
+arno dot trautmann at gmx dot de
+
+Hope you have fun with this!
+% \iffalse
+%</readme>
+%
+%<*package>
+% \fi
+% \section{Preparation}
+% Loading of packages and defition of constants. Will change somewhat when migrating to expl3 (?)
+%    \begin{macrocode}
+\RequirePackage{
+  expl3,
+  luatexbase,
+  xkeyval,
+  xparse
+}
+%% So far, no keys are needed.
+\ExplSyntaxOn
+\keys_define:nn {chick} {
+  columns.tl_gset:N = \chick_cards_colums,
+  columns.default:n = 2,
+  printonly.code:n = \tl_set:Nn\chick_print_only{#1}\bool_set_true:N\chick_print_only_true,
+  sectionsoncards.bool_set:N = \chick_sectionsoncards_true,
+  german.tl_set:N = \chick_language,
+}
+\NewDocumentCommand\chicksetup{m}{
+  \keys_set:nn{chick}{#1}
+}
+\directlua{dofile("chickenize.lua")}
+%    \end{macrocode}
+% \section{Definition of Macros}
+%    \begin{macrocode}
+% 
+%    \end{macrocode}
+%\iffalse
+%</package>
+%<*lua>
+%\fi
+% \section{Lua Module}
+% This file contains all the necessary functions.
+%    \begin{macrocode}
+local HLIST = node.id("hlist")
+local RULE = node.id("rule")
+local GLUE = node.id("glue")
+local WHAT = node.id("whatsit")
+local COL = node.subtype("pdf_colorstack")
+local GLYPH = node.id("glyph")
+
+local color_push = node.new(WHAT,COL)
+local color_pop = node.new(WHAT,COL)
+color_push.stack = 0
+color_pop.stack = 0
+color_push.cmd = 1
+color_pop.cmd = 2
+
+uppercasecolor = function (head)
+  for line in node.traverse_id(HLIST,head) do 
+    for upper in node.traverse_id(GLYPH,line.list) do
+      if (((upper.char > 64) and (upper.char < 91)) or
+          ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
+        color_push.data = math.random()..math.random()..math.random().." rg"
+        line.head = node.insert_before(line.list,upper,node.copy(color_push))
+        node.insert_after(line.list,upper,node.copy(color_pop))
+      end
+    end
+  end
+  return head
+end
+
+randomuclc = function(head)
+  for i in node.traverse_id(37,head) do
+    if math.random() < 0.5 then
+      i.char = tex.uccode[i.char] 
+    else 
+      i.char = tex.lccode[i.char]
+      i.yoffset = "15 pt"
+	end
+  end
+  return head
+end
+
+function chickenize(head)
+  for i in node.traverse_id(37,head) do  --find start of a word
+    while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
+      i.next = i.next.next
+    end
+
+    chicken = {}
+    chicken[0] = node.new(37,1)
+    for i = 1,8 do 
+      chicken[i] = node.new(37,1)
+      chicken[i].font = font.current()
+    end
+    node.insert_before(head,i,chicken[1])
+
+    chicken[8].char = 67
+    chicken[7].char = 104
+    chicken[6].char = 105
+    chicken[5]  = node.new(7,3)
+    hyphennode = node.new(37,1)
+    hyphennode.char = 67
+    hyphennode.font = font.current()
+    chicken[5].pre = hyphennode
+    chicken[5].post = hyphennode
+    chicken[4].char = 99
+    chicken[3].char = 107
+    chicken[2].char = 101
+    chicken[1].char = 110
+
+    for k = 1,7 do 
+      node.insert_before(head,chicken[k],chicken[k+1])
+    end
+    chicken[1].next = i.next
+  end
+
+  return head
+end
+%    \end{macrocode}
+%\iffalse 
+% </lua>
+%\fi
+% \section{Known Bugs}\label{bugs}
+% There are surely some bugs …
+% \begin{description}
+% \item ???
+% \end{description}
+% \section{To Dos}
+% Some things that should be implemented but aren’t so far or are very poor at the moment:
+% \begin{description}
+% \item ?
+% \end{description}
+% \Finale
+% \endinput
