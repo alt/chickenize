@@ -65,7 +65,7 @@ Do not distribute a modified version of this file under the same name.
 \begin{document}
 \maketitle
 \begin{abstract}
-This is the documentation of the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document.\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.} You have e.\,g. the possibility to substitute every word of a document with the word “chicken”, translate it into chi speak, make it totally colorfull or use upper/lowercase all randomly. Of course this package is \emph{not} meant for any serious document, but only for fun and – because we can!
+This is the documentation of the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document.\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.} You have e.\,g. the possibility to substitute every word of a document with the word “chicken”, translate it into 1337 speak, make it totally colorfull or use upper/lowercase all randomly. Of course this package is \emph{not} meant for any serious document, but only for fun and – because we can!
 
 If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
 \end{abstract}
@@ -123,6 +123,19 @@ Hope you have fun with this!
   \keys_set:nn{chick}{#1}
 }
 \directlua{dofile("chickenize.lua")}
+
+\NewDocumentCommand\chickenize{}{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
+}
+\NewDocumentCommand\uppercasecolor{}{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
+}
+\NewDocumentCommand\randomuclc{}{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
+}
+\NewDocumentCommand\colorstretch{}{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
+}
 %    \end{macrocode}
 % \section{Definition of Macros}
 %    \begin{macrocode}
@@ -198,6 +211,7 @@ function chickenize(head)
     hyphennode.font = font.current()
     chicken[5].pre = hyphennode
     chicken[5].post = hyphennode
+    chicken[5] = node.new(37.1)
     chicken[4].char = 99
     chicken[3].char = 107
     chicken[2].char = 101
@@ -209,6 +223,61 @@ function chickenize(head)
     chicken[1].next = i.next
   end
 
+  return head
+end
+
+-- The good parts of the following function are written by Paul Isambert.
+-- I merely copied it and changed a few parameters. Thanks for the code 
+-- and support, Paul!
+
+colorstretch = function (head)
+  -- name convention: "expansion" means stretching of spaces
+  --                  "stretch/shrink" means microtypographic expansion of glyphs
+
+  local f = font.getfont(font.current()).characters
+  for line in node.traverse_id(HLIST,head) do 
+    local rule_bad = node.new(RULE)
+
+	if colorexpansion then  -- if also the stretch/shrink of letters should be shown
+      rule_bad.width = 0.5*line.width
+
+      local g = line.head
+        while not(g.id == 37) do
+         g = g.next
+        end
+      exp_factor = g.width / f[g.char].width
+      exp_color = .5 + (1-exp_factor)*10 .. " g"
+
+    else 
+      rule_bad.width = line.width  -- only the space expansion should be shown
+    end   
+  
+    local glue_ratio = 0
+    if line.glue_order == 0 then
+      if line.glue_sign == 1 then
+        glue_ratio = .5 * math.min(line.glue_set,1)
+      else
+        glue_ratio = -.5 * math.min(line.glue_set,1)
+      end
+    end
+    color_push.data = .5 + glue_ratio .. " g"
+
+-- set up output    
+    local p = line.list
+-- first, a rule with the badness color
+    line.list = node.copy(color_push)
+    node.flush_list(p)
+    node.insert_after(line.list,line.list,rule_bad)
+    node.insert_after(line.list,rule_bad,node.copy(color_pop))
+
+-- then a rule with the expansion color
+	if colorexpansion then  -- if also the stretch/shrink of letters should be shown
+      color_push.data = exp_color
+      node.insert_before(line.list,node.tail(line.list),node.copy(color_push))
+      node.insert_before(line.list,node.tail(line.list),node.copy(rule_bad)) 
+      node.insert_before(line.list,node.tail(line.list),node.copy(color_pop))
+    end
+  end
   return head
 end
 %    \end{macrocode}
