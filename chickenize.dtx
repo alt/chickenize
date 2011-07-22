@@ -43,16 +43,18 @@ Do not distribute a modified version of this file under the same name.
   \expandafter\endgroup
 \fi
 \ProvidesFile{chickenize.sty}
-  [v0.0 chickenize package]
+  [v0.1 chickenize package]
 \documentclass[english]{ltxdoc}
 \usepackage{
+  array,
   babel,
+  booktabs,
   fontspec,
   graphicx,
-  hyperref
+  hyperref,
+  tabu
 }
 \hypersetup{
-  pdfborder= 0 0 0,
   colorlinks=true,
   linkcolor=blue,
   filecolor=blue,
@@ -66,41 +68,66 @@ Do not distribute a modified version of this file under the same name.
 \begin{document}
 \maketitle
 \kern-6cm
-{\hfill \parbox{6.3cm}{»\textit{The Monthy Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.}«\\
-\hspace*{4cm}Paul Isambert}\kern-2.5cm
+{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monthy Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\
+\hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
 \kern4cm
 \begin{abstract}
-This is the documentation of the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document.\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.} You have e.\,g. the possibility to substitute every word of a document with the word “chicken”, translate it into 1337 speak, make it totally colorfull or use upper/lowercase all randomly. Of course this package is \emph{not} meant for any serious document, but only for fun and – because we can!
-
-If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
+This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.}, but is actually only for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about your possibilities and provides links to the Lua functions. A \LaTeX\ and plain\TeX\ interface is also offered, see below.\\[2ex]
+\begin{tabu}{lX[j]}
+\toprule
+function & \hfill effect \hfill\, \\
+\midrule
+\hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness of a line\\
+\hyperref[sec:leetspeak]{leetspeak} & translates every letter into the corresponding 1337 letter\\
+\hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
+\hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
+\hyperref[sec:randomchars]{randomchars} & randomizes the whole input\\
+\hyperref[sec:uppercasecolor]{uppercasecolor} & adds a color to every uppercase letter\\
+\bottomrule
+\end{tabu}
+\vspace*{2ex}
+\noindent If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
 \end{abstract}
 \tableofcontents
-\section{Usage}
-This package should be useable some time …
+\section{How It Works}
+We make use of Lua\TeX s callbacks, especially the |pre_linebreak_filter| and the |post_linebreak_filter|. Hooking a function into these, we can nearly arbitrarily change the contents of the document. If the changes should be on the input-side (replacing with |chicken|), one can use the |pre_linebreak_filter|. Hower, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is used for such things.
 
-\section{Working Principle}
-We make use of Lua\TeX s callbacks, especially the |pre_linebreak_filter| and the |post_linebreak_filter|. Hooking a function into these, we can chanke the input (into “chicken”) or add/transform the input (putting color in, changing lower/uppercase).
+\section{How You Can Use It}
+There are several ways to make use of this package. As all features are implemented on the Lua side, you can use these functions on their own. If you do so, please consult the corresponding subsections in the \hyperref{implementation}[sec:implementation] part, because there are some variables that can be adapted to your need.
 
-\section{Package Options}
-There surely will be some options etc.
+You can use the following code inside a |\directlua| statement or in a |luacode| environment (or the corresponding thing in your format):
+\begin{verbatim}
+luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)
+\end{verbatim}
+Replace |"pre| by |"post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
 
-\section{Commands}
-You have a number of commands at your hand, each of which does some manipulating with the input. In fact, the code is easy and straightforward, but the result may blow your mind. Be careful, especially when combining things …
+If you don't want to mess with the Lua side (but please, try it, you'll learn much!), there is a \LaTeX- as well as a plain\TeX\ interface described in the next section. The commands may not always be on the latest code base – if anything does not work as expected, please tell me and I'll correct it.
+
+\subsection{Commands}
+You have a number of commands at your hand, each of which does some manipulation of the input or output. In fact, the code is easy and straightforward, but be careful, especially when combining things. Apply features step by step so your brain won't be damaged …
 
 Some commands have optional arguments that are \emph{only} available for \LaTeX. plain\TeX\ users are mostly capable of finding out how to change things themselfs, but if you are willing to wrap up the code for optional argument processing, don't hesitate sharing it with me ;)
 \begin{description}
-\item[chickenize] Replaces every word of the input with the word “chicken”. Maybe sometime the replaced word can be changed, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, after a full-stop 
+\item[chickenize] Replaces every word of the input with the word “chicken”. Maybe sometime the replaced word can be changed, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \item[uppercasecolor] Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \item[randomuclc] Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
+\item[randomfonts] Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
 \item[leetspeak] Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \item[colorstretch] Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is. You may specifiy the optional arguments |[(no)keeptext]| to display the text or delete it, also |[(no)colorexpansion]| controls wether or not the font expansion should be evaluated or not.
 
 This functionality is actually the only really usefull implementation of this package …
 \end{description}
 
+\subsection{text-Versions}
+The functions of this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document keeps its color. However, to achieve this effect, still the whole node list has to be traversed, so it may slow down your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
+
+Please don't fool around by mixing a |\text|-version with the non-|\text|-version. If you feel like and are not please with the result, it is up to \emph{you} to provide a stable and working solution.
+
 \section{Implementation}
+\label{sec:implementation}
 \DocInput{chickenize.dtx}
 \end{document}
 %</driver>
@@ -113,18 +140,36 @@ This functionality is actually the only really usefull implementation of this pa
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
 }
-\def\uppercasecolor{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
-}
-\def\randomuclc{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
-}
 \def\colorstretch{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
 }
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
 }
+\def\randomcolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"random color",1)}
+}
+\def\randomfonts{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"random fonts",1)}
+}
+\def\randomuclc{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
+}
+\def\uppercasecolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
+}
+
+\newluatexattribute\randcolorattr
+\def\textrandomcolor#1{%
+\randomcolor%
+\setluatexattribute\randcolorattr{42}#1%
+\unsetluatexattribute\randcolorattr%
+\directlua{randomcolor_onlytext=true}%
+\gdef\textrandomcolor#1{%
+\setluatexattribute\randcolorattr{42}#1%
+\unsetluatexattribute\randcolorattr}
+} %% to turn off automatic all-colorizing
+
 %    \end{macrocode}
 % \iffalse
 %</tex>
@@ -141,14 +186,8 @@ This functionality is actually the only really usefull implementation of this pa
 }
 %% So far, no keys are defined. This will change …
 \ExplSyntaxOn
-\keys_define:nn {chick} {
-  keeptext.code:n = \directlua{keeptext = true},
-  colorexpansion.code:n = \directlua{colorexpansion = true},
-  nokeeptext.code:n = \directlua{keeptext = false},
-  nocolorexpansion.code:n = \directlua{colorexpansion = false}
-}
-\NewDocumentCommand\chicksetup{m}{
-  \keys_set:nn{chick}{#1}
+\NewDocumentCommand\chickenizesetup{m}{
+  \directlua{#1}
 }
 %    \end{macrocode}
 % \section{Definition of User-Level Macros}
@@ -160,21 +199,6 @@ This functionality is actually the only really usefull implementation of this pa
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
 }
-\DeclareDocumentCommand\uppercasecolor{}{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
-}
-\DeclareDocumentCommand\randomuclc{}{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
-}
-
-\DeclareDocumentCommand\colorstretch{O{}}{
-  \keys_set:nn { chick } {#1}
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
-}
-\DeclareDocumentCommand\leetspeak{}{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
-}
-
 %% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
 %%           (most probable only available for \LaTeX)
 
@@ -206,78 +230,77 @@ This functionality is actually the only really usefull implementation of this pa
 %<*lua>
 %\fi
 % \section{Lua Module}
-% This file contains all the necessary functions.
+% This file contains all the necessary functions, sorted alphabetically, not by sense.
+% 
+% First, we set up some constants. These are made global so the code can be manipulated on document level, too.
 %    \begin{macrocode}
-local Hhead = node.id("hhead")
-local RULE = node.id("rule")
-local GLUE = node.id("glue")
-local WHAT = node.id("whatsit")
-local COL = node.subtype("pdf_colorstack")
-local GLYPH = node.id("glyph")
+Hhead = node.id("hhead")
+RULE = node.id("rule")
+GLUE = node.id("glue")
+WHAT = node.id("whatsit")
+COL = node.subtype("pdf_colorstack")
+GLYPH = node.id("glyph")
+%    \end{macrocode}
+% Now we set up the nodes used for all color things. The nodes are whatsits of subtype |pdf_colorstack|.
+%    \begin{macrocode}
+color_push = node.new(WHAT,COL)
+color_pop = node.new(WHAT,COL)
+color_push.stack = 0
+color_pop.stack = 0
+color_push.cmd = 1
+color_pop.cmd = 2
 
-uppercasecolor = function (head)
-  for line in node.traverse_id(Hhead,head) do 
-    for upper in node.traverse_id(GLYPH,line.head) do
-      if (((upper.char > 64) and (upper.char < 91)) or
-          ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
-        color_push.data = math.random()..math.random()..math.random().." rg"
-        line.head = node.insert_before(line.head,upper,node.copy(color_push))
-        node.insert_after(line.head,upper,node.copy(color_pop))
-      end
-    end
-  end
-  return head
-end
+%    \end{macrocode}
+% \subsection{chickenize}\label{sec:chickenize}
+% The infamous |\chickenize| macro. Substitutes every word of the input with the given string. This can be elaborated arbitrarily, and whenever I feel like, I might add functionality. So far, only the string replaces the word, and even hyphenation is not possible.
+%    \begin{macrocode}
+chickenstring = "Chicken"
 
-randomuclc = function(head)
-  for i in node.traverse_id(37,head) do
-    if math.random() < 0.5 then
-      i.char = tex.uccode[i.char] 
-    else 
-      i.char = tex.lccode[i.char]
-      i.yoffset = "15 pt"
-	end
-  end
-  return head
-end
+local tbl = font.getfont(font.current())
+local space = tbl.parameters.space
+local shrink = tbl.parameters.space_shrink
+local stretch = tbl.parameters.space_stretch
+local match = unicode.utf8.match
 
 function chickenize(head)
   for i in node.traverse_id(37,head) do  --find start of a word
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
     end
-
+ 
     chicken = {}
-    chicken[0] = node.new(37,1)
-    for i = 1,7 do 
+    chicken[0] = node.new(37,1)  -- only a dummy for the loop
+    for i = 1,string.len(chickenstring) do 
       chicken[i] = node.new(37,1)
       chicken[i].font = font.current()
+      chicken[i-1].next = chicken[i]
     end
-    node.insert_before(head,i,chicken[1])
+    
+    j = 1
+    for s in string.utfvalues(chickenstring) do
+    local char = unicode.utf8.char(s)
+      chicken[j].char = s
+      if match(char,"%s") then 
+        chicken[j] = node.new(10)
+        chicken[j].spec = node.new(47)
+        chicken[j].spec.width = space
+        chicken[j].spec.shrink = shrink
+        chicken[j].spec.stretch = stretch
+      end
+      j = j+1
+    end
 
-  -- randomize upper/lower case to get a more natural output. 
-  -- however, this may make break points inconsistent!
-if (math.random() > 0.8) then
-    chicken[7].char = 67  else
-    chicken[7].char = 99
-end
- 
-    chicken[6].char = 104
-    chicken[5].char = 105
-    chicken[4].char = 99
-    chicken[3].char = 107
-    chicken[2].char = 101
-    chicken[1].char = 110
-lang.hyphenate(chicken[1])
-    for k = 1,6 do 
-      node.insert_before(head,chicken[k],chicken[k+1])
-    end
-    chicken[1].next = i.next
+    node.insert_before(head,i,chicken[1])
+    chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
+    chicken[string.len(chickenstring)].next = i.next
   end
 
   return head
 end
-
+%    \end{macrocode}
+% \subsection{leet}\label{sec:leet}
+% The |leettable| is the substitution scheme. Just add items if you feel to. Maybe we will differ between a light-weight version and a hardcore 1337.
+%    \begin{macrocode}
 leettable = {
   [101] = 51, -- e
   [105] = 49, -- i
@@ -293,7 +316,9 @@ leettable = {
   [115-32] = 53, -- s
   [116-32] = 55, -- t
 }
-
+%    \end{macrocode}
+% And the function. So simple that I will not write any 
+%    \begin{macrocode}
 function leet(head)
   for line in node.traverse_id(Hhead,head) do 
     for i in node.traverse_id(GLYPH,line.head) do
@@ -305,7 +330,110 @@ function leet(head)
   return head
 end
 %    \end{macrocode}
-% \subsubsection{colorstretch}
+% \subsection{randomfonts}\label{sec:randomfonts}
+% Traverses the output and substitutes fonts randomly. A check is done so that the font number is existing.
+% One day, the fonts should be easily given explicitely in terms of |\bf| etc.
+%    \begin{macrocode}
+randomfontslower = 1
+randomfontsupper = 0
+% 
+function randomfonts(head)
+  if (randomfontsupper > 0) then rfub = randomfontsupper else rfub = font.max() end  -- either a user-defined or all currently loaded fonts
+  for line in node.traverse_id(Hhead,head) do
+    for i in node.traverse_id(GLYPH,line.head) do
+      i.font = math.random(randomfontslower,rfub)
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{randomuclc}\label{sec:randomuclc}
+% Traverses the input list and changes lowercase/uppercase codes.
+%    \begin{macrocode}
+uclcratio = 0.5 -- so, this can even be changed!
+randomuclc = function(head)
+  for i in node.traverse_id(37,head) do
+    if math.random() < uclcratio then
+      i.char = tex.uccode[i.char] 
+    else 
+      i.char = tex.lccode[i.char]
+	end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{randomchars}\label{sec:randomchars}
+%    \begin{macrocode}
+randomchars = function (head)
+  for line in node.traverse_id(Hhead,head) do
+    for i in node.traverse_id(GLYPH,line.head) do
+      i.char = math.floor(math.random()*512)
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{randomcolor}\label{sec:randomcolor}
+% Setup of the boolean for grey/color, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
+%    \begin{macrocode}
+randomcolor_grey = false
+randomcolor_onlytext = false --switch between local and global colorization
+-- false means “color everything”
+Rgb_lower = 1
+rGb_lower = 1
+rgB_lower = 1
+Rgb_upper = 254
+rGb_upper = 254
+rgB_upper = 254
+grey_lower = 0
+grey_upper = 900
+%    \end{macrocode}
+% This function produces the string needed for the pdf color stack. We need values 0]..[1 for the colors.
+%    \begin{macrocode}
+function randomcolorstring()
+  if randomcolorgrey then
+    return (0.001*math.random(grey_lower,grey_upper)).." g"
+  else 
+    Rgb = math.random(Rgb_lower,Rgb_upper)/255
+    rGb = math.random(rGb_lower,rGb_upper)/255
+    rgB = math.random(rgB_lower,rgB_upper)/255
+    return Rgb..rGb..rgB.." rg"
+  end
+end
+%    \end{macrocode}
+% The function that does all the colorizing action. It goes through the whole paragraph and looks at every glyph. If the boolean |randomcolor_onlytext| is set, only glyphs with the set attribute will be colored. Elsewise, all glyphs are taken.
+%    \begin{macrocode}
+function randomcolor(head)
+  for line in node.traverse_id(0,head) do
+    for i in node.traverse_id(37,line.head) do
+      if not(randomcolor_onlytext) or (node.has_attribute(i,luatexbase.attributes.randcolorattr)) then
+        color_push.data = randomcolorstring()  -- color or grey string
+        line.head = node.insert_before(line.head,i,node.copy(color_push))
+        node.insert_after(line.head,i,node.copy(color_pop))
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{uppercasecolor}\label{sec:uppercasecolor}
+% Loop through all the nodes and checking whether it is uppercase. If so (and also for small caps), color it.
+%    \begin{macrocode}
+uppercasecolor = function (head)
+  for line in node.traverse_id(Hhead,head) do 
+    for upper in node.traverse_id(GLYPH,line.head) do
+      if (((upper.char > 64) and (upper.char < 91)) or
+          ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
+        color_push.data = randomcolorstring()  -- color or grey string
+        line.head = node.insert_before(line.head,upper,node.copy(color_push))
+        node.insert_after(line.head,upper,node.copy(color_pop))
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsubsection{colorstretch}\label{sec:colorstretch}
 % This function displays the amount of stretching that has been done for each line of an arbitrary document. A well-typeset document should be equally grey over all lines, which is not always possible.
 % 
 % The function shows in fact two boxes: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth gray, whereas a too dense line is indicated by a dark grey box. 
@@ -314,17 +442,10 @@ end
 %
 % The base structure of the following code is written by Paul Isambert. Thanks for the code and support, Paul!
 %
-% First, we set up some constants that will be used later on. Two booleans, |keeptext|, and |colorexpansion|, are used to control the behaviour of the function.
+% Two booleans, |keeptext|, and |colorexpansion|, are used to control the behaviour of the function.
 %    \begin{macrocode}
-local color_push = node.new(WHAT,COL)
-local color_pop = node.new(WHAT,COL)
-color_push.stack = 0
-color_pop.stack = 0
-color_push.cmd = 1
-color_pop.cmd = 2
-
-local keeptext = true
-local colorexpansion = true
+keeptext = true
+colorexpansion = true
 %    \end{macrocode}
 % After setting the constants, the function starts. It receives the vertical list of the typeset paragraph as |head|, and loops through all horizontal lists.
 % 
@@ -336,7 +457,7 @@ colorstretch = function (head)
   for line in node.traverse_id(Hhead,head) do 
     local rule_bad = node.new(RULE)
 
-	if colorexpansion then  -- if also the stretch/shrink of letters should be shown
+	if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
         while not(g.id == 37) do
          g = g.next
