@@ -1,6 +1,24 @@
 % \iffalse
-%% File: chickenize.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
 %<*driver>
+%% File: chickenize.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
+\iffalse
+%</driver>
+%<*readme>
+This is the README file that should contain some important information. So far I can only tell you to run the lualatex on the file chickenize.dtx to produce the four files
+  chickenize.pdf  (documentation)
+  chickenize.tex  (low-level commands; plainTeX)
+  chickenize.sty  (LaTeX user interface)
+  chickenize.lua  (Lua package code)
+
+You need an up-to-date TeX Live (2011, if possible) to use this package.
+
+For any comments or suggestions, contact me:
+arno dot trautmann at gmx dot de
+
+Hope you have fun with this!
+%</readme>
+%<*driver>
+\fi
 \def\nameofplainTeX{plain}
 \ifx\fmtname\nameofplainTeX\else
   \expandafter\begingroup
@@ -125,14 +143,14 @@ This functionality is actually the only really usefull implementation of this pa
 The functions of this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document keeps its color. However, to achieve this effect, still the whole node list has to be traversed, so it may slow down your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
 
 Please don't fool around by mixing a |\text|-version with the non-|\text|-version. If you feel like and are not please with the result, it is up to \emph{you} to provide a stable and working solution.
-
-\section{Implementation}
-\label{sec:implementation}
 \DocInput{chickenize.dtx}
 \end{document}
 %</driver>
 %<*tex>
 % \fi
+%\part{Implementation}
+%\label{sec:implementation}
+%\section{\TeX\ file}
 %    \begin{macrocode}
 \input{luatexbase.sty}
 \directlua{dofile("chickenize.lua")}
@@ -532,23 +550,5 @@ end
 % \begin{description}
 % \item ?
 % \end{description}
-%\iffalse
-%<*readme>
-% \fi
-This is the README file that should contain some important information. So far I can only tell you to run the lualatex on the file chickenize.dtx to produce the four files
-  chickenize.pdf  (documentation)
-  chickenize.tex  (low-level commands; plainTeX)
-  chickenize.sty  (LaTeX user interface)
-  chickenize.lua  (Lua package code)
-
-You need an up-to-date TeX Live (2011, if possible) to use this package.
-
-For any comments or suggestions, contact me:
-arno dot trautmann at gmx dot de
-
-Hope you have fun with this!
-% \iffalse
-%</readme>
-%\fi
 % \Finale
 % \endinput
