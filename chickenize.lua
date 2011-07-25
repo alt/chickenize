@@ -60,6 +60,10 @@ chickenize = function(head)
       end
       j = j+1
     end
+    node.slide(chicken[1])
+    lang.hyphenate(chicken[1])
+    chicken[1] = node.kerning(chicken[1])
+    chicken[1] = node.ligaturing(chicken[1])
 
     node.insert_before(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
@@ -148,9 +152,9 @@ Rgb_upper = 254
 rGb_upper = 254
 rgB_upper = 254
 rainbow_step = 0.005
-rainbow_Rgb = 1-step -- we start in the red phase
-rainbow_rGb = step   -- values x must always be 0 < x < 1
-rainbow_rgB = step
+rainbow_Rgb = 1-rainbow_step -- we start in the red phase
+rainbow_rGb = rainbow_step   -- values x must always be 0 < x < 1
+rainbow_rgB = rainbow_step
 rainind = 1          -- 1:red,2:yellow,3:green,4:blue,5:purple
 randomcolorstring = function()
   if randomcolor_grey then

@@ -41,6 +41,7 @@
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
              rainbowcolor = false}}
 \let\nyanize\rainbowcolor
+\let\unnyanize\unrainbowcolor
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
