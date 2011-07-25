@@ -70,8 +70,10 @@ Do not distribute a modified version of this file under the same name.
   babel,
   booktabs,
   fontspec,
+  geometry,
   graphicx,
   hyperref,
+  microtype,
   scrpage2,
   tabu
 }
@@ -81,54 +83,56 @@ Do not distribute a modified version of this file under the same name.
   filecolor=blue,
   urlcolor=blue
 }
-\cfoot{chicken \pagemark}
+%\geometry{a4paper}
+
+\cfoot{\directlua{if math.random() > .5 then tex.print("chicken") else tex.print("Chicken") end} \pagemark}
 \ohead{}
 \pagestyle{scrheadings}
+\setmainfont{TeX Gyre Pagella}
 
 \title{chickenize}
 \author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 \begin{document}
-\maketitle
+\maketitle\thispagestyle{scrheadings}
 \kern-6cm
-{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monthy Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\
+{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
 \kern4cm
 \begin{abstract}
-This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\LaTeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't try to use it with any other \TeX\ flavour.}, but is actually only for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about your possibilities and provides links to the Lua functions. A \LaTeX\ and plain\TeX\ interface is also offered, see below.\\[2ex]
+This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\TeX\ document,\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} but is actually just for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
+\end{abstract}
+
+\noindent
 \begin{tabu}{lX[j]}
 \toprule
-function & \hfill effect \hfill\, \\
+\rlap{function/command} & \hfill effect \hfill\, \\
 \midrule
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness of a line\\
-\hyperref[sec:leetspeak]{leetspeak} & translates every letter into the corresponding 1337 letter\\
+\hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the whole input\\
-\hyperref[sec:uppercasecolor]{uppercasecolor} & adds a color to every uppercase letter\\
+\hyperref[sec:randomchars]{randomcolor} & prints every letter in a random color\\
+\hyperref[sec:uppercasecolor]{uppercasecolor} & makes every uppercase letter colored\\
 \bottomrule
 \end{tabu}
-\vspace*{2ex}
+\kern 2ex
+
 \noindent If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
-\end{abstract}
+
 \tableofcontents
+\part{User Documentation}
 \section{How It Works}
 We make use of Lua\TeX s callbacks, especially the |pre_linebreak_filter| and the |post_linebreak_filter|. Hooking a function into these, we can nearly arbitrarily change the contents of the document. If the changes should be on the input-side (replacing with |chicken|), one can use the |pre_linebreak_filter|. Hower, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is used for such things.
 
+\hypertarget{texinterface}{}
 \section{How You Can Use It}
-There are several ways to make use of this package. As all features are implemented on the Lua side, you can use these functions on their own. If you do so, please consult the corresponding subsections in the \hyperref{implementation}[sec:implementation] part, because there are some variables that can be adapted to your need.
+There are several ways to make use of this package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are simple wrappers around the functions.
 
-You can use the following code inside a |\directlua| statement or in a |luacode| environment (or the corresponding thing in your format):
-\begin{verbatim}
-luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)
-\end{verbatim}
-Replace |"pre| by |"post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
-
-If you don't want to mess with the Lua side (but please, try it, you'll learn much!), there is a \LaTeX- as well as a plain\TeX\ interface described in the next section. The commands may not always be on the latest code base – if anything does not work as expected, please tell me and I'll correct it.
-
-\subsection{Commands – Document Wide}
+\subsection{\TeX\ Commands – Document Wide}
 You have a number of commands at your hand, each of which does some manipulation of the input or output. In fact, the code is easy and straightforward, but be careful, especially when combining things. Apply features step by step so your brain won't be damaged …
 
 The effect of the commands can be influenced, not with arguments, but only via the |\chickenizesetup| described \hyperlink{adjustment}{below}.
@@ -139,34 +143,50 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
+\command{randomcolor} Does what it's name says.
+\command{rainbowcolor} Instead of random colors, this command causes the text color to change slowly according to the colors of a rainbow. Do not mix this with |randomcolor|, as it doesn't make any sense.
+\command{nyanize} A synonym for |rainbowcolor|.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
-\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.% You may specifiy the optional arguments |[(no)keeptext]| to display the text or delete it, also |[(no)colorexpansion]| controls wether or not the font expansion should be evaluated or not.  %% FIXME: No, no optional s**it. Use variables.
+\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.
 
 This functionality is actually the only really usefull implementation of this package …
 \end{description}
 
-\subsection{text-Versions}
-The functions of this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document keeps its color. However, to achieve this effect, still the whole node list has to be traversed, so it may slow down your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
+\subsection{\texttt{\textbackslash text}-Versions}
+The functions of this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have\footnote{If they don't have, I did miss that, sorry. Please inform me about such cases.} a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document keeps its color. However, to achieve this effect, still the whole node list has to be traversed, so it may slow down your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
 
 Please don't fool around by mixing a |\text|-version with the non-|\text|-version. If you feel like and are not please with the result, it is up to \emph{you} to provide a stable and working solution.
 
+\subsection{Lua functions}
+As all features are implemented on the Lua side, you can use these functions on their own. If you do so, please consult the corresponding subsections in the \hyperlink{sec:luamodule}{implementation} part, because there are some variables that can be adapted to your need.
+
+You can use the following code inside a |\directlua| statement or in a |luacode| environment (or the corresponding thing in your format):
+\begin{verbatim}
+luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
+\end{verbatim}
+Replace |"pre| by |"post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
+
 \hypertarget{adjustment}{}
 \section{How to Adjust It}
-There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|.\footnote{To be honest, this is just \textbackslash|let| to \textbackslash|directlua|. But having a separate macro just feels more natural. However, it might change in the future, so an abstraction layer is nice to have.} But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands, e.\,g.: |\chickenizesetup{randomfontslower = 1| |randomfontsupper = 0}| instead of |\chickenizesetup{randomfontslower = 1,| |randomfontsupper = 0}|. Ok?
+There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|.\footnote{To be honest, this is just \textbackslash|def|d to \textbackslash|directlua|. One small advantage of this is that \TeX\ comments do work.} But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands. The argument must have the syntax |{randomfontslower = 1| |randomfontsupper = 0}| instead of |{randomfontslower = 1,| |randomfontsupper = 0}|. Alright?
+
+However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{both} |%| \emph{or} |--| as comment string.
 
 The following list tries to keep kind of track of the options and variables. There is no guarantee for this list, and if you find something that is missing or doesn't work as described here, please inform me!
 
-\def\arg#1{\textcolor{red}{\ttfamily <#1> }}
+\def\arg#1{\textcolor{red}{\ttfamily <#1>}}
 \def\opt#1{\textcolor{blue}{\ttfamily #1}}
+\def\default#1{\textcolor{black}{\ttfamily #1}}
 \begin{description}
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{string}] The string that is printed when using |\chickenize|. So far, this does not really work, especially breaking into lines and hyphenation. Remember that this is Lua input, so a string must be given with quotation marks: |chickenstring = "foo bar"|.
 \item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
-\item[\opt{uclcratio} = \arg{float}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
-\item[\opt{randomcolor\_grey} = \arg{bool}] For a printer-friendly version, this offeres a grey scale instead of an rgb value for |\randomcolor|.
+\item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
+\item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
 \item[\opt{Rgb\_lower}, \opt{rGb\_upper} = \arg{int}] To specify the color space that is used for |\randomcolor|, you can specify six values, the upper and lower value for each color. The uppercase letter in the variable denotes the color, so |rGb_upper| gives the upper value for green etc. Possible values are between |1| and |254|. If you enter anything outside this, your pdf will become invalid and break. For grey scale, use |grey_lower| and |grey_upper|, with values between |0| (black) and |1000| (white), included. Default is |0| to |900| to prevent white letters.
-\item[\opt{keeptext} = \arg{bool}] This is for the |\colorstretch| command. If set to |true|, the text of your document will be kept. This way, it is easier to identify bad lines and the reason for the badness.
-\item[\opt{colorexpansion} = \arg{bool}] If |true|, two bars are shown of which the second one denotes the font expansion. Only usefull if font expansion is used. (You \emph{do} use font expansion, do you?)
+\item[\opt{rainbow\_step} = \arg{float}\default{0.005}] This indicates the relative change of color using the rainbow functionality. A value of |1| changes the color in one step from red to yellow, while a value of |0.005| – you get it, I gues. Useful values are below |0.05|, but it depends on the amount of text. The longer the text and the lower the |step|, the nicer the rainbow will be.
+\item[\opt{keeptext} = \arg{bool} \default{false}] This is for the |\colorstretch| command. If set to |true|, the text of your document will be kept. This way, it is easier to identify bad lines and the reason for the badness.
+\item[\opt{colorexpansion} = \arg{bool} \default{true}] If |true|, two bars are shown of which the second one denotes the font expansion. Only usefull if font expansion is used. (You \emph{do} use font expansion, do you?)
 \end{description}
 
 \DocInput{chickenize.dtx}
@@ -179,48 +199,81 @@ The following list tries to keep kind of track of the options and variables. The
 %\section{\TeX\ file}
 %    \begin{macrocode}
 \input{luatexbase.sty}
+% read the Lua code first
 \directlua{dofile("chickenize.lua")}
-
+% then define the global macros. These affect the whole document and will stay active until the functions will be un-registered explicitely.
 \def\chickenize{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
-}
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
+    luatexbase.add_to_callback("start_page_number",function() texio.write("["..status.total_pages) end ,"cstartpage")
+    luatexbase.add_to_callback("stop_page_number",function() texio.write(" chickens]") end,"cstoppage")}}  % yes, I /am/ funny ☺
+\def\unchickenize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
+    luatexbase.remove_from_callback("start_page_number","cstarttpage")
+    luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
+
 \def\colorstretch{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"show stretch and expansion",1)}
-}
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
+\def\uncolorstretch{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","colorstretch")}}
+
 \def\leetspeak{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"transform input to 1337",1)}
-}
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
+\def\unleetspeak{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
+
+\def\rainbowcolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")
+             rainbowcolor = true}}
+\def\unrainbowcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
+             rainbowcolor = false}}
+\let\nyanize\rainbowcolor
+
 \def\randomcolor{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"random color",1)}
-}
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
+\def\unrandomcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+
 \def\randomfonts{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"random fonts",1)}
-}
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"randomfonts")}}
+\def\unrandomfonts{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomfonts")}}
+
 \def\randomuclc{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomize uc/lc chars",1)}
-}
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
+\def\unrandomuclc{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
 \def\uppercasecolor{
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"color all uc chars",1)}
-}
-
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
+\def\unuppercasecolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+%    \end{macrocode}
+% Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
+%    \begin{macrocode}
+\newluatexattribute\leetattr
 \newluatexattribute\randcolorattr
-\def\textrandomcolor#1{%
-\randomcolor%
-\setluatexattribute\randcolorattr{42}#1%
-\unsetluatexattribute\randcolorattr%
-\directlua{randomcolor_onlytext=true}%
-\gdef\textrandomcolor#1{%
-\setluatexattribute\randcolorattr{42}#1%
-\unsetluatexattribute\randcolorattr}
-} %% to turn off automatic all-colorizing
+\newluatexattribute\randfontsattr
 
+\long\def\textleetspeak#1%
+  {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
+\long\def\textrandomcolor#1%
+  {\setluatexattribute\randcolorattr{42}#1\unsetluatexattribute\randcolorattr}
+\long\def\textrandomfonts#1%
+  {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+\long\def\textrandomfonts#1%
+  {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+%    \end{macrocode}
+% Finally, a macro to control the setup. For now, it's only a wrapper for |\directlua|, but it is nice to have a separate abstraction macro. Maybe this will allow for some flexibility.
+%    \begin{macrocode}
+\def\chickenizesetup#1{\directlua{#1}}
 %    \end{macrocode}
 % \iffalse
 %</tex>
 %<*package>
 % \fi
-% \section{Preparation}
-% Loading of packages and defition of constants. Will change somewhat when migrating to expl3 (?)
+% \section{\LaTeX\ package}
+% I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing usefull, but it provides a |chickenize.sty| that loads |chickenize.tex|. Some code might be implemented to manipulate figures for full chickenization.
 %    \begin{macrocode}
 \input{chickenize}
 \RequirePackage{
@@ -228,25 +281,16 @@ The following list tries to keep kind of track of the options and variables. The
   xkeyval,
   xparse
 }
-%% So far, no keys are defined. This will change …
-\ExplSyntaxOn
-\NewDocumentCommand\chickenizesetup{m}{
-  \directlua{#1}
-}
 %    \end{macrocode}
-% \section{Definition of User-Level Macros}
+% \subsection{Definition of User-Level Macros}
 %    \begin{macrocode}
-\DeclareDocumentCommand\chickenize{}{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize the input",1)}
   %% We want to “chickenize” figures, too. So …
   \DeclareDocumentCommand\includegraphics{O{}m}{
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
-}
 %% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
-%%           (most probable only available for \LaTeX)
 
-\ExplSyntaxOff  %% because of the : in the domain …
+\ExplSyntaxOff  %% because of the : in the domain
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
   \begin{tikzpicture}
   \hspace*{#2}  %% anyhow necessary to fix centering … strange :(
@@ -274,6 +318,7 @@ The following list tries to keep kind of track of the options and variables. The
 %<*lua>
 %\fi
 % \section{Lua Module}
+% \label{sec:luamodule}
 % This file contains all the necessary functions, sorted alphabetically, not by sense.
 % 
 % First, we set up some constants. These are made global so the code can be manipulated on document level, too.
@@ -293,7 +338,6 @@ color_push.stack = 0
 color_pop.stack = 0
 color_push.cmd = 1
 color_pop.cmd = 2
-
 %    \end{macrocode}
 % \subsection{chickenize}\label{sec:chickenize}
 % The infamous |\chickenize| macro. Substitutes every word of the input with the given string. This can be elaborated arbitrarily, and whenever I feel like, I might add functionality. So far, only the string replaces the word, and even hyphenation is not possible.
@@ -306,13 +350,13 @@ local shrink = tbl.parameters.space_shrink
 local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 
-function chickenize(head)
+chickenize = function(head)
   for i in node.traverse_id(37,head) do  --find start of a word
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
     end
- 
-    chicken = {}
+
+    chicken = {}  -- constructing the node list. Should be done only once?
     chicken[0] = node.new(37,1)  -- only a dummy for the loop
     for i = 1,string.len(chickenstring) do 
       chicken[i] = node.new(37,1)
@@ -322,7 +366,7 @@ function chickenize(head)
     
     j = 1
     for s in string.utfvalues(chickenstring) do
-    local char = unicode.utf8.char(s)
+      local char = unicode.utf8.char(s)
       chicken[j].char = s
       if match(char,"%s") then 
         chicken[j] = node.new(10)
@@ -345,13 +389,14 @@ end
 % \subsection{leet}\label{sec:leet}
 % The |leettable| is the substitution scheme. Just add items if you feel to. Maybe we will differ between a light-weight version and a hardcore 1337.
 %    \begin{macrocode}
+leet_onlytext = false
 leettable = {
-  [101] = 51, -- e
-  [105] = 49, -- i
-  [108] = 49, -- l
-  [111] = 48, -- o
-  [115] = 53, -- s
-  [116] = 55, -- t
+  [101] = 51, -- E
+  [105] = 49, -- I
+  [108] = 49, -- L
+  [111] = 48, -- O
+  [115] = 53, -- S
+  [116] = 55, -- T
 
   [101-32] = 51, -- e
   [105-32] = 49, -- i
@@ -361,13 +406,17 @@ leettable = {
   [116-32] = 55, -- t
 }
 %    \end{macrocode}
-% And the function. So simple that I will not write any 
+% And here the function itself. So simple that I will not write any 
 %    \begin{macrocode}
-function leet(head)
+leet = function(head)
   for line in node.traverse_id(Hhead,head) do 
     for i in node.traverse_id(GLYPH,line.head) do
-      if leettable[i.char] then 
-        i.char = leettable[i.char]
+      if not(leetspeak_onlytext) or
+         node.has_attribute(i,luatexbase.attributes.leetattr)
+      then
+        if leettable[i.char] then 
+          i.char = leettable[i.char]
+        end
       end
     end
   end
@@ -381,11 +430,17 @@ end
 randomfontslower = 1
 randomfontsupper = 0
 % 
-function randomfonts(head)
-  if (randomfontsupper > 0) then rfub = randomfontsupper else rfub = font.max() end  -- either a user-defined or all currently loaded fonts
+randomfonts = function(head)
+  if (randomfontsupper > 0) then  -- fixme: this should be done only once, no? Or at every paragraph?
+    rfub = randomfontsupper  -- user-specified value
+  else
+    rfub = font.max()        -- or just take all fonts
+  end
   for line in node.traverse_id(Hhead,head) do
     for i in node.traverse_id(GLYPH,line.head) do
-      i.font = math.random(randomfontslower,rfub)
+      if not(randomfonts_onlytext) or node.has_attribute(i,luatexbase.attributes.randfontsattr) then
+        i.font = math.random(randomfontslower,rfub)
+      end
     end
   end
   return head
@@ -408,7 +463,7 @@ end
 %    \end{macrocode}
 % \subsection{randomchars}\label{sec:randomchars}
 %    \begin{macrocode}
-randomchars = function (head)
+randomchars = function(head)
   for line in node.traverse_id(Hhead,head) do
     for i in node.traverse_id(GLYPH,line.head) do
       i.char = math.floor(math.random()*512)
@@ -418,25 +473,54 @@ randomchars = function (head)
 end
 %    \end{macrocode}
 % \subsection{randomcolor}\label{sec:randomcolor}
-% Setup of the boolean for grey/color, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
+% Setup of the boolean for grey/color or rainbowcolor, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
 %    \begin{macrocode}
 randomcolor_grey = false
 randomcolor_onlytext = false --switch between local and global colorization
--- false means “color everything”
+rainbowcolor = false
+
+grey_lower = 0
+grey_upper = 900
+
 Rgb_lower = 1
 rGb_lower = 1
 rgB_lower = 1
 Rgb_upper = 254
 rGb_upper = 254
 rgB_upper = 254
-grey_lower = 0
-grey_upper = 900
+%    \end{macrocode}
+% Variables for the rainbow. 1/rainbow\_step*5 is the number of letters used for one cycle, the color changes from red to yellow to green to blue to purple. 
+%    \begin{macrocode}
+rainbow_step = 0.005
+rainbow_Rgb = 1-step -- we start in the red phase
+rainbow_rGb = step   -- values x must always be 0 < x < 1
+rainbow_rgB = step
+rainind = 1          -- 1:red,2:yellow,3:green,4:blue,5:purple
 %    \end{macrocode}
 % This function produces the string needed for the pdf color stack. We need values 0]..[1 for the colors.
 %    \begin{macrocode}
-function randomcolorstring()
+randomcolorstring = function()
   if randomcolor_grey then
     return (0.001*math.random(grey_lower,grey_upper)).." g"
+  elseif rainbowcolor then
+    if rainind == 1 then -- red
+      rainbow_rGb = rainbow_rGb + rainbow_step
+      if rainbow_rGb >= 1-rainbow_step then rainind = 2 end
+    elseif rainind == 2 then -- yellow
+      rainbow_Rgb = rainbow_Rgb - rainbow_step
+      if rainbow_Rgb <= rainbow_step then rainind = 3 end
+    elseif rainind == 3 then -- green
+      rainbow_rgB = rainbow_rgB + rainbow_step
+      rainbow_rGb = rainbow_rGb - rainbow_step
+      if rainbow_rGb <= rainbow_step then rainind = 4 end
+    elseif rainind == 4 then -- blue
+      rainbow_Rgb = rainbow_Rgb + rainbow_step
+      if rainbow_Rgb >= 1-rainbow_step then rainind = 5 end
+    else -- purple
+      rainbow_rgB = rainbow_rgB - rainbow_step
+      if rainbow_rgB <= rainbow_step then rainind = 1 end
+    end
+    return rainbow_Rgb..rainbow_rGb..rainbow_rgB.." rg"
   else 
     Rgb = math.random(Rgb_lower,Rgb_upper)/255
     rGb = math.random(rGb_lower,rGb_upper)/255
@@ -447,10 +531,12 @@ end
 %    \end{macrocode}
 % The function that does all the colorizing action. It goes through the whole paragraph and looks at every glyph. If the boolean |randomcolor_onlytext| is set, only glyphs with the set attribute will be colored. Elsewise, all glyphs are taken.
 %    \begin{macrocode}
-function randomcolor(head)
+randomcolor = function(head)
   for line in node.traverse_id(0,head) do
     for i in node.traverse_id(37,line.head) do
-      if not(randomcolor_onlytext) or (node.has_attribute(i,luatexbase.attributes.randcolorattr)) then
+      if not(randomcolor_onlytext) or
+         (node.has_attribute(i,luatexbase.attributes.randcolorattr))
+      then
         color_push.data = randomcolorstring()  -- color or grey string
         line.head = node.insert_before(line.head,i,node.copy(color_push))
         node.insert_after(line.head,i,node.copy(color_pop))
@@ -477,10 +563,10 @@ uppercasecolor = function (head)
   return head
 end
 %    \end{macrocode}
-% \subsubsection{colorstretch}\label{sec:colorstretch}
+% \subsection{colorstretch}\label{sec:colorstretch}
 % This function displays the amount of stretching that has been done for each line of an arbitrary document. A well-typeset document should be equally grey over all lines, which is not always possible.
 % 
-% The function shows in fact two boxes: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth gray, whereas a too dense line is indicated by a dark grey box. 
+% The function prints two boxes, in fact: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth gray, whereas a too dense line is indicated by a dark grey box. 
 %
 %The second box is only usefull if microtypographic extensions are used, e.\,g. with the |microtype| package under \LaTeX. The box color then corresponds to the amount of font expansion in the line. This can be greatly used to show the positive effect of font expansion on the badness of a line!
 %
@@ -517,7 +603,7 @@ colorstretch = function (head)
 %
 % The glue order and sign can be obtained directly and are translated into a grey scale.
 %    \begin{macrocode}
-    rule_bad.height = tex.baselineskip.width*4/5  -- this should give a quite nice output!
+    rule_bad.height = tex.baselineskip.width*4/5  -- this should give a better output
     rule_bad.depth = tex.baselineskip.width*1/5
   
     local glue_ratio = 0
@@ -542,7 +628,7 @@ colorstretch = function (head)
   -- if the text should still be displayed, the color and box nodes are inserted additionally 
   -- and the head is set to the color node
     if keeptext then
-      line.head = node.insert_before(line.head,line.head,node.copy(color_push)) -- make the color the first thing
+      line.head = node.insert_before(line.head,line.head,node.copy(color_push))
     else
       node.flush_list(p)
       line.head = node.copy(color_push)

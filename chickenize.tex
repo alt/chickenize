@@ -1,0 +1,79 @@
+%%
+%% This is file `chickenize.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% chickenize.dtx  (with options: `tex')
+%% 
+%% EXPERIMENTAL CODE
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file under the same name.
+%% 
+\input{luatexbase.sty}
+\directlua{dofile("chickenize.lua")}
+\def\chickenize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
+    luatexbase.add_to_callback("start_page_number",function() texio.write("["..status.total_pages) end ,"cstartpage")
+    luatexbase.add_to_callback("stop_page_number",function() texio.write(" chickens]") end,"cstoppage")}}  % yes, I /am/ funny ☺
+\def\unchickenize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
+    luatexbase.remove_from_callback("start_page_number","cstarttpage")
+    luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
+
+\def\colorstretch{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
+\def\uncolorstretch{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","colorstretch")}}
+
+\def\leetspeak{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
+\def\unleetspeak{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
+
+\def\rainbowcolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")
+             rainbowcolor = true}}
+\def\unrainbowcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
+             rainbowcolor = false}}
+\let\nyanize\rainbowcolor
+
+\def\randomcolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
+\def\unrandomcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+
+\def\randomfonts{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"randomfonts")}}
+\def\unrandomfonts{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomfonts")}}
+
+\def\randomuclc{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
+\def\unrandomuclc{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\def\uppercasecolor{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
+\def\unuppercasecolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+\newluatexattribute\leetattr
+\newluatexattribute\randcolorattr
+\newluatexattribute\randfontsattr
+
+\long\def\textleetspeak#1%
+  {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
+\long\def\textrandomcolor#1%
+  {\setluatexattribute\randcolorattr{42}#1\unsetluatexattribute\randcolorattr}
+\long\def\textrandomfonts#1%
+  {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+\long\def\textrandomfonts#1%
+  {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+\def\chickenizesetup#1{\directlua{#1}}
+%% 
+%%
+%% End of file `chickenize.tex'.

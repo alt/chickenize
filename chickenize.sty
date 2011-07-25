@@ -1,0 +1,52 @@
+%%
+%% This is file `chickenize.sty',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% chickenize.dtx  (with options: `package')
+%% 
+%% EXPERIMENTAL CODE
+%% 
+%% Do not distribute this file without also distributing the
+%% source files specified above.
+%% 
+%% Do not distribute a modified version of this file under the same name.
+%% 
+\input{chickenize}
+\RequirePackage{
+  expl3,
+  xkeyval,
+  xparse
+}
+  %% We want to “chickenize” figures, too. So …
+  \DeclareDocumentCommand\includegraphics{O{}m}{
+     \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
+  }
+%% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
+
+\ExplSyntaxOff  %% because of the : in the domain
+\NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
+  \begin{tikzpicture}
+  \hspace*{#2}  %% anyhow necessary to fix centering … strange :(
+  \begin{axis}
+  [width=10cm,height=7cm,
+   xmin=-0.005,xmax=0.28,ymin=-0.05,ymax=1,
+   xtick={0,0.02,...,0.27},ytick=\empty,
+   /pgf/number format/precision=3,/pgf/number format/fixed,
+   tick label style={font=\small},
+   label style = {font=\Large},
+   xlabel = \fontspec{Punk Nova} BLOOD ALCOHOL CONCENTRATION (\%),
+   ylabel = \fontspec{Punk Nova} \rotatebox{-90}{\parbox{3cm}{\center programming\\ skills}}]
+    \addplot
+      [domain=-0.01:0.27,color=red,samples=250]
+      {0.8*exp(-0.5*((x-0.1335)^2)/.00002)+
+       0.5*exp(-0.5*((x+0.015)^2)/0.01)
+      };
+  \end{axis}
+  \end{tikzpicture}
+}
+\ExplSyntaxOn
+%% 
+%%
+%% End of file `chickenize.sty'.
