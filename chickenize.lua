@@ -60,10 +60,11 @@ chickenize = function(head)
       end
       j = j+1
     end
+
     node.slide(chicken[1])
     lang.hyphenate(chicken[1])
-    chicken[1] = node.kerning(chicken[1])
-    chicken[1] = node.ligaturing(chicken[1])
+    chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
+    chicken[1] = node.ligaturing(chicken[1]) -- dito
 
     node.insert_before(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
@@ -119,14 +120,16 @@ randomfonts = function(head)
   end
   return head
 end
-uclcratio = 0.5 -- so, this can even be changed!
+uclcratio = 0.5 -- ratio between uppercase and lower case
 randomuclc = function(head)
   for i in node.traverse_id(37,head) do
-    if math.random() < uclcratio then
-      i.char = tex.uccode[i.char]
-    else
-      i.char = tex.lccode[i.char]
-end
+    if not(randomuclc_onlytext) or node.has_attribute(i,luatexbase.attributes.randuclcattr) then
+      if math.random() < uclcratio then
+        i.char = tex.uccode[i.char]
+      else
+        i.char = tex.lccode[i.char]
+      end
+    end
   end
   return head
 end

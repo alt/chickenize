@@ -145,6 +145,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
 \command{randomcolor} Does what it's name says.
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change slowly according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
+\command{pancakenize} This is a dummy so far, as I have no idea what it should do. If you have suggestions, please tell me.
 \command{nyanize} A synonym for |rainbowcolor|.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.
@@ -174,7 +175,7 @@ Replace |"pre| by |"post| to register into the post linebreak filter. The second
 \section{How to Adjust It}
 There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|.\footnote{To be honest, this is just \textbackslash|def|d to \textbackslash|directlua|. One small advantage of this is that \TeX\ comments do work.} But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands. The argument must have the syntax |{randomfontslower = 1| |randomfontsupper = 0}| instead of |{randomfontslower = 1,| |randomfontsupper = 0}|. Alright?
 
-However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{both} |%| \emph{or} |--| as comment string.
+However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{only} |%| as comment string. If you use |--|, all of the argument will be ignored as \TeX\ does not pass an eol to |\directlua|. If you don't understand that, just ignore it and go on as usual.
 
 The following list tries to keep kind of track of the options and variables. There is no guarantee for this list, and if you find something that is missing or doesn't work as described here, please inform me!
 
@@ -234,6 +235,11 @@ The following list tries to keep kind of track of the options and variables. The
 \let\nyanize\rainbowcolor
 \let\unnyanize\unrainbowcolor
 
+\def\pancakenize{
+  \directlua{}}
+\def\unpancakenize{
+  \directlua{}}
+
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
 \def\unrandomcolor{
@@ -259,6 +265,7 @@ The following list tries to keep kind of track of the options and variables. The
 \newluatexattribute\leetattr
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
+\newluatexattribute\randuclcattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -268,6 +275,8 @@ The following list tries to keep kind of track of the options and variables. The
   {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
 \long\def\textrandomfonts#1%
   {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+\long\def\textrandomuclc#1%
+  {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 %    \end{macrocode}
 % Finally, a macro to control the setup. For now, it's only a wrapper for |\directlua|, but it is nice to have a separate abstraction macro. Maybe this will allow for some flexibility.
 %    \begin{macrocode}
@@ -382,10 +391,11 @@ chickenize = function(head)
       end
       j = j+1
     end
+
     node.slide(chicken[1])
     lang.hyphenate(chicken[1])
-    chicken[1] = node.kerning(chicken[1])
-    chicken[1] = node.ligaturing(chicken[1])
+    chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
+    chicken[1] = node.ligaturing(chicken[1]) -- dito
 
     node.insert_before(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
@@ -458,14 +468,16 @@ end
 % \subsection{randomuclc}\label{sec:randomuclc}
 % Traverses the input list and changes lowercase/uppercase codes.
 %    \begin{macrocode}
-uclcratio = 0.5 -- so, this can even be changed!
+uclcratio = 0.5 -- ratio between uppercase and lower case
 randomuclc = function(head)
   for i in node.traverse_id(37,head) do
-    if math.random() < uclcratio then
-      i.char = tex.uccode[i.char] 
-    else 
-      i.char = tex.lccode[i.char]
-	end
+    if not(randomuclc_onlytext) or node.has_attribute(i,luatexbase.attributes.randuclcattr) then
+      if math.random() < uclcratio then
+        i.char = tex.uccode[i.char] 
+      else 
+        i.char = tex.lccode[i.char]
+      end
+    end
   end
   return head
 end

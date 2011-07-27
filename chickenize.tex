@@ -43,6 +43,11 @@
 \let\nyanize\rainbowcolor
 \let\unnyanize\unrainbowcolor
 
+\def\pancakenize{
+  \directlua{}}
+\def\unpancakenize{
+  \directlua{}}
+
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
 \def\unrandomcolor{
@@ -65,6 +70,7 @@
 \newluatexattribute\leetattr
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
+\newluatexattribute\randuclcattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -74,6 +80,8 @@
   {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
 \long\def\textrandomfonts#1%
   {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
+\long\def\textrandomuclc#1%
+  {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 \def\chickenizesetup#1{\directlua{#1}}
 %% 
 %%
