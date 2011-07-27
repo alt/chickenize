@@ -7,12 +7,12 @@
 This is the README file of the chickenize package. The package provides several commands and lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is /not/ intended for serious documents!
 
 To produce the package files, run lualatex on chickinize.dtx, wich should result in the creaction of the following files:
-  chickenize.pdf  (documentation)
-  chickenize.tex  (plainTeX user interface)
-  chickenize.sty  (LaTeX user interface) [may vanish]
+  chickenize.pdf  (documentation)\n
+  chickenize.tex  (plainTeX user interface)\n
+  chickenize.sty  (LaTeX user interface)\n
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2011, if possible) to use this package.
+You need an up-to-date TeX Live (2011, if possible) to use this package, maybe a full MiKTeX will do, too.
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -100,22 +100,22 @@ Do not distribute a modified version of this file under the same name.
 }
 
 \kern4cm
-\begin{abstract}
-This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\TeX\ document,\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} but is actually just for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
-\end{abstract}
+
+This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\TeX\ document,\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} but is actually just for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.\\[3ex]
 
 \noindent
 \begin{tabu}{lX[j]}
 \toprule
-\rlap{function/command} & \hfill effect \hfill\, \\
+function/command & \hfill effect \hfill\, \\
 \midrule
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
-\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness of a line\\
+\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness and font expansion of each line\\
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the whole input\\
-\hyperref[sec:randomchars]{randomcolor} & prints every letter in a random color\\
+\hyperref[sec:randomcolor]{randomcolor} & prints every letter in a random color\\
+\hyperref[sec:rainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
 \hyperref[sec:uppercasecolor]{uppercasecolor} & makes every uppercase letter colored\\
 \bottomrule
 \end{tabu}
@@ -123,10 +123,14 @@ This is the package |chickenize|. It allows you to substitute or change the cont
 
 \noindent If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
 
+\newpage
 \tableofcontents
+\newpage
 \part{User Documentation}
 \section{How It Works}
-We make use of Lua\TeX s callbacks, especially the |pre_linebreak_filter| and the |post_linebreak_filter|. Hooking a function into these, we can nearly arbitrarily change the contents of the document. If the changes should be on the input-side (replacing with |chicken|), one can use the |pre_linebreak_filter|. Hower, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is used for such things.
+We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| and the |post_line|\-|break_filter|. Hooking a function into these, we can nearly arbitrarily change the contents of the document. If the changes should be on the input-side (replacing with |chicken|), one can use the |pre_linebreak_filter|. Hower, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is used for such things.
+
+All functions traverse the node list of a paragraph and manipulate the nodes' properties (like |.font| or |.char|) or insert nodes (like color push/pop nodes) and return this changed node list.
 
 \hypertarget{texinterface}{}
 \section{How You Can Use It}
@@ -240,6 +244,11 @@ The following list tries to keep kind of track of the options and variables. The
 \def\unpancakenize{
   \directlua{}}
 
+\def\coffeestainize{
+  \directlua{}}
+\def\uncoffeestainize{
+  \directlua{}}
+
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
 \def\unrandomcolor{
@@ -291,8 +300,6 @@ The following list tries to keep kind of track of the options and variables. The
 %    \begin{macrocode}
 \input{chickenize}
 \RequirePackage{
-  expl3,
-  xkeyval,
   xparse
 }
 %    \end{macrocode}
@@ -303,7 +310,7 @@ The following list tries to keep kind of track of the options and variables. The
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
 %% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
-
+%% so far, you have to load pgfplots yourself. As it is a mighty package, I don't want the user to force loading it.
 \ExplSyntaxOff  %% because of the : in the domain
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
   \begin{tikzpicture}
@@ -587,7 +594,7 @@ end
 % \subsection{colorstretch}\label{sec:colorstretch}
 % This function displays the amount of stretching that has been done for each line of an arbitrary document. A well-typeset document should be equally grey over all lines, which is not always possible.
 % 
-% The function prints two boxes, in fact: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth gray, whereas a too dense line is indicated by a dark grey box. 
+% In fact, two boxes are drawn: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth gray, whereas a too dense line is indicated by a dark grey box. 
 %
 %The second box is only usefull if microtypographic extensions are used, e.\,g. with the |microtype| package under \LaTeX. The box color then corresponds to the amount of font expansion in the line. This can be greatly used to show the positive effect of font expansion on the badness of a line!
 %
@@ -675,14 +682,12 @@ end
 %\fi
 % \newpage
 % \section{Known Bugs}\label{bugs}
-% There are surely some bugs …
-% \begin{description}
-% \item 
-% \end{description}
+% A rather severe bug is related to Adobe's Acrobat Reader: While |randomcolor| works fine and produces a pdf, that pdf cannot be viewed using the Acrobat Reader. I have no idea so far what's the problem. However, every other pdf viewer seems to work fine here, so just use another one.
 % \section{To Dos}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
 % \begin{description}
-% \item ?
+% \item[rainbowcolor] should be more flexible – the ange of the rainbow should be easily adjustable.
+% \item[pancakenize] should do something funny.
 % \end{description}
 % \Finale
 % \endinput

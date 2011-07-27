@@ -15,8 +15,6 @@
 %% 
 \input{chickenize}
 \RequirePackage{
-  expl3,
-  xkeyval,
   xparse
 }
   %% We want to “chickenize” figures, too. So …
@@ -24,7 +22,7 @@
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
 %% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
-
+%% so far, you have to load pgfplots yourself. As it is a mighty package, I don't want the user to force loading it.
 \ExplSyntaxOff  %% because of the : in the domain
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
   \begin{tikzpicture}
