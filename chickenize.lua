@@ -180,12 +180,12 @@ randomcolorstring = function()
       rainbow_rgB = rainbow_rgB - rainbow_step
       if rainbow_rgB <= rainbow_step then rainind = 1 end
     end
-    return rainbow_Rgb..rainbow_rGb..rainbow_rgB.." rg"
+    return rainbow_Rgb.." "..rainbow_rGb.." "..rainbow_rgB.." rg"
   else
     Rgb = math.random(Rgb_lower,Rgb_upper)/255
     rGb = math.random(rGb_lower,rGb_upper)/255
     rgB = math.random(rgB_lower,rgB_upper)/255
-    return Rgb..rGb..rgB.." rg"
+    return Rgb.." "..rGb.." "..rgB.." ".." rg"
   end
 end
 randomcolor = function(head)

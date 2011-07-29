@@ -17,8 +17,10 @@
 \directlua{dofile("chickenize.lua")}
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
-    luatexbase.add_to_callback("start_page_number",function() texio.write("["..status.total_pages) end ,"cstartpage")
-    luatexbase.add_to_callback("stop_page_number",function() texio.write(" chickens]") end,"cstoppage")}}  % yes, I /am/ funny ☺
+    luatexbase.add_to_callback("start_page_number",
+    function() texio.write("["..status.total_pages) end ,"cstartpage")
+    luatexbase.add_to_callback("stop_page_number",
+    function() texio.write(" chickens]") end,"cstoppage")}}    % yes, I /am/ funny ☺
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
     luatexbase.remove_from_callback("start_page_number","cstarttpage")

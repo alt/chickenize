@@ -14,16 +14,14 @@
 %% Do not distribute a modified version of this file under the same name.
 %% 
 \input{chickenize}
-\RequirePackage{
-  xparse
-}
   %% We want to “chickenize” figures, too. So …
+\iffalse
   \DeclareDocumentCommand\includegraphics{O{}m}{
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
-%% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
-%% so far, you have to load pgfplots yourself. As it is a mighty package, I don't want the user to force loading it.
-\ExplSyntaxOff  %% because of the : in the domain
+%%%% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
+%% So far, you have to load pgfplots yourself.
+%% As it is a mighty package, I don't want the user to force loading it.
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
   \begin{tikzpicture}
   \hspace*{#2}  %% anyhow necessary to fix centering … strange :(
@@ -44,7 +42,7 @@
   \end{axis}
   \end{tikzpicture}
 }
-\ExplSyntaxOn
+\fi
 %% 
 %%
 %% End of file `chickenize.sty'.

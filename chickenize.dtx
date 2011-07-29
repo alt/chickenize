@@ -6,10 +6,10 @@
 %<*readme>
 This is the README file of the chickenize package. The package provides several commands and lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is /not/ intended for serious documents!
 
-To produce the package files, run lualatex on chickinize.dtx, wich should result in the creaction of the following files:
-  chickenize.pdf  (documentation)\n
-  chickenize.tex  (plainTeX user interface)\n
-  chickenize.sty  (LaTeX user interface)\n
+To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
+  chickenize.pdf  (documentation)
+  chickenize.tex  (plainTeX user interface)
+  chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
 You need an up-to-date TeX Live (2011, if possible) to use this package, maybe a full MiKTeX will do, too.
@@ -64,7 +64,7 @@ Do not distribute a modified version of this file under the same name.
 \fi
 \ProvidesFile{chickenize.sty}
   [v0.1 chickenize package]
-\documentclass[english]{ltxdoc}
+\documentclass[11pt,english]{ltxdoc}
 \usepackage{
   array,
   babel,
@@ -173,11 +173,11 @@ You can use the following code inside a |\directlua| statement or in a |luacode|
 \begin{verbatim}
 luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
 \end{verbatim}
-Replace |"pre| by |"post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
+Replace |pre| by |post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
 
 \hypertarget{adjustment}{}
 \section{How to Adjust It}
-There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|.\footnote{To be honest, this is just \textbackslash|def|d to \textbackslash|directlua|. One small advantage of this is that \TeX\ comments do work.} But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands. The argument must have the syntax |{randomfontslower = 1| |randomfontsupper = 0}| instead of |{randomfontslower = 1,| |randomfontsupper = 0}|. Alright?
+There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|. But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands. The argument must have the syntax |{randomfontslower = 1| |randomfontsupper = 0}| instead of |{randomfontslower = 1,| |randomfontsupper = 0}|. Alright?
 
 However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{only} |%| as comment string. If you use |--|, all of the argument will be ignored as \TeX\ does not pass an eol to |\directlua|. If you don't understand that, just ignore it and go on as usual.
 
@@ -213,8 +213,10 @@ The following list tries to keep kind of track of the options and variables. The
 % then define the global macros. These affect the whole document and will stay active until the functions will be un-registered explicitely.
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
-    luatexbase.add_to_callback("start_page_number",function() texio.write("["..status.total_pages) end ,"cstartpage")
-    luatexbase.add_to_callback("stop_page_number",function() texio.write(" chickens]") end,"cstoppage")}}  % yes, I /am/ funny ☺
+    luatexbase.add_to_callback("start_page_number",
+    function() texio.write("["..status.total_pages) end ,"cstartpage")
+    luatexbase.add_to_callback("stop_page_number",
+    function() texio.write(" chickens]") end,"cstoppage")}}    % yes, I /am/ funny ☺
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
@@ -287,7 +289,7 @@ The following list tries to keep kind of track of the options and variables. The
 \long\def\textrandomuclc#1%
   {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 %    \end{macrocode}
-% Finally, a macro to control the setup. For now, it's only a wrapper for |\directlua|, but it is nice to have a separate abstraction macro. Maybe this will allow for some flexibility.
+% Finally, a macro to control the setup. So far, it's only a wrapper that allows \TeX-style comments to make the user feel more at home.
 %    \begin{macrocode}
 \def\chickenizesetup#1{\directlua{#1}}
 %    \end{macrocode}
@@ -296,22 +298,20 @@ The following list tries to keep kind of track of the options and variables. The
 %<*package>
 % \fi
 % \section{\LaTeX\ package}
-% I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing usefull, but it provides a |chickenize.sty| that loads |chickenize.tex|. Some code might be implemented to manipulate figures for full chickenization.
+% I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing usefull, but it provides a |chickenize.sty| that loads |chickenize.tex|. Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you want to use anything of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \input{chickenize}
-\RequirePackage{
-  xparse
-}
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
 %    \begin{macrocode}
   %% We want to “chickenize” figures, too. So …
+\iffalse
   \DeclareDocumentCommand\includegraphics{O{}m}{
      \fbox{Chicken}  %% actually, I'd love to draw a mp graph showing a chicken …
   }
-%% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
-%% so far, you have to load pgfplots yourself. As it is a mighty package, I don't want the user to force loading it.
-\ExplSyntaxOff  %% because of the : in the domain
+%%%% specials: the balmerpeak. A tribute to http://xkcd.com/323/.
+%% So far, you have to load pgfplots yourself.
+%% As it is a mighty package, I don't want the user to force loading it.
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
   \begin{tikzpicture}
   \hspace*{#2}  %% anyhow necessary to fix centering … strange :(
@@ -332,7 +332,7 @@ The following list tries to keep kind of track of the options and variables. The
   \end{axis}
   \end{tikzpicture}
 }
-\ExplSyntaxOn
+\fi
 %    \end{macrocode}
 %\iffalse
 %</package>
@@ -548,12 +548,12 @@ randomcolorstring = function()
       rainbow_rgB = rainbow_rgB - rainbow_step
       if rainbow_rgB <= rainbow_step then rainind = 1 end
     end
-    return rainbow_Rgb..rainbow_rGb..rainbow_rgB.." rg"
+    return rainbow_Rgb.." "..rainbow_rGb.." "..rainbow_rgB.." rg"
   else 
     Rgb = math.random(Rgb_lower,Rgb_upper)/255
     rGb = math.random(rGb_lower,rGb_upper)/255
     rgB = math.random(rgB_lower,rgB_upper)/255
-    return Rgb..rGb..rgB.." rg"
+    return Rgb.." "..rGb.." "..rgB.." ".." rg"
   end
 end
 %    \end{macrocode}
