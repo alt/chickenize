@@ -33,13 +33,15 @@ local shrink = tbl.parameters.space_shrink
 local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 
-chickenize = function(head)
-  for i in node.traverse_id(37,head) do  --find start of a word
+chickenize_real_stuff = function(i,head)
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
     end
 
-    chicken = {}  -- constructing the node list. Should be done only once?
+    chicken = {}  -- constructing the node list.
+--  Should this be done only once? No, then we loose the freedom to change the string in-document.
+-- in-paragraph changes are not possible, however. Maybe in the far, far future
+-- by using a special attribute
     chicken[0] = node.new(37,1)  -- only a dummy for the loop
     for i = 1,string.len(chickenstring) do
       chicken[i] = node.new(37,1)
@@ -69,8 +71,23 @@ chickenize = function(head)
     node.insert_before(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
     chicken[string.len(chickenstring)].next = i.next
-  end
+  return head
+end
 
+chickenize_ignore_word = false
+chickenizefraction = 0.5
+
+chickenize = function(head)
+  for i in node.traverse_id(37,head) do  --find start of a word
+if (chickenize_ignore_word == false) then
+      head = chickenize_real_stuff(i,head)
+    end
+
+if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then chickenize_ignore_word = false
+else end
+if math.random() > chickenizefraction then chickenize_ignore_word = true end
+
+  end
   return head
 end
 leet_onlytext = false
@@ -279,7 +296,7 @@ if colorexpansion then  -- if also the font expansion should be shown
     if drawstretchnumbers then
       j = 1
       glue_ratio_output = {}
-      for s in string.utfvalues(math.abs(glue_ratio)) do -- using the abs here gets us rid of the minus sign
+      for s in string.utfvalues(math.abs(glue_ratio)) do -- using math.abs here gets us rid of the minus sign
         local char = unicode.utf8.char(s)
         glue_ratio_output[j] = node.new(37,1)
         glue_ratio_output[j].font = font.current()
