@@ -217,6 +217,9 @@ uppercasecolor = function (head)
 end
 keeptext = true
 colorexpansion = true
+drawstretchnumbers = true
+drawstretchthreshold = 0.1
+drawexpansionthreshold = 0.9
 colorstretch = function (head)
 
   local f = font.getfont(font.current()).characters
@@ -246,6 +249,7 @@ if colorexpansion then  -- if also the font expansion should be shown
       end
     end
     color_push.data = .5 + glue_ratio .. " g"
+
 -- set up output
     local p = line.head
 
@@ -272,6 +276,28 @@ if colorexpansion then  -- if also the font expansion should be shown
       node.insert_after(line.head,tmpnode.next,node.copy(rule_bad))
       node.insert_after(line.head,tmpnode.next.next,node.copy(color_pop))
     end
+    if drawstretchnumbers then
+      j = 1
+      glue_ratio_output = {}
+      for s in string.utfvalues(math.abs(glue_ratio)) do -- using the abs here gets us rid of the minus sign
+        local char = unicode.utf8.char(s)
+        glue_ratio_output[j] = node.new(37,1)
+        glue_ratio_output[j].font = font.current()
+        glue_ratio_output[j].char = s
+        j = j+1
+      end
+      if math.abs(glue_ratio) > drawstretchthreshold then
+        if glue_ratio < 0 then color_push.data = "0.99 0 0 rg"
+        else color_push.data = "0 0.99 0 rg" end
+      else color_push.data = "0 0 0 rg"
+      end
+
+      node.insert_after(line.head,node.tail(line.head),node.copy(color_push))
+      for i = 1,math.min(j-1,7) do
+        node.insert_after(line.head,node.tail(line.head),glue_ratio_output[i])
+      end
+      node.insert_after(line.head,node.tail(line.head),node.copy(color_pop))
+    end -- end of stretch number insertion
   end
   return head
 end

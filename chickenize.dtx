@@ -604,6 +604,9 @@ end
 %    \begin{macrocode}
 keeptext = true
 colorexpansion = true
+drawstretchnumbers = true
+drawstretchthreshold = 0.1
+drawexpansionthreshold = 0.9
 %    \end{macrocode}
 % After setting the constants, the function starts. It receives the vertical list of the typeset paragraph as |head|, and loops through all horizontal lists.
 % 
@@ -643,6 +646,7 @@ colorstretch = function (head)
       end
     end
     color_push.data = .5 + glue_ratio .. " g"
+
 %    \end{macrocode}
 % Now, we throw everything together in a way that works. Somehow …
 %    \begin{macrocode}
@@ -672,6 +676,31 @@ colorstretch = function (head)
       node.insert_after(line.head,tmpnode.next,node.copy(rule_bad)) 
       node.insert_after(line.head,tmpnode.next.next,node.copy(color_pop))
     end
+%    \end{macrocode}
+% Now we are ready with the boxes and stuff and everything. However, a very useful information might be the amount of stretching, not encoded as color, but the real value. In concreto, I mean: narrow boxes get one color, loose boxes get another one, but only if the badness is above a certain amount. This information is printed into the right-hand margin. The threshold is user-adjustable.
+%    \begin{macrocode}
+    if drawstretchnumbers then
+      j = 1
+      glue_ratio_output = {}
+      for s in string.utfvalues(math.abs(glue_ratio)) do -- using the abs here gets us rid of the minus sign
+        local char = unicode.utf8.char(s)
+        glue_ratio_output[j] = node.new(37,1)
+        glue_ratio_output[j].font = font.current()
+        glue_ratio_output[j].char = s
+        j = j+1
+      end
+      if math.abs(glue_ratio) > drawstretchthreshold then 
+        if glue_ratio < 0 then color_push.data = "0.99 0 0 rg"
+        else color_push.data = "0 0.99 0 rg" end
+      else color_push.data = "0 0 0 rg"
+      end
+
+      node.insert_after(line.head,node.tail(line.head),node.copy(color_push))
+      for i = 1,math.min(j-1,7) do
+        node.insert_after(line.head,node.tail(line.head),glue_ratio_output[i])
+      end
+      node.insert_after(line.head,node.tail(line.head),node.copy(color_pop))
+    end -- end of stretch number insertion
   end
   return head
 end
@@ -682,11 +711,11 @@ end
 %\fi
 % \newpage
 % \section{Known Bugs}\label{bugs}
-% A rather severe bug is related to Adobe's Acrobat Reader: While |randomcolor| works fine and produces a pdf, that pdf cannot be viewed using the Acrobat Reader. I have no idea so far what's the problem. However, every other pdf viewer seems to work fine here, so just use another one.
+% So far, no bugs are known. The behaviour of the |\chickenize| macro is under construction and everything it does so far is considered a feature.
 % \section{To Dos}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
 % \begin{description}
-% \item[rainbowcolor] should be more flexible – the ange of the rainbow should be easily adjustable.
+% \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.
 % \item[pancakenize] should do something funny.
 % \end{description}
 % \Finale
