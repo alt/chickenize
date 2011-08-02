@@ -25,13 +25,18 @@ color_push.stack = 0
 color_pop.stack = 0
 color_push.cmd = 1
 color_pop.cmd = 2
-chickenstring = "Chicken"
+chickenstring = {}
+chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
+
+chickenizefraction = 1
+-- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 
 local tbl = font.getfont(font.current())
 local space = tbl.parameters.space
 local shrink = tbl.parameters.space_shrink
 local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
+chickenize_ignore_word = false
 
 chickenize_real_stuff = function(i,head)
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
@@ -39,18 +44,20 @@ chickenize_real_stuff = function(i,head)
     end
 
     chicken = {}  -- constructing the node list.
---  Should this be done only once? No, then we loose the freedom to change the string in-document.
--- in-paragraph changes are not possible, however. Maybe in the far, far future
--- by using a special attribute
+
+-- Should this be done only once? No, then we loose the freedom to change the string in-document.
+--but it could be done only once each paragraph as in-paragraph changes are not possible!
+
+    chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
     chicken[0] = node.new(37,1)  -- only a dummy for the loop
-    for i = 1,string.len(chickenstring) do
+    for i = 1,string.len(chickenstring_tmp) do
       chicken[i] = node.new(37,1)
       chicken[i].font = font.current()
       chicken[i-1].next = chicken[i]
     end
 
     j = 1
-    for s in string.utfvalues(chickenstring) do
+    for s in string.utfvalues(chickenstring_tmp) do
       local char = unicode.utf8.char(s)
       chicken[j].char = s
       if match(char,"%s") then
@@ -70,23 +77,25 @@ chickenize_real_stuff = function(i,head)
 
     node.insert_before(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
-    chicken[string.len(chickenstring)].next = i.next
+    chicken[string.len(chickenstring_tmp)].next = i.next
   return head
 end
 
-chickenize_ignore_word = false
-chickenizefraction = 0.5
-
 chickenize = function(head)
   for i in node.traverse_id(37,head) do  --find start of a word
-if (chickenize_ignore_word == false) then
+    if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
       head = chickenize_real_stuff(i,head)
     end
 
-if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then chickenize_ignore_word = false
-else end
-if math.random() > chickenizefraction then chickenize_ignore_word = true end
+-- At the end of the word, the ignoring is reset. New chance for everyone.
+    if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
+      chickenize_ignore_word = false
+    end
 
+-- and the random determination of the chickenization of the next word:
+    if math.random() > chickenizefraction then
+      chickenize_ignore_word = true
+    end
   end
   return head
 end
