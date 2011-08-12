@@ -28,7 +28,7 @@ color_pop.cmd = 2
 chickenstring = {}
 chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 1
+chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 
 local tbl = font.getfont(font.current())
@@ -327,5 +327,25 @@ if colorexpansion then  -- if also the font expansion should be shown
   end
   return head
 end
+nicetext = function()
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl(" ")
+  texio.write_nl("Heyho dear user,")
+  texio.write_nl("good job you did there, fine document.")
+  texio.write_nl("I had fun compiling this, really!")
+  texio.write_nl(" ")
+  texio.write_nl("Now, leave the computer, go outside, have fun")
+  texio.write_nl("and enjoy your life. There are so many great things out there!")
+  texio.write_nl("Have a nice day!!!11")
+  texio.write_nl(" ")
+  texio.write_nl("And don't forget to feet your chicken!")
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl(" ")
+  texio.write_nl(" ")
+end
+
+luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
 -- 
 --  End of File `chickenize.lua'.

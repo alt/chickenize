@@ -189,7 +189,7 @@ The following list tries to keep kind of track to the options and variables. The
 \begin{description}
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
-\item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|.
+\item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
 \item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
 \item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
 \item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
@@ -367,7 +367,7 @@ color_pop.cmd = 2
 chickenstring = {}
 chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 1
+chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 
 local tbl = font.getfont(font.current())
@@ -733,6 +733,30 @@ colorstretch = function (head)
 end
 %    \end{macrocode}
 % And that's it!\qquad {\fontsize{40}{0}\raisebox{-2ex}{\fontspec{XITS}☺}}
+% \newpage
+% Well, not totally … I've decided to print a small message at the very end of everything. It's nice to hear some friendly words from your computer, isn't it?
+%    \begin{macrocode}
+nicetext = function()
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl(" ")
+  texio.write_nl("Heyho dear user,")
+  texio.write_nl("good job you did there, fine document.")
+  texio.write_nl("I had fun compiling this, really!")
+  texio.write_nl(" ")
+  texio.write_nl("Now, leave the computer, go outside, have fun")
+  texio.write_nl("and enjoy your life. There are so many great things out there!")
+  texio.write_nl("Have a nice day!!!11")
+  texio.write_nl(" ")
+  texio.write_nl("And don't forget to feet your chicken!")
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl(" ")
+  texio.write_nl(" ")
+end
+
+luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
+%    \end{macrocode}
 %\iffalse 
 % </lua>
 %\fi
