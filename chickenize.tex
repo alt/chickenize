@@ -20,7 +20,11 @@
     luatexbase.add_to_callback("start_page_number",
     function() texio.write("["..status.total_pages) end ,"cstartpage")
     luatexbase.add_to_callback("stop_page_number",
-    function() texio.write(" chickens]") end,"cstoppage")}}    % yes, I /am/ funny ☺
+    function() texio.write(" chickens]") end,"cstoppage")
+
+    luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
+  }
+}
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
@@ -29,7 +33,7 @@
 \def\colorstretch{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","colorstretch")}}
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -90,6 +94,49 @@
 \long\def\textrandomuclc#1%
   {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 \def\chickenizesetup#1{\directlua{#1}}
+\long\def\luadraw#1#2{%
+  \vbox to #1bp{%
+    \vfil
+    \luatexlatelua{pdf_print("q") #2 pdf_print("Q")}%
+  }%
+}
+\long\def\drawchicken{
+\luadraw{90}{
+kopf = {200,50} % Kopfmitte
+kopf_rad = 20
+
+d = {215,35} % Halsansatz
+e = {230,10} %
+
+korper = {260,-10}
+korper_rad = 40
+
+bein11 = {260,-50}
+bein12 = {250,-70}
+bein13 = {235,-70}
+
+bein21 = {270,-50}
+bein22 = {260,-75}
+bein23 = {245,-75}
+
+schnabel_oben = {185,55}
+schnabel_vorne = {165,45}
+schnabel_unten = {185,35}
+
+flugel_vorne = {260,-10}
+flugel_unten = {280,-40}
+flugel_hinten = {275,-15}
+
+sloppycircle(kopf,kopf_rad)
+sloppyline(d,e)
+sloppycircle(korper,korper_rad)
+sloppyline(bein11,bein12) sloppyline(bein12,bein13)
+sloppyline(bein21,bein22) sloppyline(bein22,bein23)
+sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
+sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
+
+}
+}
 %% 
 %%
 %% End of file `chickenize.tex'.

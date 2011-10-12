@@ -114,8 +114,8 @@ function/command & \hfill effect \hfill\, \\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the whole input\\
-\hyperref[sec:randomcolor]{randomcolor} & prints every letter in a random color\\
-\hyperref[sec:rainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
+\hyperref[sec:randomrainbowcolor]{randomcolor} & prints every letter in a random color\\
+\hyperref[sec:randomrainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
 \hyperref[sec:uppercasecolor]{uppercasecolor} & makes every uppercase letter colored\\
 \bottomrule
 \end{tabu}
@@ -133,7 +133,7 @@ We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| an
 All functions traverse the node list of a paragraph and manipulate the nodes' properties (like |.font| or |.char|) or insert nodes (like color push/pop nodes) and return this changed node list.
 
 \hypertarget{texinterface}{}
-\section{How You Can Use It}
+\section{Commands – How You Can Use It}
 There are several ways to make use of this package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are simple wrappers around the functions.
 
 \subsection{\TeX\ Commands – Document Wide}
@@ -176,7 +176,7 @@ luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
 Replace |pre| by |post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
 
 \hypertarget{adjustment}{}
-\section{How to Adjust It}
+\section{Options – How to Adjust It}
 There are several ways to change the behaviour of |chickenize| and its macros. Most of the options are Lua variables and can be set using |\chickenizesetup|. But be \emph{careful!} The argument of |\chickenizesetup| is parsed directly to Lua, therefore you are \emph{not} using a comma-separated key-value list, but uncorrelated Lua commands. The argument must have the syntax |{randomfontslower = 1| |randomfontsupper = 0}| instead of |{randomfontslower = 1,| |randomfontsupper = 0}|. Alright?
 
 However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{only} |%| as comment string. If you use |--|, all of the argument will be ignored as \TeX\ does not pass an eol to |\directlua|. If you don't understand that, just ignore it and go on as usual.
@@ -190,6 +190,7 @@ The following list tries to keep kind of track to the options and variables. The
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
 \item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
+\item[\opt{colorstretchnumbers} = \arg{true}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
 \item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
 \item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
 \item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
@@ -217,7 +218,11 @@ The following list tries to keep kind of track to the options and variables. The
     luatexbase.add_to_callback("start_page_number",
     function() texio.write("["..status.total_pages) end ,"cstartpage")
     luatexbase.add_to_callback("stop_page_number",
-    function() texio.write(" chickens]") end,"cstoppage")}}    % yes, I /am/ funny ☺
+    function() texio.write(" chickens]") end,"cstoppage")
+    
+    luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
+  }
+}
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
@@ -226,7 +231,7 @@ The following list tries to keep kind of track to the options and variables. The
 \def\colorstretch{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","colorstretch")}}
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -293,6 +298,51 @@ The following list tries to keep kind of track to the options and variables. The
 % Finally, a macro to control the setup. So far, it's only a wrapper that allows \TeX-style comments to make the user feel more at home.
 %    \begin{macrocode}
 \def\chickenizesetup#1{\directlua{#1}}
+%    \end{macrocode}
+%    \begin{macrocode}
+\long\def\luadraw#1#2{%
+  \vbox to #1bp{%
+    \vfil
+    \luatexlatelua{pdf_print("q") #2 pdf_print("Q")}%
+  }%
+}
+\long\def\drawchicken{
+\luadraw{90}{
+kopf = {200,50} % Kopfmitte
+kopf_rad = 20
+
+d = {215,35} % Halsansatz
+e = {230,10} % 
+
+korper = {260,-10}
+korper_rad = 40
+
+bein11 = {260,-50}
+bein12 = {250,-70}
+bein13 = {235,-70}
+
+bein21 = {270,-50}
+bein22 = {260,-75}
+bein23 = {245,-75}
+
+schnabel_oben = {185,55}
+schnabel_vorne = {165,45}
+schnabel_unten = {185,35}
+
+flugel_vorne = {260,-10}
+flugel_unten = {280,-40}
+flugel_hinten = {275,-15}
+
+sloppycircle(kopf,kopf_rad)
+sloppyline(d,e)
+sloppycircle(korper,korper_rad)
+sloppyline(bein11,bein12) sloppyline(bein12,bein13)
+sloppyline(bein21,bein22) sloppyline(bein22,bein23)
+sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
+sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
+
+}
+}
 %    \end{macrocode}
 % \iffalse
 %</tex>
@@ -364,6 +414,8 @@ color_pop.cmd = 2
 % \subsection{chickenize}\label{sec:chickenize}
 % The infamous |\chickenize| macro. Substitutes every word of the input with the given string. This can be elaborated arbitrarily, and whenever I feel like, I might add functionality. So far, only the string replaces the word, and even hyphenation is not possible.
 %    \begin{macrocode}
+chicken_pagenumbers = true
+
 chickenstring = {}
 chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
 
@@ -438,8 +490,19 @@ chickenize = function(head)
   end
   return head
 end
+
+nicetext = function()
+  texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl("Hello my dear user,")
+  texio.write_nl("good job, now go outside and enjoy the world!")
+  texio.write_nl(" ")
+  texio.write_nl("And don't forget to feet your chicken!")
+  texio.write_nl("----------------------------")
+end
 %    \end{macrocode}
-% \subsection{leet}\label{sec:leet}
+% \subsection{leetspeak}\label{sec:leetspeak}
 % The |leettable| is the substitution scheme. Just add items if you feel to. Maybe we will differ between a light-weight version and a hardcore 1337.
 %    \begin{macrocode}
 leet_onlytext = false
@@ -475,6 +538,10 @@ leet = function(head)
   end
   return head
 end
+%    \end{macrocode}
+% \subsection{pancakenize}\label{sec:pancakenize}
+% Not yet completely decided what this should do, but it might come down to inserting a cooking receipe for a … well, guess what. Possible implementations are: Substitute a whole sentence, from full-stop to full-stop. OR: Substitute word-by-word at a random place. OR (expert-freak-1337-level): Substitute the n-th word of each page to a word of the receipe. That would be totally awesome!!
+%    \begin{macrocode}
 %    \end{macrocode}
 % \subsection{randomfonts}\label{sec:randomfonts}
 % Traverses the output and substitutes fonts randomly. A check is done so that the font number is existing.
@@ -527,7 +594,7 @@ randomchars = function(head)
   return head
 end
 %    \end{macrocode}
-% \subsection{randomcolor}\label{sec:randomcolor}
+% \subsection{randomcolor and rainbowcolor}\label{sec:randomrainbowcolor}
 % Setup of the boolean for grey/color or rainbowcolor, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
 %    \begin{macrocode}
 randomcolor_grey = false
@@ -601,6 +668,10 @@ randomcolor = function(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{rickroll}\label{sec:rickroll}
+% Another tribute to pop culture. Either: substitute word-by-word as in pancake. OR: substitute each link to a youtube-rickroll …
+%    \begin{macrocode}
+%    \end{macrocode}
 % \subsection{uppercasecolor}\label{sec:uppercasecolor}
 % Loop through all the nodes and checking whether it is uppercase. If so (and also for small caps), color it.
 %    \begin{macrocode}
@@ -631,7 +702,11 @@ end
 %    \begin{macrocode}
 keeptext = true
 colorexpansion = true
-drawstretchnumbers = true
+
+colorstretch_coloroffset = 0.5
+colorstretch_colorrange = 0.5
+
+colorstretchnumbers = true
 drawstretchthreshold = 0.1
 drawexpansionthreshold = 0.9
 %    \end{macrocode}
@@ -651,7 +726,7 @@ colorstretch = function (head)
          g = g.next
         end
       exp_factor = g.width / f[g.char].width
-      exp_color = .5 + (1-exp_factor)*10 .. " g"
+      exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
       rule_bad.width = 0.5*line.width  -- we need two rules on each line!
     else 
       rule_bad.width = line.width  -- only the space expansion should be shown, only one rule
@@ -667,12 +742,12 @@ colorstretch = function (head)
     local glue_ratio = 0
     if line.glue_order == 0 then
       if line.glue_sign == 1 then
-        glue_ratio = .5 * math.min(line.glue_set,1)
+        glue_ratio = colorstretch_colorrange * math.min(line.glue_set,1)
       else
-        glue_ratio = -.5 * math.min(line.glue_set,1)
+        glue_ratio = -colorstretch_colorrange * math.min(line.glue_set,1)
       end
     end
-    color_push.data = .5 + glue_ratio .. " g"
+    color_push.data = colorstretch_coloroffset + glue_ratio .. " g"
 
 %    \end{macrocode}
 % Now, we throw everything together in a way that works. Somehow …
@@ -706,7 +781,7 @@ colorstretch = function (head)
 %    \end{macrocode}
 % Now we are ready with the boxes and stuff and everything. However, a very useful information might be the amount of stretching, not encoded as color, but the real value. In concreto, I mean: narrow boxes get one color, loose boxes get another one, but only if the badness is above a certain amount. This information is printed into the right-hand margin. The threshold is user-adjustable.
 %    \begin{macrocode}
-    if drawstretchnumbers then
+    if colorstretchnumbers then
       j = 1
       glue_ratio_output = {}
       for s in string.utfvalues(math.abs(glue_ratio)) do -- using math.abs here gets us rid of the minus sign
@@ -734,28 +809,89 @@ end
 %    \end{macrocode}
 % And that's it!\qquad {\fontsize{40}{0}\raisebox{-2ex}{\fontspec{XITS}☺}}
 % \newpage
-% Well, not totally … I've decided to print a small message at the very end of everything. It's nice to hear some friendly words from your computer, isn't it?
+% \subsection{draw a chicken}
+% A \emph{very} first, experimental implementation of a drawing of a chicken. The parameters should be consistent, easy to change and that monster should look more like a cute chicken. However, it is chicken, it is Lua, so it belongs into this package. So far, all numbers and positions are hard coded, this will of course change!
 %    \begin{macrocode}
-nicetext = function()
-  texio.write_nl(" ")
-  texio.write_nl("----------------------------")
-  texio.write_nl(" ")
-  texio.write_nl("Heyho dear user,")
-  texio.write_nl("good job you did there, fine document.")
-  texio.write_nl("I had fun compiling this, really!")
-  texio.write_nl(" ")
-  texio.write_nl("Now, leave the computer, go outside, have fun")
-  texio.write_nl("and enjoy your life. There are so many great things out there!")
-  texio.write_nl("Have a nice day!!!11")
-  texio.write_nl(" ")
-  texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl(" ")
-  texio.write_nl("----------------------------")
-  texio.write_nl(" ")
-  texio.write_nl(" ")
+--
+function pdf_print (...)
+  for _, str in ipairs({...}) do
+    pdf.print(str .. " ")
+  end
+  pdf.print("\string\n")
 end
 
-luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
+function move (p)
+  pdf_print(p[1],p[2],"m")
+end
+
+function line (p)
+  pdf_print(p[1],p[2],"l")
+end
+
+function curve(p1,p2,p3)
+  pdf_print(p1[1], p1[2],
+            p2[1], p2[2],
+            p3[1], p3[2], "c")
+end
+
+function close ()
+  pdf_print("h")
+end
+
+function linewidth (w)
+  pdf_print(w,"w")
+end
+
+function stroke ()
+  pdf_print("S")
+end
+--
+
+function strictcircle(center,radius)
+  local left = {center[1] - radius, center[2]}
+  local lefttop = {left[1], left[2] + 1.45*radius}
+  local leftbot = {left[1], left[2] - 1.45*radius}
+  local right = {center[1] + radius, center[2]}
+  local righttop = {right[1], right[2] + 1.45*radius}
+  local rightbot = {right[1], right[2] - 1.45*radius}
+
+  move (left)
+  curve (lefttop, righttop, right)
+  curve (rightbot, leftbot, left)
+stroke()
+end
+
+function disturb_point(point)
+  return {point[1] + math.random()*5 - 2.5,
+          point[2] + math.random()*5 - 2.5}
+end
+
+function sloppycircle(center,radius)
+  local left = disturb_point({center[1] - radius, center[2]})
+  local lefttop = disturb_point({left[1], left[2] + 1.45*radius})
+  local leftbot = {lefttop[1], lefttop[2] - 2.9*radius}
+  local right = disturb_point({center[1] + radius, center[2]})
+  local righttop = disturb_point({right[1], right[2] + 1.45*radius})
+  local rightbot = disturb_point({right[1], right[2] - 1.45*radius})
+
+  local right_end = disturb_point(right)
+
+  move (right)
+  curve (rightbot, leftbot, left)
+  curve (lefttop, righttop, right_end)
+  linewidth(math.random()+0.5)
+  stroke()
+end
+
+function sloppyline(start,stop)
+  local start_line = disturb_point(start)
+  local stop_line = disturb_point(stop)
+  start = disturb_point(start)
+  stop = disturb_point(stop)
+  move(start) curve(start_line,stop_line,stop)
+  linewidth(math.random()+0.5)
+  stroke()
+end
 %    \end{macrocode}
 %\iffalse 
 % </lua>
@@ -772,6 +908,8 @@ luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
 % \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.
 % \item[pancakenize] should do something funny.
 % \item[chickenize] should differ between character and punctuation.
+% \item[swing] swing dancing apes!
+% \item[chickenmath] chickenization of math mode
 % \end{description}
 % \Finale
 % \endinput

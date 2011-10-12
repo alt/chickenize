@@ -25,6 +25,8 @@ color_push.stack = 0
 color_pop.stack = 0
 color_push.cmd = 1
 color_pop.cmd = 2
+chicken_pagenumbers = true
+
 chickenstring = {}
 chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
 
@@ -98,6 +100,17 @@ chickenize = function(head)
     end
   end
   return head
+end
+
+nicetext = function()
+  texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texio.write_nl(" ")
+  texio.write_nl("----------------------------")
+  texio.write_nl("Hello my dear user,")
+  texio.write_nl("good job, now go outside and enjoy the world!")
+  texio.write_nl(" ")
+  texio.write_nl("And don't forget to feet your chicken!")
+  texio.write_nl("----------------------------")
 end
 leet_onlytext = false
 leettable = {
@@ -243,7 +256,11 @@ uppercasecolor = function (head)
 end
 keeptext = true
 colorexpansion = true
-drawstretchnumbers = true
+
+colorstretch_coloroffset = 0.5
+colorstretch_colorrange = 0.5
+
+colorstretchnumbers = true
 drawstretchthreshold = 0.1
 drawexpansionthreshold = 0.9
 colorstretch = function (head)
@@ -258,7 +275,7 @@ if colorexpansion then  -- if also the font expansion should be shown
          g = g.next
         end
       exp_factor = g.width / f[g.char].width
-      exp_color = .5 + (1-exp_factor)*10 .. " g"
+      exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
       rule_bad.width = 0.5*line.width  -- we need two rules on each line!
     else
       rule_bad.width = line.width  -- only the space expansion should be shown, only one rule
@@ -269,12 +286,12 @@ if colorexpansion then  -- if also the font expansion should be shown
     local glue_ratio = 0
     if line.glue_order == 0 then
       if line.glue_sign == 1 then
-        glue_ratio = .5 * math.min(line.glue_set,1)
+        glue_ratio = colorstretch_colorrange * math.min(line.glue_set,1)
       else
-        glue_ratio = -.5 * math.min(line.glue_set,1)
+        glue_ratio = -colorstretch_colorrange * math.min(line.glue_set,1)
       end
     end
-    color_push.data = .5 + glue_ratio .. " g"
+    color_push.data = colorstretch_coloroffset + glue_ratio .. " g"
 
 -- set up output
     local p = line.head
@@ -302,7 +319,7 @@ if colorexpansion then  -- if also the font expansion should be shown
       node.insert_after(line.head,tmpnode.next,node.copy(rule_bad))
       node.insert_after(line.head,tmpnode.next.next,node.copy(color_pop))
     end
-    if drawstretchnumbers then
+    if colorstretchnumbers then
       j = 1
       glue_ratio_output = {}
       for s in string.utfvalues(math.abs(glue_ratio)) do -- using math.abs here gets us rid of the minus sign
@@ -327,25 +344,85 @@ if colorexpansion then  -- if also the font expansion should be shown
   end
   return head
 end
-nicetext = function()
-  texio.write_nl(" ")
-  texio.write_nl("----------------------------")
-  texio.write_nl(" ")
-  texio.write_nl("Heyho dear user,")
-  texio.write_nl("good job you did there, fine document.")
-  texio.write_nl("I had fun compiling this, really!")
-  texio.write_nl(" ")
-  texio.write_nl("Now, leave the computer, go outside, have fun")
-  texio.write_nl("and enjoy your life. There are so many great things out there!")
-  texio.write_nl("Have a nice day!!!11")
-  texio.write_nl(" ")
-  texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl(" ")
-  texio.write_nl("----------------------------")
-  texio.write_nl(" ")
-  texio.write_nl(" ")
+--
+function pdf_print (...)
+  for _, str in ipairs({...}) do
+    pdf.print(str .. " ")
+  end
+  pdf.print("\string\n")
 end
 
-luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
+function move (p)
+  pdf_print(p[1],p[2],"m")
+end
+
+function line (p)
+  pdf_print(p[1],p[2],"l")
+end
+
+function curve(p1,p2,p3)
+  pdf_print(p1[1], p1[2],
+            p2[1], p2[2],
+            p3[1], p3[2], "c")
+end
+
+function close ()
+  pdf_print("h")
+end
+
+function linewidth (w)
+  pdf_print(w,"w")
+end
+
+function stroke ()
+  pdf_print("S")
+end
+--
+
+function strictcircle(center,radius)
+  local left = {center[1] - radius, center[2]}
+  local lefttop = {left[1], left[2] + 1.45*radius}
+  local leftbot = {left[1], left[2] - 1.45*radius}
+  local right = {center[1] + radius, center[2]}
+  local righttop = {right[1], right[2] + 1.45*radius}
+  local rightbot = {right[1], right[2] - 1.45*radius}
+
+  move (left)
+  curve (lefttop, righttop, right)
+  curve (rightbot, leftbot, left)
+stroke()
+end
+
+function disturb_point(point)
+  return {point[1] + math.random()*5 - 2.5,
+          point[2] + math.random()*5 - 2.5}
+end
+
+function sloppycircle(center,radius)
+  local left = disturb_point({center[1] - radius, center[2]})
+  local lefttop = disturb_point({left[1], left[2] + 1.45*radius})
+  local leftbot = {lefttop[1], lefttop[2] - 2.9*radius}
+  local right = disturb_point({center[1] + radius, center[2]})
+  local righttop = disturb_point({right[1], right[2] + 1.45*radius})
+  local rightbot = disturb_point({right[1], right[2] - 1.45*radius})
+
+  local right_end = disturb_point(right)
+
+  move (right)
+  curve (rightbot, leftbot, left)
+  curve (lefttop, righttop, right_end)
+  linewidth(math.random()+0.5)
+  stroke()
+end
+
+function sloppyline(start,stop)
+  local start_line = disturb_point(start)
+  local stop_line = disturb_point(stop)
+  start = disturb_point(start)
+  stop = disturb_point(stop)
+  move(start) curve(start_line,stop_line,stop)
+  linewidth(math.random()+0.5)
+  stroke()
+end
 -- 
 --  End of File `chickenize.lua'.
