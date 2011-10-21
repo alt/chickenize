@@ -259,6 +259,8 @@ colorexpansion = true
 
 colorstretch_coloroffset = 0.5
 colorstretch_colorrange = 0.5
+chickenize_rule_bad_height = 4/5 -- height and depth of the rules
+chickenize_rule_bad_depth = 1/5
 
 colorstretchnumbers = true
 drawstretchthreshold = 0.1
@@ -280,8 +282,8 @@ if colorexpansion then  -- if also the font expansion should be shown
     else
       rule_bad.width = line.width  -- only the space expansion should be shown, only one rule
     end
-    rule_bad.height = tex.baselineskip.width*4/5  -- this should give a better output
-    rule_bad.depth = tex.baselineskip.width*1/5
+    rule_bad.height = tex.baselineskip.width*chickenize_rule_bad_height -- this should give a better output
+    rule_bad.depth = tex.baselineskip.width*chickenize_rule_bad_depth
 
     local glue_ratio = 0
     if line.glue_order == 0 then
