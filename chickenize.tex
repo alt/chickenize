@@ -30,6 +30,11 @@
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
+\def\coffeestainize{
+  \directlua{}}
+\def\uncoffeestainize{
+  \directlua{}}
+
 \def\colorstretch{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
@@ -40,23 +45,31 @@
 \def\unleetspeak{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
 
+\def\letterspaceadjust{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
+\def\unletterspacedjust{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+
+\let\stealsheep\letterspaceadjust
+\let\unstealsheep\unletterspaceadjust
+
+\def\milkcow{
+  \directlua{}}
+\def\unmilkcow{
+  \directlua{}}
+
 \def\rainbowcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")
              rainbowcolor = true}}
 \def\unrainbowcolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
              rainbowcolor = false}}
-\let\nyanize\rainbowcolor
-\let\unnyanize\unrainbowcolor
+  \let\nyanize\rainbowcolor
+  \let\unnyanize\unrainbowcolor
 
 \def\pancakenize{
   \directlua{}}
 \def\unpancakenize{
-  \directlua{}}
-
-\def\coffeestainize{
-  \directlua{}}
-\def\uncoffeestainize{
   \directlua{}}
 
 \def\randomcolor{
@@ -73,6 +86,11 @@
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\def\spankmonkey{
+  \directlua{}}
+\def\unspankmonkey{
+  \directlua{}}
 
 \def\uppercasecolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}

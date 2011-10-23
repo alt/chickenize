@@ -142,6 +142,24 @@ leet = function(head)
   end
   return head
 end
+local letterspace_glue = node.new(node.id"glue")
+local letterspace_spec = node.new(node.id"glue_spec")
+local letterspace_pen = node.new(node.id"penalty")
+
+letterspace_spec.width   = tex.sp"0pt"
+letterspace_spec.stretch = tex.sp"2pt"
+letterspace_glue.spec    = letterspace_spec
+letterspace_pen.penalty  = 10000
+letterspaceadjust = function(head)
+  for glyph in node.traverse_id(node.id"glyph", head) do
+    if glyph.prev and (glyph.prev.id == node.id"glyph") then
+      local g = node.copy(letterspace_glue)
+      node.insert_before(head, glyph, g)
+      node.insert_before(head, g, node.copy(letterspace_pen))
+    end
+  end
+  return head
+end
 randomfontslower = 1
 randomfontsupper = 0
 randomfonts = function(head)

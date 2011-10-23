@@ -63,7 +63,7 @@ Do not distribute a modified version of this file under the same name.
   \expandafter\endgroup
 \fi
 \ProvidesFile{chickenize.sty}
-  [v0.1 chickenize package]
+  [2011/10/22 v0.1 chickenize package]
 \documentclass[11pt,english]{ltxdoc}
 \usepackage{
   array,
@@ -228,6 +228,11 @@ The following list tries to keep kind of track to the options and variables. The
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
+\def\coffeestainize{
+  \directlua{}}
+\def\uncoffeestainize{
+  \directlua{}}
+
 \def\colorstretch{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
@@ -238,23 +243,31 @@ The following list tries to keep kind of track to the options and variables. The
 \def\unleetspeak{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
 
+\def\letterspaceadjust{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
+\def\unletterspacedjust{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+
+\let\stealsheep\letterspaceadjust
+\let\unstealsheep\unletterspaceadjust
+
+\def\milkcow{
+  \directlua{}}
+\def\unmilkcow{
+  \directlua{}}
+
 \def\rainbowcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")
              rainbowcolor = true}}
 \def\unrainbowcolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
              rainbowcolor = false}}
-\let\nyanize\rainbowcolor
-\let\unnyanize\unrainbowcolor
+  \let\nyanize\rainbowcolor
+  \let\unnyanize\unrainbowcolor
 
 \def\pancakenize{
   \directlua{}}
 \def\unpancakenize{
-  \directlua{}}
-
-\def\coffeestainize{
-  \directlua{}}
-\def\uncoffeestainize{
   \directlua{}}
 
 \def\randomcolor{
@@ -271,6 +284,11 @@ The following list tries to keep kind of track to the options and variables. The
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\def\spankmonkey{
+  \directlua{}}
+\def\unspankmonkey{
+  \directlua{}}
 
 \def\uppercasecolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
@@ -534,6 +552,32 @@ leet = function(head)
           i.char = leettable[i.char]
         end
       end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{letterspaceadjust}\label{sec:letterspaceadjust}
+% Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced and the greyness of a page (hopefully) comes out more equally.
+% \subsubsection{setup of variables}
+%    \begin{macrocode}
+local letterspace_glue = node.new(node.id"glue")
+local letterspace_spec = node.new(node.id"glue_spec")
+local letterspace_pen = node.new(node.id"penalty")
+
+letterspace_spec.width   = tex.sp"0pt"
+letterspace_spec.stretch = tex.sp"2pt"
+letterspace_glue.spec    = letterspace_spec
+letterspace_pen.penalty  = 10000
+%    \end{macrocode}
+% \subsubsection{function implementation}
+%    \begin{macrocode}
+letterspaceadjust = function(head)
+  for glyph in node.traverse_id(node.id"glyph", head) do
+    if glyph.prev and (glyph.prev.id == node.id"glyph") then
+      local g = node.copy(letterspace_glue)
+      node.insert_before(head, glyph, g)
+      node.insert_before(head, g, node.copy(letterspace_pen))
     end
   end
   return head
