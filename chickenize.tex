@@ -42,8 +42,7 @@
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\itsame{
-  \directlua{drawmario}
-  }
+  \directlua{drawmario}}
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
