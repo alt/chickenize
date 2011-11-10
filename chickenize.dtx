@@ -62,8 +62,6 @@ Do not distribute a modified version of this file under the same name.
 \else
   \expandafter\endgroup
 \fi
-\ProvidesFile{chickenize.sty}
-  [2011/10/22 v0.1 chickenize package]
 \documentclass[11pt,english]{ltxdoc}
 \usepackage{
   array,
@@ -73,6 +71,7 @@ Do not distribute a modified version of this file under the same name.
   geometry,
   graphicx,
   hyperref,
+  longtable,
   microtype,
   scrpage2,
   tabu
@@ -95,30 +94,41 @@ Do not distribute a modified version of this file under the same name.
 \begin{document}
 \maketitle\thispagestyle{scrheadings}
 \kern-6cm
-{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\
+{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
 \kern4cm
 
-This is the package |chickenize|. It allows you to substitute or change the contents of a Lua\TeX\ document,\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} but is actually just for fun. Please \emph{never} use any of the functionality of this package for a production document. The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.\\[3ex]
+This is the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} exploiting the possibilities offered by the callbacks that influence line breaking. Most of this package's content is just for fun and educational use, but there are also some functions that can be really useful.
+
+The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
+
+The documentation of this package is far from being well-readable, consistent or even complete. This is caused either by lack of time or priority. If you miss anything that should be documented or if you have suggestions on how to increase the readability of the descriptions, please let me know.
+\\[3ex]
 
 \noindent
-\begin{tabu}{lX[j]}
-\toprule
-function/command & \hfill effect \hfill\, \\
-\midrule
-\hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\begin{longtabu}{lX[j]}
+\hbox to 0cm{\bfseries \qquad maybe usefull things}\\
+\cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness and font expansion of each line\\
+\hyperref[sec:letterspaceadjust]{letterspaceadjust} & uses a small amount of letterspacing to improve the greyness, especially for narrow lines\\
+\addlinespace\addlinespace
+\hbox to 0cm{\bfseries \qquad less usefull things} \\
+\cmidrule(lr){1-2}
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
-\hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
-\hyperref[sec:randomchars]{randomchars} & randomizes the whole input\\
-\hyperref[sec:randomrainbowcolor]{randomcolor} & prints every letter in a random color\\
 \hyperref[sec:randomrainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
+\hyperref[sec:randomrainbowcolor]{randomcolor} & prints every letter in a random color\\
 \hyperref[sec:uppercasecolor]{uppercasecolor} & makes every uppercase letter colored\\
+\addlinespace\addlinespace
+\hbox to 0cm{\bfseries \qquad complete nonsense} \\
+\cmidrule(lr){1-2}
+\hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
+\hyperref[sec:randomchars]{randomchars} & randomizes the (letter of the) whole input\\
 \bottomrule
-\end{tabu}
+\end{longtabu}
 \kern 2ex
 
 \noindent If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
@@ -153,8 +163,6 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{nyanize} A synonym for |rainbowcolor|.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.
-
-This functionality is actually the only really usefull implementation of this package …
 \end{description}
 \subsection{How to Deactivate It}
 Every command has a |\un|-version that deactivetes it's functionality. So once you used |\chickenize|, it will chickenize the whole document up to |\unchickenize|. However, the paragraph in which |\unchickenize| appears, will \emph{not} be chickenized. The same is true for all other manipulations. Take care that you don't |\un|-anything bevor activating it, as this will result in an error.\footnote{Which is so far not catchable due to missing functionality in luatexbase.}
@@ -186,6 +194,8 @@ The following list tries to keep kind of track to the options and variables. The
 \def\arg#1{\textcolor{red}{\ttfamily <#1>}}
 \def\opt#1{\textcolor{blue}{\ttfamily #1}}
 \def\default#1{\textcolor{black}{\ttfamily #1}}
+\subsection{chickenize}
+\subsection{}
 \begin{description}
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
@@ -208,11 +218,13 @@ The following list tries to keep kind of track to the options and variables. The
 %\part{Implementation}
 %\label{sec:implementation}
 %\section{\TeX\ file}
+% This file is more-or-less just a dummy file to offer a nice interface for the functions. Basically, every macro registers the function with the same name in the corresponding callback. The |un|-macros remove the functions. If it makes sense, there are |text|-variants that activate the function only in a certain area of the text, using Lua\TeX's attributes.
+%
+% For (un)registering, we use the |luatexbase| package. Then, the |.lua| file is loaded which does the actual work. Finally, the \TeX\ macros are defined as simple |\directlua| calls.
 %    \begin{macrocode}
 \input{luatexbase.sty}
-% read the Lua code first
 \directlua{dofile("chickenize.lua")}
-% then define the global macros. These affect the whole document and will stay active until the functions will be un-registered explicitely.
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -228,7 +240,7 @@ The following list tries to keep kind of track to the options and variables. The
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
-\def\coffeestainize{
+\def\coffeestainize{  %% to be implemented.
   \directlua{}}
 \def\uncoffeestainize{
   \directlua{}}
@@ -237,6 +249,10 @@ The following list tries to keep kind of track to the options and variables. The
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
+
+\def\itsame{
+  \directlua{drawmario}
+  }
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -248,12 +264,17 @@ The following list tries to keep kind of track to the options and variables. The
 \def\unletterspacedjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
 
-\let\stealsheep\letterspaceadjust
+\let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 
-\def\milkcow{
+\def\milkcow{     %% to be implemented
   \directlua{}}
 \def\unmilkcow{
+  \directlua{}}
+
+\def\pancakenize{        %% to be implemented
+  \directlua{}}
+\def\unpancakenize{
   \directlua{}}
 
 \def\rainbowcolor{
@@ -264,11 +285,6 @@ The following list tries to keep kind of track to the options and variables. The
              rainbowcolor = false}}
   \let\nyanize\rainbowcolor
   \let\unnyanize\unrainbowcolor
-
-\def\pancakenize{
-  \directlua{}}
-\def\unpancakenize{
-  \directlua{}}
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -285,9 +301,14 @@ The following list tries to keep kind of track to the options and variables. The
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
 
-\def\spankmonkey{
+\def\spankmonkey{    %% to be implemented
   \directlua{}}
 \def\unspankmonkey{
+  \directlua{}}
+
+\def\tabularasa{    %% TBI – should output just an empty docmunt, but only *after* typesetting. So the content will take exactly the space it needs. Might actualy … be … useful!
+  \directlua{}}
+\def\untabularasa{
   \directlua{}}
 
 \def\uppercasecolor{
@@ -317,6 +338,7 @@ The following list tries to keep kind of track to the options and variables. The
 %    \begin{macrocode}
 \def\chickenizesetup#1{\directlua{#1}}
 %    \end{macrocode}
+% The following is the very first try of implementing a small drawing language in Lua. It draws a beautiful chicken.
 %    \begin{macrocode}
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%
@@ -367,8 +389,12 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 %<*package>
 % \fi
 % \section{\LaTeX\ package}
-% I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing usefull, but it provides a |chickenize.sty| that loads |chickenize.tex|. Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you want to use anything of the features presented here, you have to load the packages on your own. Maybe this will change.
+% I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing usefull, but it provides a |chickenize.sty| that loads |chickenize.tex| so the user can still say |\usepackage{chickenize}|. This file will never support package options!
+% 
+% Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you want to use anything of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
+\ProvidesPackage{chickenize}%
+  [2011/10/22 v0.1 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
@@ -382,24 +408,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 %% So far, you have to load pgfplots yourself.
 %% As it is a mighty package, I don't want the user to force loading it.
 \NewDocumentCommand\balmerpeak{G{}O{-4cm}}{
-  \begin{tikzpicture}
-  \hspace*{#2}  %% anyhow necessary to fix centering … strange :(
-  \begin{axis}
-  [width=10cm,height=7cm,
-   xmin=-0.005,xmax=0.28,ymin=-0.05,ymax=1,
-   xtick={0,0.02,...,0.27},ytick=\empty,
-   /pgf/number format/precision=3,/pgf/number format/fixed,
-   tick label style={font=\small},
-   label style = {font=\Large},
-   xlabel = \fontspec{Punk Nova} BLOOD ALCOHOL CONCENTRATION (\%),
-   ylabel = \fontspec{Punk Nova} \rotatebox{-90}{\parbox{3cm}{\center programming\\ skills}}]
-    \addplot
-      [domain=-0.01:0.27,color=red,samples=250]
-      {0.8*exp(-0.5*((x-0.1335)^2)/.00002)+
-       0.5*exp(-0.5*((x+0.015)^2)/0.01)
-      };
-  \end{axis}
-  \end{tikzpicture}
+%% to be done using Lua drawing.
 }
 \fi
 %    \end{macrocode}
@@ -413,6 +422,12 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % 
 % First, we set up some constants. These are made global so the code can be manipulated on document level, too.
 %    \begin{macrocode}
+
+local traverseid = node.traverse_id
+local insertbefore = node.insert_before
+local insertafter = node.insert_after
+local nodenew = node.new
+
 Hhead = node.id("hhead")
 RULE = node.id("rule")
 GLUE = node.id("glue")
@@ -422,8 +437,8 @@ GLYPH = node.id("glyph")
 %    \end{macrocode}
 % Now we set up the nodes used for all color things. The nodes are whatsits of subtype |pdf_colorstack|.
 %    \begin{macrocode}
-color_push = node.new(WHAT,COL)
-color_pop = node.new(WHAT,COL)
+color_push = nodenew(WHAT,COL)
+color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
 color_pop.stack = 0
 color_push.cmd = 1
@@ -458,9 +473,9 @@ chickenize_real_stuff = function(i,head)
 --but it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
-    chicken[0] = node.new(37,1)  -- only a dummy for the loop
+    chicken[0] = nodenew(37,1)  -- only a dummy for the loop
     for i = 1,string.len(chickenstring_tmp) do 
-      chicken[i] = node.new(37,1)
+      chicken[i] = nodenew(37,1)
       chicken[i].font = font.current()
       chicken[i-1].next = chicken[i]
     end
@@ -470,8 +485,8 @@ chickenize_real_stuff = function(i,head)
       local char = unicode.utf8.char(s)
       chicken[j].char = s
       if match(char,"%s") then 
-        chicken[j] = node.new(10)
-        chicken[j].spec = node.new(47)
+        chicken[j] = nodenew(10)
+        chicken[j].spec = nodenew(47)
         chicken[j].spec.width = space
         chicken[j].spec.shrink = shrink
         chicken[j].spec.stretch = stretch
@@ -484,14 +499,14 @@ chickenize_real_stuff = function(i,head)
     chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
     chicken[1] = node.ligaturing(chicken[1]) -- dito
 
-    node.insert_before(head,i,chicken[1])
+    insertbefore(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
     chicken[string.len(chickenstring_tmp)].next = i.next
   return head
 end
 
 chickenize = function(head)
-  for i in node.traverse_id(37,head) do  --find start of a word
+  for i in traverseid(37,head) do  --find start of a word
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
       head = chickenize_real_stuff(i,head)
     end
@@ -543,8 +558,8 @@ leettable = {
 % And here the function itself. So simple that I will not write any 
 %    \begin{macrocode}
 leet = function(head)
-  for line in node.traverse_id(Hhead,head) do 
-    for i in node.traverse_id(GLYPH,line.head) do
+  for line in traverseid(Hhead,head) do 
+    for i in traverseid(GLYPH,line.head) do
       if not(leetspeak_onlytext) or
          node.has_attribute(i,luatexbase.attributes.leetattr)
       then
@@ -559,11 +574,13 @@ end
 %    \end{macrocode}
 % \subsection{letterspaceadjust}\label{sec:letterspaceadjust}
 % Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced and the greyness of a page (hopefully) comes out more equally.
+%
+% Why the synonym |stealsheep|? Because of a comment of Paul on the |texhax| mailing list: \url{http://tug.org/pipermail/texhax/2011-October/018374.html}
 % \subsubsection{setup of variables}
 %    \begin{macrocode}
-local letterspace_glue = node.new(node.id"glue")
-local letterspace_spec = node.new(node.id"glue_spec")
-local letterspace_pen = node.new(node.id"penalty")
+local letterspace_glue = nodenew(node.id"glue")
+local letterspace_spec = nodenew(node.id"glue_spec")
+local letterspace_pen = nodenew(node.id"penalty")
 
 letterspace_spec.width   = tex.sp"0pt"
 letterspace_spec.stretch = tex.sp"2pt"
@@ -573,11 +590,11 @@ letterspace_pen.penalty  = 10000
 % \subsubsection{function implementation}
 %    \begin{macrocode}
 letterspaceadjust = function(head)
-  for glyph in node.traverse_id(node.id"glyph", head) do
+  for glyph in traverseid(node.id"glyph", head) do
     if glyph.prev and (glyph.prev.id == node.id"glyph") then
       local g = node.copy(letterspace_glue)
-      node.insert_before(head, glyph, g)
-      node.insert_before(head, g, node.copy(letterspace_pen))
+      insertbefore(head, glyph, g)
+      insertbefore(head, g, node.copy(letterspace_pen))
     end
   end
   return head
@@ -600,8 +617,8 @@ randomfonts = function(head)
   else
     rfub = font.max()        -- or just take all fonts
   end
-  for line in node.traverse_id(Hhead,head) do
-    for i in node.traverse_id(GLYPH,line.head) do
+  for line in traverseid(Hhead,head) do
+    for i in traverseid(GLYPH,line.head) do
       if not(randomfonts_onlytext) or node.has_attribute(i,luatexbase.attributes.randfontsattr) then
         i.font = math.random(randomfontslower,rfub)
       end
@@ -615,7 +632,7 @@ end
 %    \begin{macrocode}
 uclcratio = 0.5 -- ratio between uppercase and lower case
 randomuclc = function(head)
-  for i in node.traverse_id(37,head) do
+  for i in traverseid(37,head) do
     if not(randomuclc_onlytext) or node.has_attribute(i,luatexbase.attributes.randuclcattr) then
       if math.random() < uclcratio then
         i.char = tex.uccode[i.char] 
@@ -630,8 +647,8 @@ end
 % \subsection{randomchars}\label{sec:randomchars}
 %    \begin{macrocode}
 randomchars = function(head)
-  for line in node.traverse_id(Hhead,head) do
-    for i in node.traverse_id(GLYPH,line.head) do
+  for line in traverseid(Hhead,head) do
+    for i in traverseid(GLYPH,line.head) do
       i.char = math.floor(math.random()*512)
     end
   end
@@ -698,14 +715,14 @@ end
 % The function that does all the colorizing action. It goes through the whole paragraph and looks at every glyph. If the boolean |randomcolor_onlytext| is set, only glyphs with the set attribute will be colored. Elsewise, all glyphs are taken.
 %    \begin{macrocode}
 randomcolor = function(head)
-  for line in node.traverse_id(0,head) do
-    for i in node.traverse_id(37,line.head) do
+  for line in traverseid(0,head) do
+    for i in traverseid(37,line.head) do
       if not(randomcolor_onlytext) or
          (node.has_attribute(i,luatexbase.attributes.randcolorattr))
       then
         color_push.data = randomcolorstring()  -- color or grey string
-        line.head = node.insert_before(line.head,i,node.copy(color_push))
-        node.insert_after(line.head,i,node.copy(color_pop))
+        line.head = insertbefore(line.head,i,node.copy(color_push))
+        insertafter(line.head,i,node.copy(color_pop))
       end
     end
   end
@@ -720,13 +737,13 @@ end
 % Loop through all the nodes and checking whether it is uppercase. If so (and also for small caps), color it.
 %    \begin{macrocode}
 uppercasecolor = function (head)
-  for line in node.traverse_id(Hhead,head) do 
-    for upper in node.traverse_id(GLYPH,line.head) do
+  for line in traverseid(Hhead,head) do 
+    for upper in traverseid(GLYPH,line.head) do
       if (((upper.char > 64) and (upper.char < 91)) or
           ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
         color_push.data = randomcolorstring()  -- color or grey string
-        line.head = node.insert_before(line.head,upper,node.copy(color_push))
-        node.insert_after(line.head,upper,node.copy(color_pop))
+        line.head = insertbefore(line.head,upper,node.copy(color_push))
+        insertafter(line.head,upper,node.copy(color_pop))
       end
     end
   end
@@ -764,8 +781,8 @@ drawexpansionthreshold = 0.9
 colorstretch = function (head)
 
   local f = font.getfont(font.current()).characters
-  for line in node.traverse_id(Hhead,head) do 
-    local rule_bad = node.new(RULE)
+  for line in traverseid(Hhead,head) do 
+    local rule_bad = nodenew(RULE)
 
 	if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
@@ -803,27 +820,27 @@ colorstretch = function (head)
     local p = line.head
 
   -- a rule to immitate kerning all the way back
-    local kern_back = node.new(RULE)
+    local kern_back = nodenew(RULE)
     kern_back.width = -line.width
 
   -- if the text should still be displayed, the color and box nodes are inserted additionally 
   -- and the head is set to the color node
     if keeptext then
-      line.head = node.insert_before(line.head,line.head,node.copy(color_push))
+      line.head = insertbefore(line.head,line.head,node.copy(color_push))
     else
       node.flush_list(p)
       line.head = node.copy(color_push)
     end
-    node.insert_after(line.head,line.head,rule_bad)  -- then the rule
-    node.insert_after(line.head,line.head.next,node.copy(color_pop)) -- and then pop!
-    tmpnode =  node.insert_after(line.head,line.head.next.next,kern_back) 
+    insertafter(line.head,line.head,rule_bad)  -- then the rule
+    insertafter(line.head,line.head.next,node.copy(color_pop)) -- and then pop!
+    tmpnode =  insertafter(line.head,line.head.next.next,kern_back) 
 
     -- then a rule with the expansion color
     if colorexpansion then  -- if also the stretch/shrink of letters should be shown
       color_push.data = exp_color
-      node.insert_after(line.head,tmpnode,node.copy(color_push))
-      node.insert_after(line.head,tmpnode.next,node.copy(rule_bad)) 
-      node.insert_after(line.head,tmpnode.next.next,node.copy(color_pop))
+      insertafter(line.head,tmpnode,node.copy(color_push))
+      insertafter(line.head,tmpnode.next,node.copy(rule_bad)) 
+      insertafter(line.head,tmpnode.next.next,node.copy(color_pop))
     end
 %    \end{macrocode}
 % Now we are ready with the boxes and stuff and everything. However, a very useful information might be the amount of stretching, not encoded as color, but the real value. In concreto, I mean: narrow boxes get one color, loose boxes get another one, but only if the badness is above a certain amount. This information is printed into the right-hand margin. The threshold is user-adjustable.
@@ -833,7 +850,7 @@ colorstretch = function (head)
       glue_ratio_output = {}
       for s in string.utfvalues(math.abs(glue_ratio)) do -- using math.abs here gets us rid of the minus sign
         local char = unicode.utf8.char(s)
-        glue_ratio_output[j] = node.new(37,1)
+        glue_ratio_output[j] = nodenew(37,1)
         glue_ratio_output[j].font = font.current()
         glue_ratio_output[j].char = s
         j = j+1
@@ -844,11 +861,11 @@ colorstretch = function (head)
       else color_push.data = "0 0 0 rg"
       end
 
-      node.insert_after(line.head,node.tail(line.head),node.copy(color_push))
+      insertafter(line.head,node.tail(line.head),node.copy(color_push))
       for i = 1,math.min(j-1,7) do
-        node.insert_after(line.head,node.tail(line.head),glue_ratio_output[i])
+        insertafter(line.head,node.tail(line.head),glue_ratio_output[i])
       end
-      node.insert_after(line.head,node.tail(line.head),node.copy(color_pop))
+      insertafter(line.head,node.tail(line.head),node.copy(color_pop))
     end -- end of stretch number insertion
   end
   return head

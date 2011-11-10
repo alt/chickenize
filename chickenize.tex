@@ -15,6 +15,7 @@
 %% 
 \input{luatexbase.sty}
 \directlua{dofile("chickenize.lua")}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -30,7 +31,7 @@
     luatexbase.remove_from_callback("start_page_number","cstarttpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
-\def\coffeestainize{
+\def\coffeestainize{  %% to be implemented.
   \directlua{}}
 \def\uncoffeestainize{
   \directlua{}}
@@ -39,6 +40,10 @@
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",colorstretch,"stretch_expansion")}}
 \def\uncolorstretch{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
+
+\def\itsame{
+  \directlua{drawmario}
+  }
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -50,12 +55,17 @@
 \def\unletterspacedjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
 
-\let\stealsheep\letterspaceadjust
+\let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 
-\def\milkcow{
+\def\milkcow{     %% to be implemented
   \directlua{}}
 \def\unmilkcow{
+  \directlua{}}
+
+\def\pancakenize{        %% to be implemented
+  \directlua{}}
+\def\unpancakenize{
   \directlua{}}
 
 \def\rainbowcolor{
@@ -66,11 +76,6 @@
              rainbowcolor = false}}
   \let\nyanize\rainbowcolor
   \let\unnyanize\unrainbowcolor
-
-\def\pancakenize{
-  \directlua{}}
-\def\unpancakenize{
-  \directlua{}}
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -87,9 +92,14 @@
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
 
-\def\spankmonkey{
+\def\spankmonkey{    %% to be implemented
   \directlua{}}
 \def\unspankmonkey{
+  \directlua{}}
+
+\def\tabularasa{    %% TBI – should output just an empty docmunt, but only *after* typesetting. So the content will take exactly the space it needs. Might actualy … be … useful!
+  \directlua{}}
+\def\untabularasa{
   \directlua{}}
 
 \def\uppercasecolor{
