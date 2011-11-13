@@ -22,7 +22,6 @@
     function() texio.write("["..status.total_pages) end ,"cstartpage")
     luatexbase.add_to_callback("stop_page_number",
     function() texio.write(" chickens]") end,"cstoppage")
-
     luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
   }
 }
@@ -41,6 +40,10 @@
 \def\uncolorstretch{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
+\def\dosomethingfunny{
+    %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
+  }
+
 \def\itsame{
   \directlua{drawmario}}
 
@@ -56,6 +59,11 @@
 
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
+
+\def\matrixize{  %% TBI
+  \directlua{}}
+\def\unmatrixize{
+  \directlua{}}
 
 \def\milkcow{     %% to be implemented
   \directlua{}}
@@ -96,10 +104,10 @@
 \def\unspankmonkey{
   \directlua{}}
 
-\def\tabularasa{    %% TBI – should output just an empty docmunt, but only *after* typesetting. So the content will take exactly the space it needs. Might actualy … be … useful!
-  \directlua{}}
+\def\tabularasa{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",tabularasa,"tabularasa")}}
 \def\untabularasa{
-  \directlua{}}
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","tabularasa")}}
 
 \def\uppercasecolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
@@ -109,6 +117,7 @@
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
 \newluatexattribute\randuclcattr
+\newluatexattribute\tabularasaattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -120,6 +129,8 @@
   {\setluatexattribute\randfontsattr{42}#1\unsetluatexattribute\randfontsattr}
 \long\def\textrandomuclc#1%
   {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
+\long\def\texttabularasa#1%
+  {\setluatexattribute\tabularasaattr{42}#1\unsetluatexattribute\tabularasaattr}
 \def\chickenizesetup#1{\directlua{#1}}
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%

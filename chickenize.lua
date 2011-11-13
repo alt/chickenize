@@ -14,17 +14,20 @@
 --  Do not distribute a modified version of this file under the same name.
 --  
 
-local traverseid = node.traverse_id
-local insertbefore = node.insert_before
-local insertafter = node.insert_after
 local nodenew = node.new
+local nodecopy = node.copy
+local nodeinsertbefore = node.insert_before
+local nodeinsertafter = node.insert_after
+local noderemove = node.remove
+local nodeid = node.id
+local nodetraverseid = node.traverse_id
 
-Hhead = node.id("hhead")
-RULE = node.id("rule")
-GLUE = node.id("glue")
-WHAT = node.id("whatsit")
+Hhead = nodeid("hhead")
+RULE = nodeid("rule")
+GLUE = nodeid("glue")
+WHAT = nodeid("whatsit")
 COL = node.subtype("pdf_colorstack")
-GLYPH = node.id("glyph")
+GLYPH = nodeid("glyph")
 color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
@@ -83,14 +86,14 @@ chickenize_real_stuff = function(i,head)
     chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
     chicken[1] = node.ligaturing(chicken[1]) -- dito
 
-    insertbefore(head,i,chicken[1])
+    nodeinsertbefore(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
     chicken[string.len(chickenstring_tmp)].next = i.next
   return head
 end
 
 chickenize = function(head)
-  for i in traverseid(37,head) do  --find start of a word
+  for i in nodetraverseid(37,head) do  --find start of a word
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
       head = chickenize_real_stuff(i,head)
     end
@@ -170,8 +173,8 @@ leettable = {
   [116-32] = 55, -- t
 }
 leet = function(head)
-  for line in traverseid(Hhead,head) do
-    for i in traverseid(GLYPH,line.head) do
+  for line in nodetraverseid(Hhead,head) do
+    for i in nodetraverseid(GLYPH,line.head) do
       if not(leetspeak_onlytext) or
          node.has_attribute(i,luatexbase.attributes.leetattr)
       then
@@ -183,34 +186,34 @@ leet = function(head)
   end
   return head
 end
-local letterspace_glue = nodenew(node.id"glue")
-local letterspace_spec = nodenew(node.id"glue_spec")
-local letterspace_pen = nodenew(node.id"penalty")
+local letterspace_glue = nodenew(nodeid"glue")
+local letterspace_spec = nodenew(nodeid"glue_spec")
+local letterspace_pen = nodenew(nodeid"penalty")
 
 letterspace_spec.width   = tex.sp"0pt"
 letterspace_spec.stretch = tex.sp"2pt"
 letterspace_glue.spec    = letterspace_spec
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
-  for glyph in traverseid(node.id"glyph", head) do
-    if glyph.prev and (glyph.prev.id == node.id"glyph") then
-      local g = node.copy(letterspace_glue)
-      insertbefore(head, glyph, g)
-      insertbefore(head, g, node.copy(letterspace_pen))
+  for glyph in nodetraverseid(nodeid"glyph", head) do
+    if glyph.prev and (glyph.prev.id == nodeid"glyph") then
+      local g = nodecopy(letterspace_glue)
+      nodeinsertbefore(head, glyph, g)
+      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
     end
   end
   return head
 end
-randomfontslower = 1
-randomfontsupper = 0
+local randomfontslower = 1
+local randomfontsupper = 0
 randomfonts = function(head)
   if (randomfontsupper > 0) then  -- fixme: this should be done only once, no? Or at every paragraph?
     rfub = randomfontsupper  -- user-specified value
   else
     rfub = font.max()        -- or just take all fonts
   end
-  for line in traverseid(Hhead,head) do
-    for i in traverseid(GLYPH,line.head) do
+  for line in nodetraverseid(Hhead,head) do
+    for i in nodetraverseid(GLYPH,line.head) do
       if not(randomfonts_onlytext) or node.has_attribute(i,luatexbase.attributes.randfontsattr) then
         i.font = math.random(randomfontslower,rfub)
       end
@@ -220,7 +223,7 @@ randomfonts = function(head)
 end
 uclcratio = 0.5 -- ratio between uppercase and lower case
 randomuclc = function(head)
-  for i in traverseid(37,head) do
+  for i in nodetraverseid(37,head) do
     if not(randomuclc_onlytext) or node.has_attribute(i,luatexbase.attributes.randuclcattr) then
       if math.random() < uclcratio then
         i.char = tex.uccode[i.char]
@@ -232,8 +235,8 @@ randomuclc = function(head)
   return head
 end
 randomchars = function(head)
-  for line in traverseid(Hhead,head) do
-    for i in traverseid(GLYPH,line.head) do
+  for line in nodetraverseid(Hhead,head) do
+    for i in nodetraverseid(GLYPH,line.head) do
       i.char = math.floor(math.random()*512)
     end
   end
@@ -287,27 +290,42 @@ randomcolorstring = function()
   end
 end
 randomcolor = function(head)
-  for line in traverseid(0,head) do
-    for i in traverseid(37,line.head) do
+  for line in nodetraverseid(0,head) do
+    for i in nodetraverseid(37,line.head) do
       if not(randomcolor_onlytext) or
          (node.has_attribute(i,luatexbase.attributes.randcolorattr))
       then
         color_push.data = randomcolorstring()  -- color or grey string
-        line.head = insertbefore(line.head,i,node.copy(color_push))
-        insertafter(line.head,i,node.copy(color_pop))
+        line.head = nodeinsertbefore(line.head,i,nodecopy(color_push))
+        nodeinsertafter(line.head,i,nodecopy(color_pop))
       end
     end
   end
   return head
 end
+tabularasa_onlytext = false
+
+tabularasa = function(head)
+  s = nodenew(nodeid"kern")
+  for line in nodetraverseid(nodeid"hlist",head) do
+    for n in nodetraverseid(nodeid"glyph",line.list) do
+    if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
+      s.kern = n.width
+      nodeinsertafter(line.list,n,nodecopy(s))
+      noderemove(line.list,n)
+    end
+    end
+  end
+  return head
+end
 uppercasecolor = function (head)
-  for line in traverseid(Hhead,head) do
-    for upper in traverseid(GLYPH,line.head) do
+  for line in nodetraverseid(Hhead,head) do
+    for upper in nodetraverseid(GLYPH,line.head) do
       if (((upper.char > 64) and (upper.char < 91)) or
           ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
         color_push.data = randomcolorstring()  -- color or grey string
-        line.head = insertbefore(line.head,upper,node.copy(color_push))
-        insertafter(line.head,upper,node.copy(color_pop))
+        line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
+        nodeinsertafter(line.head,upper,nodecopy(color_pop))
       end
     end
   end
@@ -325,9 +343,8 @@ colorstretchnumbers = true
 drawstretchthreshold = 0.1
 drawexpansionthreshold = 0.9
 colorstretch = function (head)
-
   local f = font.getfont(font.current()).characters
-  for line in traverseid(Hhead,head) do
+  for line in nodetraverseid(Hhead,head) do
     local rule_bad = nodenew(RULE)
 
 if colorexpansion then  -- if also the font expansion should be shown
@@ -364,21 +381,21 @@ if colorexpansion then  -- if also the font expansion should be shown
   -- if the text should still be displayed, the color and box nodes are inserted additionally
   -- and the head is set to the color node
     if keeptext then
-      line.head = insertbefore(line.head,line.head,node.copy(color_push))
+      line.head = nodeinsertbefore(line.head,line.head,nodecopy(color_push))
     else
       node.flush_list(p)
-      line.head = node.copy(color_push)
+      line.head = nodecopy(color_push)
     end
-    insertafter(line.head,line.head,rule_bad)  -- then the rule
-    insertafter(line.head,line.head.next,node.copy(color_pop)) -- and then pop!
-    tmpnode =  insertafter(line.head,line.head.next.next,kern_back)
+    nodeinsertafter(line.head,line.head,rule_bad)  -- then the rule
+    nodeinsertafter(line.head,line.head.next,nodecopy(color_pop)) -- and then pop!
+    tmpnode =  nodeinsertafter(line.head,line.head.next.next,kern_back)
 
     -- then a rule with the expansion color
     if colorexpansion then  -- if also the stretch/shrink of letters should be shown
       color_push.data = exp_color
-      insertafter(line.head,tmpnode,node.copy(color_push))
-      insertafter(line.head,tmpnode.next,node.copy(rule_bad))
-      insertafter(line.head,tmpnode.next.next,node.copy(color_pop))
+      nodeinsertafter(line.head,tmpnode,nodecopy(color_push))
+      nodeinsertafter(line.head,tmpnode.next,nodecopy(rule_bad))
+      nodeinsertafter(line.head,tmpnode.next.next,nodecopy(color_pop))
     end
     if colorstretchnumbers then
       j = 1
@@ -396,11 +413,11 @@ if colorexpansion then  -- if also the font expansion should be shown
       else color_push.data = "0 0 0 rg"
       end
 
-      insertafter(line.head,node.tail(line.head),node.copy(color_push))
+      nodeinsertafter(line.head,node.tail(line.head),nodecopy(color_push))
       for i = 1,math.min(j-1,7) do
-        insertafter(line.head,node.tail(line.head),glue_ratio_output[i])
+        nodeinsertafter(line.head,node.tail(line.head),glue_ratio_output[i])
       end
-      insertafter(line.head,node.tail(line.head),node.copy(color_pop))
+      nodeinsertafter(line.head,node.tail(line.head),nodecopy(color_pop))
     end -- end of stretch number insertion
   end
   return head
