@@ -204,6 +204,27 @@ letterspaceadjust = function(head)
   end
   return head
 end
+matrixize = function(head)
+x = {}
+s = nodenew(nodeid"disc")
+  for n in nodetraverseid(nodeid"glyph",head) do
+    j = n.char
+    for m = 0,7 do -- stay ASCII for now
+      x[7-m] = nodecopy(n) -- to get the same font etc.
+
+      if (j / (2^(7-m)) < 1) then
+        x[7-m].char = 48
+      else
+        x[7-m].char = 49
+        j = j-(2^(7-m))
+      end
+      nodeinsertbefore(head,n,x[7-m])
+      nodeinsertafter(head,x[7-m],nodecopy(s))
+    end
+    noderemove(head,n)
+  end
+  return head
+end
 local randomfontslower = 1
 local randomfontsupper = 0
 randomfonts = function(head)

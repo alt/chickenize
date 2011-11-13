@@ -126,6 +126,7 @@ The documentation of this package is far from being well-readable, consistent or
 \hbox to 0cm{\bfseries \qquad complete nonsense} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letter of the) whole input\\
 \bottomrule
@@ -162,8 +163,9 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change slowly according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
 \command{pancakenize} This is a dummy so far, as I have no idea what it should do. If you have suggestions, please tell me.
 \command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
-\command{nyanize} A synonym for |rainbowcolor|.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
+\command{nyanize} A synonym for |rainbowcolor|.
+\command{matrixize} Replaces every glyph by a binary sequence representating its ASCII value.
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.
 \end{description}
 
@@ -273,10 +275,10 @@ The following list tries to keep kind of track to the options and variables. The
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 
-\def\matrixize{  %% TBI
-  \directlua{}}
+\def\matrixize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
 \def\unmatrixize{
-  \directlua{}}
+  \directlua{lutaexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
 
 \def\milkcow{     %% to be implemented
   \directlua{}}
@@ -652,6 +654,32 @@ letterspaceadjust = function(head)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
     end
+  end
+  return head
+end
+%    \end{macrocode}
+% 
+% \subsection{matrixize}\label{sec:matrixize}
+% Substitutes every glyph by a representation of its ASCII value. Migth be extended to cover full unicode, but so far only 8bit is supported. The code is quite straight-forward and works ok. The line ends are not necessarily correcty adjusted. However, with microtype, i.\,e. font expansion, everything looks fine.
+%    \begin{macrocode}
+matrixize = function(head)
+x = {}
+s = nodenew(nodeid"disc")
+  for n in nodetraverseid(nodeid"glyph",head) do
+    j = n.char
+    for m = 0,7 do -- stay ASCII for now
+      x[7-m] = nodecopy(n) -- to get the same font etc.
+
+      if (j / (2^(7-m)) < 1) then
+        x[7-m].char = 48
+      else
+        x[7-m].char = 49
+        j = j-(2^(7-m))
+      end
+      nodeinsertbefore(head,n,x[7-m])
+      nodeinsertafter(head,x[7-m],nodecopy(s))
+    end
+    noderemove(head,n)
   end
   return head
 end

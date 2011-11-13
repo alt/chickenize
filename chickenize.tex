@@ -60,10 +60,10 @@
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 
-\def\matrixize{  %% TBI
-  \directlua{}}
+\def\matrixize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
 \def\unmatrixize{
-  \directlua{}}
+  \directlua{lutaexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
 
 \def\milkcow{     %% to be implemented
   \directlua{}}
