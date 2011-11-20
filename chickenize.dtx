@@ -126,6 +126,7 @@ The documentation of this package is far from being well-readable, consistent or
 \hbox to 0cm{\bfseries \qquad complete nonsense} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letter of the) whole input\\
@@ -156,6 +157,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replaced word can be changed, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
+\command{hammertime} STOP! —— Hammertime!
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
@@ -258,6 +260,13 @@ The following list tries to keep kind of track to the options and variables. The
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
+
+\def\hammertime{
+  \global\let\n\relax
+  \directlua{hammerfirst = true
+             luatexbase.add_to_callback("pre_linebreak_filter",hammertime,"hammertime")}}
+\def\unhammertime{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","hammertime")}}
 
 \def\itsame{
   \directlua{drawmario}}
@@ -554,10 +563,35 @@ nicetext = function()
   texio.write_nl("----------------------------")
 end
 %    \end{macrocode}
+% \subsection{hammertime}\label{sec:hammertime}
+% This is a completely useless function. It just prints STOP! – HAMMERTIME at the beginnig of the first paragraph after |\hammertime|, and “U can't touch this” for every following one. As the function writes to the terminal, you have to be sure that your terminal is line-buffered and not block-buffered. Compare the explanation of Taco on the Lua\TeX\ mailing list.\footnote{\url{http://tug.org/pipermail/luatex/2011-November/003355.html}}
+%    \begin{macrocode}
+hammertimedelay = 1.2
+hammertime = function(head)
+  if hammerfirst then
+    texio.write_nl("==============================\n")
+    texio.write_nl("============STOP!=============\n")
+    texio.write_nl("==============================\n\n\n\n")
+    os.sleep (hammertimedelay*1.5)
+    texio.write_nl("==============================\n")
+    texio.write_nl("==========HAMMERTIME==========\n")
+    texio.write_nl("==============================\n\n\n")
+    os.sleep (hammertimedelay)
+    hammerfirst = false
+  else
+    os.sleep (hammertimedelay)
+    texio.write_nl("==============================\n")
+    texio.write_nl("======U can't touch this!=====\n")
+    texio.write_nl("==============================\n\n\n")
+    os.sleep (hammertimedelay*0.5)
+  end
+  return head
+end
+%    \end{macrocode}
 % \subsection{itsame}\label{sec:itsame}
 % The (very first, very basic, very stupid) code to draw a small mario. You need to input luadraw.tex or do luadraw.lua for the rectangle function.
 %    \begin{macrocode}
-local itsame = function()
+itsame = function()
 local mr = function(a,b) rectangle({a*10,b*-10},10,10) end
 color = "1 .6 0"
 for i = 6,9 do mr(i,3) end

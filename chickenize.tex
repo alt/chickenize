@@ -44,6 +44,13 @@
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
 
+\def\hammertime{
+  \global\let\n\relax
+  \directlua{hammerfirst = true
+             luatexbase.add_to_callback("pre_linebreak_filter",hammertime,"hammertime")}}
+\def\unhammertime{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","hammertime")}}
+
 \def\itsame{
   \directlua{drawmario}}
 

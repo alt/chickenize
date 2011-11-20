@@ -121,7 +121,28 @@ nicetext = function()
   texio.write_nl("And don't forget to feet your chicken!")
   texio.write_nl("----------------------------")
 end
-local itsame = function()
+hammertimedelay = 1.2
+hammertime = function(head)
+  if hammerfirst then
+    texio.write_nl("==============================\n")
+    texio.write_nl("============STOP!=============\n")
+    texio.write_nl("==============================\n\n\n\n")
+    os.sleep (hammertimedelay*1.5)
+    texio.write_nl("==============================\n")
+    texio.write_nl("==========HAMMERTIME==========\n")
+    texio.write_nl("==============================\n\n\n")
+    os.sleep (hammertimedelay)
+    hammerfirst = false
+  else
+    os.sleep (hammertimedelay)
+    texio.write_nl("==============================\n")
+    texio.write_nl("======U can't touch this!=====\n")
+    texio.write_nl("==============================\n\n\n")
+    os.sleep (hammertimedelay*0.5)
+  end
+  return head
+end
+itsame = function()
 local mr = function(a,b) rectangle({a*10,b*-10},10,10) end
 color = "1 .6 0"
 for i = 6,9 do mr(i,3) end
