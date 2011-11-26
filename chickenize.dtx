@@ -337,6 +337,11 @@ The following list tries to keep kind of track to the options and variables. The
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+
+\def\zebranize{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",zebranize,"zebranize")}}
+\def\unzebranize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","zebranize")}}
 %    \end{macrocode}
 % Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
 %    \begin{macrocode}
@@ -405,7 +410,6 @@ sloppyline(bein11,bein12) sloppyline(bein12,bein13)
 sloppyline(bein21,bein22) sloppyline(bein22,bein23)
 sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
 sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
-
 }
 }
 %    \end{macrocode}
@@ -498,7 +502,7 @@ chickenize_real_stuff = function(i,head)
     chicken = {}  -- constructing the node list.
 
 -- Should this be done only once? No, then we loose the freedom to change the string in-document.
---but it could be done only once each paragraph as in-paragraph changes are not possible!
+-- but it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
     chicken[0] = nodenew(37,1)  -- only a dummy for the loop
@@ -555,12 +559,12 @@ end
 nicetext = function()
   texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
   texio.write_nl(" ")
-  texio.write_nl("----------------------------")
+  texio.write_nl("============================")
   texio.write_nl("Hello my dear user,")
   texio.write_nl("good job, now go outside and enjoy the world!")
   texio.write_nl(" ")
   texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl("----------------------------")
+  texio.write_nl("============================")
 end
 %    \end{macrocode}
 % \subsection{hammertime}\label{sec:hammertime}
@@ -774,6 +778,7 @@ randomchars = function(head)
 end
 %    \end{macrocode}
 % \subsection{randomcolor and rainbowcolor}\label{sec:randomrainbowcolor}
+% \subsubsection{randomcolor – preliminaries}
 % Setup of the boolean for grey/color or rainbowcolor, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
 %    \begin{macrocode}
 randomcolor_grey = false
@@ -830,6 +835,7 @@ randomcolorstring = function()
   end
 end
 %    \end{macrocode}
+% \subsubsection{randomcolor – the function}
 % The function that does all the colorizing action. It goes through the whole paragraph and looks at every glyph. If the boolean |randomcolor_onlytext| is set, only glyphs with the set attribute will be colored. Elsewise, all glyphs are taken.
 %    \begin{macrocode}
 randomcolor = function(head)
@@ -895,7 +901,7 @@ end
 %The second box is only usefull if microtypographic extensions are used, e.\,g. with the |microtype| package under \LaTeX. The box color then corresponds to the amount of font expansion in the line. This can be greatly used to show the positive effect of font expansion on the badness of a line!
 %
 % The base structure of the following code is written by Paul Isambert. Thanks for the code and support, Paul!
-%
+% \subsubsection{colorstretch – preliminaries}
 % Two booleans, |keeptext|, and |colorexpansion|, are used to control the behaviour of the function.
 %    \begin{macrocode}
 keeptext = true
@@ -1005,6 +1011,52 @@ colorstretch = function (head)
     end -- end of stretch number insertion
   end
   return head
+end
+%    \end{macrocode}
+% \subsection{zebranize}[sec:zebranize]
+% This function will change the color of a paragraph linewise. Both the textcolor and background color are changed to create a true zebra like look. If you want to change or add colors, just change the values of |zebracolorarray[]| for the text colors and |zebracolorarray_bg[]| for the background. Do not mix with other color changing functions of this package, as that will turn out ugly or erroneous.
+% 
+% The code works just the same as every other thing here: insert color nodes, insert rules, and register the whole thing in |post_linebreak_filter|.
+% \subsubsection{zebranize – preliminaries}
+%    \begin{macrocode}
+zebracolorarray = {}
+zebracolorarray_bg = {}
+zebracolorarray[1] = "0.1 g"
+zebracolorarray[2] = "0.9 g"
+zebracolorarray_bg[1] = "0.9 g"
+zebracolorarray_bg[2] = "0.1 g"
+%    \end{macrocode}
+% \subsubsection{zebranize – the function}
+% This code has to be revisited, it is ugly.
+%    \begin{macrocode}
+function zebranize(head)
+  zebracolor = 1
+  for line in nodetraverseid(nodeid"hhead",head) do
+    if zebracolor == #zebracolorarray then zebracolor = 0 end
+    zebracolor = zebracolor + 1
+    color_push.data = zebracolorarray[zebracolor]
+    line.head =     nodeinsertbefore(line.head,line.head,nodecopy(color_push))
+    for n in nodetraverseid(nodeid"glyph",line.head) do
+      if n.next then else
+        nodeinsertafter(line.head,n,nodecopy(color_pull))
+      end
+    end
+
+    local rule_zebra = nodenew(RULE)
+    rule_zebra.width = line.width
+    rule_zebra.height = tex.baselineskip.width*4/5
+    rule_zebra.depth = tex.baselineskip.width*1/5
+
+    local kern_back = nodenew(RULE)
+    kern_back.width = -line.width
+
+    color_push.data = zebracolorarray_bg[zebracolor]
+    line.head = nodeinsertbefore(line.head,line.head,nodecopy(color_pop))
+    line.head = nodeinsertbefore(line.head,line.head,nodecopy(color_push))
+    nodeinsertafter(line.head,line.head,kern_back)
+    nodeinsertafter(line.head,line.head,rule_zebra)
+  end
+  return (head)
 end
 %    \end{macrocode}
 % And that's it!\qquad {\fontsize{40}{0}\raisebox{-2ex}{\fontspec{XITS}☺}}

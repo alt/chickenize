@@ -57,7 +57,7 @@ chickenize_real_stuff = function(i,head)
     chicken = {}  -- constructing the node list.
 
 -- Should this be done only once? No, then we loose the freedom to change the string in-document.
---but it could be done only once each paragraph as in-paragraph changes are not possible!
+-- but it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
     chicken[0] = nodenew(37,1)  -- only a dummy for the loop
@@ -114,12 +114,12 @@ end
 nicetext = function()
   texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
   texio.write_nl(" ")
-  texio.write_nl("----------------------------")
+  texio.write_nl("============================")
   texio.write_nl("Hello my dear user,")
   texio.write_nl("good job, now go outside and enjoy the world!")
   texio.write_nl(" ")
   texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl("----------------------------")
+  texio.write_nl("============================")
 end
 hammertimedelay = 1.2
 hammertime = function(head)
@@ -463,6 +463,41 @@ if colorexpansion then  -- if also the font expansion should be shown
     end -- end of stretch number insertion
   end
   return head
+end
+zebracolorarray = {}
+zebracolorarray_bg = {}
+zebracolorarray[1] = "0.1 g"
+zebracolorarray[2] = "0.9 g"
+zebracolorarray_bg[1] = "0.9 g"
+zebracolorarray_bg[2] = "0.1 g"
+function zebranize(head)
+  zebracolor = 1
+  for line in nodetraverseid(nodeid"hhead",head) do
+    if zebracolor == #zebracolorarray then zebracolor = 0 end
+    zebracolor = zebracolor + 1
+    color_push.data = zebracolorarray[zebracolor]
+    line.head =     nodeinsertbefore(line.head,line.head,nodecopy(color_push))
+    for n in nodetraverseid(nodeid"glyph",line.head) do
+      if n.next then else
+        nodeinsertafter(line.head,n,nodecopy(color_pull))
+      end
+    end
+
+    local rule_zebra = nodenew(RULE)
+    rule_zebra.width = line.width
+    rule_zebra.height = tex.baselineskip.width*4/5
+    rule_zebra.depth = tex.baselineskip.width*1/5
+
+    local kern_back = nodenew(RULE)
+    kern_back.width = -line.width
+
+    color_push.data = zebracolorarray_bg[zebracolor]
+    line.head = nodeinsertbefore(line.head,line.head,nodecopy(color_pop))
+    line.head = nodeinsertbefore(line.head,line.head,nodecopy(color_push))
+    nodeinsertafter(line.head,line.head,kern_back)
+    nodeinsertafter(line.head,line.head,rule_zebra)
+  end
+  return (head)
 end
 --
 function pdf_print (...)

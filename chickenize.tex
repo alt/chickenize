@@ -120,6 +120,11 @@
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+
+\def\zebranize{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",zebranize,"zebranize")}}
+\def\unzebranize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","zebranize")}}
 \newluatexattribute\leetattr
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
@@ -179,7 +184,6 @@ sloppyline(bein11,bein12) sloppyline(bein12,bein13)
 sloppyline(bein21,bein22) sloppyline(bein22,bein23)
 sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
 sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
-
 }
 }
 %% 
