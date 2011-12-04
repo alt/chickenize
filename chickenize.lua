@@ -121,6 +121,20 @@ nicetext = function()
   texio.write_nl("And don't forget to feet your chicken!")
   texio.write_nl("============================")
 end
+local quotestrings = {[171] = true, [172] = true,
+  [8216] = true, [8217] = true, [8218] = true,
+  [8219] = true, [8220] = true, [8221] = true,
+  [8222] = true, [8223] = true,
+  [8248] = true, [8249] = true, [8250] = true}
+guttenbergenize_rq = function(head)
+  for n in nodetraverseid(nodeid"glyph",head) do
+    local i = n.char
+    if quotestrings[i] then
+      noderemove(head,n)
+    end
+  end
+  return head
+end
 hammertimedelay = 1.2
 hammertime = function(head)
   if hammerfirst then
@@ -354,7 +368,7 @@ tabularasa = function(head)
     if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
       s.kern = n.width
       nodeinsertafter(line.list,n,nodecopy(s))
-      noderemove(line.list,n)
+      line.head = noderemove(line.list,n)
     end
     end
   end
@@ -462,6 +476,12 @@ if colorexpansion then  -- if also the font expansion should be shown
       nodeinsertafter(line.head,node.tail(line.head),nodecopy(color_pop))
     end -- end of stretch number insertion
   end
+  return head
+end
+function scorpionize_color(head)
+  color_push.data = ".35 .55 .75 rg"
+  nodeinsertafter(head,head,nodecopy(color_push))
+  nodeinsertafter(head,node.tail(head),nodecopy(color_pop))
   return head
 end
 zebracolorarray = {}

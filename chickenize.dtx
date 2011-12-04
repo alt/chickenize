@@ -89,18 +89,20 @@ Do not distribute a modified version of this file under the same name.
 \pagestyle{scrheadings}
 \setmainfont{TeX Gyre Pagella}
 
-\title{chickenize}
 \author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 \begin{document}
-\maketitle\thispagestyle{scrheadings}
-\kern-6cm
 {\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
-\kern4cm
+\centerline{\fontsize{35}{0}\selectfont \fontspec[Letters=Random]{Punk Nova}chickenize}
 
-This is the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under Lua\LaTeX, and should be working fine with plainLua\TeX. If you tried it with Con\TeX t, please share your experience!} exploiting the possibilities offered by the callbacks that influence line breaking. Most of this package's content is just for fun and educational use, but there are also some functions that can be really useful.
+\kern.5cm
+\centerline{\hspace*{2cm} Arno Trautmann}
+\centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+
+\kern.5cm
+This is the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking. Most of this package's content is just for fun and educational use, but there are also some functions that can be usefull in a normal document.
 
 The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
 
@@ -108,13 +110,14 @@ The documentation of this package is far from being well-readable, consistent or
 \\[3ex]
 
 \noindent
-\begin{longtabu}{lX[j]}
-\hbox to 0cm{\bfseries \qquad maybe usefull things}\\
+\tabulinesep=.5ex
+\begin{longtabu} to .95\textwidth [c]{lX[j]}
+\hbox to 0cm{\bfseries \qquad maybe usefull functions}\\
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness and font expansion of each line\\
 \hyperref[sec:letterspaceadjust]{letterspaceadjust} & uses a small amount of letterspacing to improve the greyness, especially for narrow lines\\
 \addlinespace\addlinespace
-\hbox to 0cm{\bfseries \qquad less usefull things} \\
+\hbox to 0cm{\bfseries \qquad less usefull functions} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
@@ -126,10 +129,11 @@ The documentation of this package is far from being well-readable, consistent or
 \hbox to 0cm{\bfseries \qquad complete nonsense} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
-\hyperref[sec:randomchars]{randomchars} & randomizes the (letter of the) whole input\\
+\hyperref[sec:randomchars]{randomchars} & randomizes the (letters of the) whole input\\
 \bottomrule
 \end{longtabu}
 \kern 2ex
@@ -201,8 +205,6 @@ The following list tries to keep kind of track to the options and variables. The
 \def\arg#1{\textcolor{red}{\ttfamily <#1>}}
 \def\opt#1{\textcolor{blue}{\ttfamily #1}}
 \def\default#1{\textcolor{black}{\ttfamily #1}}
-\subsection{chickenize}
-\subsection{}
 \begin{description}
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
@@ -217,11 +219,19 @@ The following list tries to keep kind of track to the options and variables. The
 \item[\opt{colorexpansion} = \arg{bool} \default{true}] If |true|, two bars are shown of which the second one denotes the font expansion. Only usefull if font expansion is used. (You \emph{do} use font expansion, do you?)
 \end{description}
 
+\clearpage
+\part{Tutorial}
+I thought it might be helpful to add a small tutorial to this package at it is mainly written for learning purposes. However, this is \emph{not} intended as a comprehensive Lua\TeX\ tutorial. It's just to get an idea how things work here.
+
+
+
+
 \DocInput{chickenize.dtx}
 \end{document}
 %</driver>
 %<*tex>
 % \fi
+% \clearpage
 %\part{Implementation}
 %\label{sec:implementation}
 %\section{\TeX\ file}
@@ -260,6 +270,26 @@ The following list tries to keep kind of track to the options and variables. The
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
+
+\def\guttenbergenize{ %% makes only sense when using LaTeX
+  \AtBeginDocument{
+    \gdef\footnote##1{}
+    \gdef\cite##1{}\gdef\parencite##1{}
+    \gdef\Cite##1{}\gdef\Parencite##1{}
+    \gdef\cites##1{}\gdef\parencites##1{}
+    \gdef\Cites##1{}\gdef\Parencites##1{}
+    \gdef\footcite##1{}\gdef\footcitetext##1{}
+    \gdef\footcites##1{}\gdef\footcitetexts##1{}
+    \gdef\textcite##1{}\gdef\Textcite##1{}
+    \gdef\textcites##1{}\gdef\Textcites##1{}
+    \gdef\smartcites##1{}\gdef\Smartcites##1{}
+    \gdef\supercite##1{}\gdef\supercites##1{}
+    \gdef\autocite##1{}\gdef\Autocite##1{}
+    \gdef\autocites##1{}\gdef\Autocites##1{}
+    %% many, many missing … maybe we need to tackle the underlying mechanism?
+  }
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",guttenbergenize_rq,"guttenbergenize_rq")}
+}
 
 \def\hammertime{
   \global\let\n\relax
@@ -322,6 +352,11 @@ The following list tries to keep kind of track to the options and variables. The
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\def\scorpionize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
+\def\unscorpionize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","scorpionize_color")}}
 
 \def\spankmonkey{    %% to be implemented
   \directlua{}}
@@ -565,6 +600,33 @@ nicetext = function()
   texio.write_nl(" ")
   texio.write_nl("And don't forget to feet your chicken!")
   texio.write_nl("============================")
+end
+%    \end{macrocode}
+% \subsection{guttenbergenize}\label{sec:guttenbergenize}
+% A function in honor of the german politician Guttenberg. Pleas do \emph{not} confuse him with the grand master Gutenberg!
+% 
+% Calling |\guttenbergenize| will not only execute or manipulate Lua code, but also redefine some \TeX\ or \LaTeX\ commands. The aim is to remove all quotations, footnotes and anything that will give information about the real sources of your work.
+% 
+% The following Lua function will remove all quotation marks from the input. Again, the |pre_linebreak_filter| is used for this, although it should be rather removed in the input filter or so.
+% \subsubsection{guttenbergenize – preliminaries}
+% This is a nice way Lua offers for our needs. Learn it, this might be helpful for you sometime, too.
+%    \begin{macrocode}
+local quotestrings = {[171] = true, [172] = true,
+  [8216] = true, [8217] = true, [8218] = true,
+  [8219] = true, [8220] = true, [8221] = true,
+  [8222] = true, [8223] = true,
+  [8248] = true, [8249] = true, [8250] = true}
+%    \end{macrocode}
+% \subsubsection{guttenbergenize – the function}
+%    \begin{macrocode}
+guttenbergenize_rq = function(head)
+  for n in nodetraverseid(nodeid"glyph",head) do
+    local i = n.char
+    if quotestrings[i] then
+      noderemove(head,n)
+    end
+  end
+  return head
 end
 %    \end{macrocode}
 % \subsection{hammertime}\label{sec:hammertime}
@@ -869,7 +931,7 @@ tabularasa = function(head)
     if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
       s.kern = n.width
       nodeinsertafter(line.list,n,nodecopy(s))
-      noderemove(line.list,n)
+      line.head = noderemove(line.list,n)
     end
     end
   end
@@ -1013,8 +1075,18 @@ colorstretch = function (head)
   return head
 end
 %    \end{macrocode}
+% \subsection*{scorpionize}
+% These functions intentionally not documented.
+%    \begin{macrocode}
+function scorpionize_color(head)
+  color_push.data = ".35 .55 .75 rg"
+  nodeinsertafter(head,head,nodecopy(color_push))
+  nodeinsertafter(head,node.tail(head),nodecopy(color_pop))
+  return head
+end
+%    \end{macrocode}
 % \subsection{zebranize}[sec:zebranize]
-% This function will change the color of a paragraph linewise. Both the textcolor and background color are changed to create a true zebra like look. If you want to change or add colors, just change the values of |zebracolorarray[]| for the text colors and |zebracolorarray_bg[]| for the background. Do not mix with other color changing functions of this package, as that will turn out ugly or erroneous.
+% This function is inspired by a discussion with the Heidelberg regular's table and will change the color of each paragraph linewise. Both the textcolor and background color are changed to create a true zebra like look. If you want to change or add colors, just change the values of |zebracolorarray[]| for the text colors and |zebracolorarray_bg[]| for the background. Do not mix with other color changing functions of this package, as that will turn out ugly or erroneous.
 % 
 % The code works just the same as every other thing here: insert color nodes, insert rules, and register the whole thing in |post_linebreak_filter|.
 % \subsubsection{zebranize – preliminaries}

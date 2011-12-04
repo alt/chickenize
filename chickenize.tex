@@ -44,6 +44,26 @@
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
 
+\def\guttenbergenize{ %% makes only sense when using LaTeX
+  \AtBeginDocument{
+    \gdef\footnote##1{}
+    \gdef\cite##1{}\gdef\parencite##1{}
+    \gdef\Cite##1{}\gdef\Parencite##1{}
+    \gdef\cites##1{}\gdef\parencites##1{}
+    \gdef\Cites##1{}\gdef\Parencites##1{}
+    \gdef\footcite##1{}\gdef\footcitetext##1{}
+    \gdef\footcites##1{}\gdef\footcitetexts##1{}
+    \gdef\textcite##1{}\gdef\Textcite##1{}
+    \gdef\textcites##1{}\gdef\Textcites##1{}
+    \gdef\smartcites##1{}\gdef\Smartcites##1{}
+    \gdef\supercite##1{}\gdef\supercites##1{}
+    \gdef\autocite##1{}\gdef\Autocite##1{}
+    \gdef\autocites##1{}\gdef\Autocites##1{}
+    %% many, many missing … maybe we need to tackle the underlying mechanism?
+  }
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",guttenbergenize_rq,"guttenbergenize_rq")}
+}
+
 \def\hammertime{
   \global\let\n\relax
   \directlua{hammerfirst = true
@@ -105,6 +125,11 @@
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\def\scorpionize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
+\def\unscorpionize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","scorpionize_color")}}
 
 \def\spankmonkey{    %% to be implemented
   \directlua{}}
