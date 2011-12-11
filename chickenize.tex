@@ -46,6 +46,10 @@
 
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
+    \let\grqq\relax\let\glqq\relax
+    \let\frqq\relax\let\flqq\relax
+    \let\grq\relax\let\glq\relax
+    \let\frq\relax\let\flq\relax
     \gdef\footnote##1{}
     \gdef\cite##1{}\gdef\parencite##1{}
     \gdef\Cite##1{}\gdef\Parencite##1{}

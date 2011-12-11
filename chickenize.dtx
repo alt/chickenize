@@ -104,20 +104,25 @@ Do not distribute a modified version of this file under the same name.
 \kern.5cm
 This is the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking. Most of this package's content is just for fun and educational use, but there are also some functions that can be usefull in a normal document.
 
-The following table informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
+The table on the next page informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
 
 The documentation of this package is far from being well-readable, consistent or even complete. This is caused either by lack of time or priority. If you miss anything that should be documented or if you have suggestions on how to increase the readability of the descriptions, please let me know.
-\\[3ex]
+
+For a better understanding of what's going on in the code of this package, there is a small \hyperlink{tutorial}{tutorial} below that explains shortly the most important features used here.
+
+If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
+
+\newpage
 
 \noindent
 \tabulinesep=.5ex
 \begin{longtabu} to .95\textwidth [c]{lX[j]}
-\hbox to 0cm{\bfseries \qquad maybe usefull functions}\\
+\hbox to 0cm{\bfseries \hspace*{2cm} maybe usefull functions}\\
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness and font expansion of each line\\
 \hyperref[sec:letterspaceadjust]{letterspaceadjust} & uses a small amount of letterspacing to improve the greyness, especially for narrow lines\\
 \addlinespace\addlinespace
-\hbox to 0cm{\bfseries \qquad less usefull functions} \\
+\hbox to 0cm{\bfseries \hspace*{2cm} less usefull functions} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
@@ -126,7 +131,7 @@ The documentation of this package is far from being well-readable, consistent or
 \hyperref[sec:tabularasa]{tabularasa} & removes every glyph from the output and leaves an empty document\\
 \hyperref[sec:uppercasecolor]{uppercasecolor} & makes every uppercase letter colored\\
 \addlinespace\addlinespace
-\hbox to 0cm{\bfseries \qquad complete nonsense} \\
+\hbox to 0cm{\bfseries \hspace*{2cm} complete nonsense} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
@@ -136,9 +141,6 @@ The documentation of this package is far from being well-readable, consistent or
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letters of the) whole input\\
 \bottomrule
 \end{longtabu}
-\kern 2ex
-
-\noindent If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response!
 
 \newpage
 \tableofcontents
@@ -220,11 +222,87 @@ The following list tries to keep kind of track to the options and variables. The
 \end{description}
 
 \clearpage
-\part{Tutorial}
-I thought it might be helpful to add a small tutorial to this package at it is mainly written for learning purposes. However, this is \emph{not} intended as a comprehensive Lua\TeX\ tutorial. It's just to get an idea how things work here.
+\part[Tutorial]{Tutorial\hypertarget{tutorial}}
+I thought it might be helpful to add a small tutorial to this package at it is mainly written for learning purposes. However, this is \emph{not} intended as a comprehensive Lua\TeX\ tutorial. It's just to get an idea how things work here. For a deeper understanding of Lua\TeX\ you should consult the Lua\TeX\ manual and also some Lua introduction like “Programming in Lua“.
 
+\section{Lua code}
+The crucial new thing in Lua\TeX\ is the first part of its name: The programming language Lua. One can use nearly any Lua code inside the commands |\directlua{}| or |\latelua{}|. This can be used for simple tasks like calculating a number and printing it, just as if it was entered by hand:
+\begin{verbatim}
+\directlua{
+  a = 5*2
+  tex.print(a)
+}
+\end{verbatim}
+A number of additions to the Lua language make the thing usefull for \TeX ing, especially the |tex.| library that offeres access to \TeX. In the simple example above, the function |tex.print()| inserts its argument into the \TeX\ input stream, so the result of the calcuation (10) is printed in the document.
 
+Larger parts of Lua code should not be in the same file as your \TeX\ code, but rather in a separate file. That can than be loaded using	
+\begin{verbatim}
+\directlua{dofile("filename")}
+\end{verbatim}
 
+If you use Lua\LaTeX, you can also use the |luacode| environment from the eponymous package.
+
+\section{callbacks}
+While Lua code can be inserted using |\directlua| at any point in the input, a very powerful concept allows to change the way \TeX\ behaves: The callbacks. A callback is a point where you can hook into \TeX's working and do anything that may make sense – or not. (Thus maybe breaking your document completely …)
+
+Callbacks are used at several points of \TeX's work – e.\,g. for font loading, paragraph breaking, shipping out etc. In this package, we make heavy use of mostly two callbacks: The |pre_linebreak_filter| and the |post_linebreak| filter. These callbacks are called just before (or after, resp.) \TeX\ breaks a paragraph into lines. Normally, these callbacks are empty, so they are a great playground. In between these callbacks, the |linebreak_filter| takes care of \TeX's line breaking mechanism. We won't touch this as I have no idea of what's going on there ;)
+
+\subsection{How to use a callback}
+The normal way to use a callback is to “register” a function in it. This way, the function is called each time the callback is executed. Typically, the function takes a node list (see below) as an argument, does something with it, and returns it. So a basic use of the |post_linebreak_filter| would look like:
+
+\begin{verbatim}
+function my_new_filter(head)
+  return head
+end
+
+callback.register("post_linebreak_filter",my_new_filter)
+\end{verbatim}
+The function |callback.register| takes the name of the callback and your new function. However, there are some reasons we don't use this syntax here, but make use of the package |luatexbase| by Manuel Pégourié-Gonnard and Élie Roux that offers the function |luatexbase.add_to_callback| which has a somewhat extended syntax:
+\begin{verbatim}
+luatexbase.add_to_callback("post_linebreak_filter",my_new_filter,"a fancy new filter")
+\end{verbatim}
+The third argument is a name you can (have to) give to your function in the callback. That is necessary because the package also offers a possibility to remove functions from callbacks, and then you need a unique name for the function:
+\begin{verbatim}
+luatexbase.remove_from_callback("post_linebreak_filter","a fancy new filter")
+\end{verbatim}
+
+You have to consult the Lua\TeX\ manual to see what functionality a callback has, when it is executed, what arguments it expects and what return values have to be given.
+
+Everything I have written here is not the complete truth – please consult the Lua\TeX\ manual and the |luatexbase| documentation for details!
+
+\section{nodes}
+Essentially everything that Lua\TeX\ deals with are nodes – letters, spaces, colors, rules etc. In this package, we make heavy use of different types of nodes, so an understanding of the concept is crucial for the functionality.
+
+A node is an object that has different properties, depending on its type which is stored in its |.id| field. For example, a node of type |glyph| has |id| 37, has a number |.char| that represents its unicode codepoint, a |.font| entry that determines the font used for this glyph, a |.height|, |.depth| and |.width| etc.
+
+Also, a node typically has a non-empty field |.next| and |.prev|. In a list, these point to the – guess it – next or previous node. Using this, one can go through a list of nodes step by step and manipulate the list.
+
+A more convenient way to adress each node of a list is the function |node.traverse(head)| which takes as first argument the first node of the list. However, often one wants to adress only a certain type of nodes in a list – e.\,g. all glyphs in a vertical list that also contains glue, rules etc. For this, the function |node.traverse_id(37,head)| can be used, with the first argument giving the respective id of the nodes.
+
+The following example removes all characters “e” from the input just before paragraph breaking. That makes no sense, but it is a good example:
+\begin{verbatim}
+function remove_e(head)
+  for n in node.traverse_id(37,head) do
+    if n.char == 101 then
+      node.remove(head,n)
+    end
+  end
+  return head
+end
+
+luatexbase.add_to_callback("pre_linebreak_filter",remove_e,"remove all letters e")
+\end{verbatim}
+
+Now, don't read on, but try out this code by yourself! Change the number of the character to be removed, try to play around a bit. Also, try to remove the spaces between words. Those are glue nodes – look up their id in the Lua\TeX\ manual! Then, you have to remove the |if n.char| line as glue nodes don't have a |.char|. If everything works, you should have an input consisting of only one long word. Congratulations!
+
+The |pre_linebreak_filter| is especially easy because its argument (here called |head|) is just one horizontal list. For the |post_linebreak_filter|, one has to go through a whole vertical stack of horizontal lists, vertical glue and other material. See some of the functions below to understand what is necessary then.
+
+\section{Other things}
+Lua is a very intuitive and simple language, but nonetheless powerful. Just two tips: use local variables if possible – your code will be much faster. That is the reason we use synonyms like |nodetraverseid = node.traverse_id| instead of the original names.
+
+Also, Lua is kind of built around tables. Everything is best done using tables!
+
+The namespace of this package is \emph{not} consistant. Please don't take anything here as an example for good Lua coding, for good \TeX ing or even for good Lua\TeX ing. It's not. For really good code, check out the code written by Hans Hagen or other professionals. If you understand this package here, you should be ready to go on and improve your knowledge. After that, you might come back and help me improve this package – I'm always happy for any help ☺
 
 \DocInput{chickenize.dtx}
 \end{document}
@@ -273,6 +351,11 @@ I thought it might be helpful to add a small tutorial to this package at it is m
 
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
+    \let\grqq\relax\let\glqq\relax
+    \let\frqq\relax\let\flqq\relax
+    \let\grq\relax\let\glq\relax
+    \let\frq\relax\let\flq\relax
+%
     \gdef\footnote##1{}
     \gdef\cite##1{}\gdef\parencite##1{}
     \gdef\Cite##1{}\gdef\Parencite##1{}
@@ -603,7 +686,7 @@ nicetext = function()
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}
-% A function in honor of the german politician Guttenberg. Pleas do \emph{not} confuse him with the grand master Gutenberg!
+% A function in honor of the german politician Guttenberg.\footnote{Thanks to Jasper for bringing me to this idea!} Please do \emph{not} confuse him with the grand master Gutenberg!
 % 
 % Calling |\guttenbergenize| will not only execute or manipulate Lua code, but also redefine some \TeX\ or \LaTeX\ commands. The aim is to remove all quotations, footnotes and anything that will give information about the real sources of your work.
 % 
