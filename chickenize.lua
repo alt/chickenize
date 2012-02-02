@@ -231,7 +231,7 @@ letterspace_glue.spec    = letterspace_spec
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
   for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph") then
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
       local g = nodecopy(letterspace_glue)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -478,6 +478,7 @@ if colorexpansion then  -- if also the font expansion should be shown
   end
   return head
 end
+
 function scorpionize_color(head)
   color_push.data = ".35 .55 .75 rg"
   nodeinsertafter(head,head,nodecopy(color_push))

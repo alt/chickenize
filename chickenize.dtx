@@ -163,6 +163,8 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replaced word can be changed, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
+\command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw}
+\command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undepstepize| – once you go dubstep, you cannot go back …
 \command{hammertime} STOP! —— Hammertime!
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
@@ -349,6 +351,30 @@ The namespace of this package is \emph{not} consistant. Please don't take anythi
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
 
+\def\dubstepenize{
+  \chickenize
+  \directlua{
+    chickenstring[1] = "WOB"
+    chickenstring[2] = "WOB"
+    chickenstring[3] = "WOB"
+    chickenstring[4] = "BROOOAR"
+    chickenstring[5] = "WHEE"
+    chickenstring[6] = "WOB WOB WOB"
+    chickenstring[7] = "WAAAAAAAAH"
+    chickenstring[8] = "duhduh duhduh duh"
+    chickenstring[9] = "BEEEEEEEEEW"
+    chickenstring[10] = "DDEEEEEEEW"
+    chickenstring[11] = "EEEEEW"
+    chickenstring[12] = "boop"
+    chickenstring[13] = "buhdee"
+    chickenstring[14] = "bee bee"
+    chickenstring[15] = "BZZZRRRRRRROOOOOOAAAAA"
+
+    chickenizefraction = 1
+  }
+}
+\let\dubstepize\dubstepenize
+
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
     \let\grqq\relax\let\glqq\relax
@@ -391,11 +417,12 @@ The namespace of this package is \emph{not} consistant. Please don't take anythi
 
 \def\letterspaceadjust{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
-\def\unletterspacedjust{
+\def\unletterspaceadjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
 
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
+\let\returnsheep\unletterspaceadjust
 
 \def\matrixize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
@@ -832,7 +859,7 @@ letterspace_pen.penalty  = 10000
 %    \begin{macrocode}
 letterspaceadjust = function(head)
   for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph") then
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
       local g = nodecopy(letterspace_glue)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -1157,6 +1184,11 @@ colorstretch = function (head)
   end
   return head
 end
+%    \end{macrocode}
+% \subsection*{dubstepize}
+% BROOOAR WOBWOBWOB BROOOOAR WOBWOBWOB BROOOOAR WOB WOB WOB …
+%    \begin{macrocode}
+
 %    \end{macrocode}
 % \subsection*{scorpionize}
 % These functions intentionally not documented.

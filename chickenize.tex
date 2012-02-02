@@ -44,6 +44,30 @@
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
 
+\def\dubstepenize{
+  \chickenize
+  \directlua{
+    chickenstring[1] = "WOB"
+    chickenstring[2] = "WOB"
+    chickenstring[3] = "WOB"
+    chickenstring[4] = "BROOOAR"
+    chickenstring[5] = "WHEE"
+    chickenstring[6] = "WOB WOB WOB"
+    chickenstring[7] = "WAAAAAAAAH"
+    chickenstring[8] = "duhduh duhduh duh"
+    chickenstring[9] = "BEEEEEEEEEW"
+    chickenstring[10] = "DDEEEEEEEW"
+    chickenstring[11] = "EEEEEW"
+    chickenstring[12] = "boop"
+    chickenstring[13] = "buhdee"
+    chickenstring[14] = "bee bee"
+    chickenstring[15] = "BZZZRRRRRRROOOOOOAAAAA"
+
+    chickenizefraction = 1
+  }
+}
+\let\dubstepize\dubstepenize
+
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
     \let\grqq\relax\let\glqq\relax
@@ -85,11 +109,12 @@
 
 \def\letterspaceadjust{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
-\def\unletterspacedjust{
+\def\unletterspaceadjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
 
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
+\let\returnsheep\unletterspaceadjust
 
 \def\matrixize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
