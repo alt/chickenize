@@ -41,6 +41,7 @@ chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
 
 chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
+chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
 local tbl = font.getfont(font.current())
 local space = tbl.parameters.space
@@ -106,6 +107,9 @@ chickenize = function(head)
 -- and the random determination of the chickenization of the next word:
     if math.random() > chickenizefraction then
       chickenize_ignore_word = true
+    else if chickencount then
+        chicken_substitutions = chicken_substitutions + 1
+      end
     end
   end
   return head
@@ -120,6 +124,10 @@ nicetext = function()
   texio.write_nl(" ")
   texio.write_nl("And don't forget to feet your chicken!")
   texio.write_nl("============================")
+  if chickencount then
+    texio.write_nl("There were "..chicken_substitutions.." substitutions made.")
+    texio.write_nl("============================")
+  end
 end
 local quotestrings = {[171] = true, [172] = true,
   [8216] = true, [8217] = true, [8218] = true,
