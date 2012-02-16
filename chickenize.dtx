@@ -335,7 +335,7 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
 }
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
-    luatexbase.remove_from_callback("start_page_number","cstarttpage")
+    luatexbase.remove_from_callback("start_page_number","cstartpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
 \def\coffeestainize{  %% to be implemented.
@@ -406,10 +406,10 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
   \directlua{hammerfirst = true
              luatexbase.add_to_callback("pre_linebreak_filter",hammertime,"hammertime")}}
 \def\unhammertime{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","hammertime")}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","hammertime")}}
 
-\def\itsame{
-  \directlua{drawmario}}
+% \def\itsame{
+%   \directlua{drawmario}} %%% does not exist
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -467,7 +467,7 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
 \def\scorpionize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
 \def\unscorpionize{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","scorpionize_color")}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","scorpionize_color")}}
 
 \def\spankmonkey{    %% to be implemented
   \directlua{}}
@@ -706,18 +706,20 @@ chickenize = function(head)
   return head
 end
 
+local separator    = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
 nicetext = function()
-  texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
-  texio.write_nl(" ")
-  texio.write_nl("============================")
-  texio.write_nl("Hello my dear user,")
-  texio.write_nl("Good job, now go outside and enjoy the world!")
-  texio.write_nl(" ")
-  texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl("============================")
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("Hello my dear user,")
+  texiowrite_nl("good job, now go outside and enjoy the world!")
+  texiowrite_nl(" ")
+  texiowrite_nl("And don't forget to feed your chicken!")
+  texiowrite_nl(separator .. "\n")
   if chickencount then
-    texio.write_nl("There were "..chicken_substitutions.." substitutions made.")
-    texio.write_nl("============================")
+    texiowrite_nl("There were "..chicken_substitutions.." substitutions made.")
+    texiowrite_nl(separator)
   end
 end
 %    \end{macrocode}
@@ -752,22 +754,23 @@ end
 % This is a completely useless function. It just prints STOP! – HAMMERTIME at the beginnig of the first paragraph after |\hammertime|, and “U can't touch this” for every following one. As the function writes to the terminal, you have to be sure that your terminal is line-buffered and not block-buffered. Compare the explanation by Taco on the Lua\TeX\ mailing list.\footnote{\url{http://tug.org/pipermail/luatex/2011-November/003355.html}}
 %    \begin{macrocode}
 hammertimedelay = 1.2
+local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
 hammertime = function(head)
   if hammerfirst then
-    texio.write_nl("==============================\n")
-    texio.write_nl("============STOP!=============\n")
-    texio.write_nl("==============================\n\n\n\n")
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("============STOP!=============\n")
+    texiowrite_nl(htime_separator .. "\n\n\n")
     os.sleep (hammertimedelay*1.5)
-    texio.write_nl("==============================\n")
-    texio.write_nl("==========HAMMERTIME==========\n")
-    texio.write_nl("==============================\n\n\n")
+    texiowrite_nl(htime_separator .. "\n")
+    texiowrite_nl("==========HAMMERTIME==========\n")
+    texiowrite_nl(htime_separator .. "\n\n")
     os.sleep (hammertimedelay)
     hammerfirst = false
   else
     os.sleep (hammertimedelay)
-    texio.write_nl("==============================\n")
-    texio.write_nl("======U can't touch this!=====\n")
-    texio.write_nl("==============================\n\n\n")
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("======U can't touch this!=====\n")
+    texiowrite_nl(htime_separator .. "\n\n")
     os.sleep (hammertimedelay*0.5)
   end
   return head
@@ -815,7 +818,7 @@ end
 % \subsection{leetspeak}\label{sec:leetspeak}
 % The |leettable| is the substitution scheme. Just add items if you feel to. Maybe we will differ between a light-weight version and a hardcore 1337.
 %    \begin{macrocode}
-leet_onlytext = false
+leetspeak_onlytext = false
 leettable = {
   [101] = 51, -- E
   [105] = 49, -- I
@@ -837,7 +840,7 @@ leettable = {
 leet = function(head)
   for line in nodetraverseid(Hhead,head) do 
     for i in nodetraverseid(GLYPH,line.head) do
-      if not(leetspeak_onlytext) or
+      if not leetspeak_onlytext or
          node.has_attribute(i,luatexbase.attributes.leetattr)
       then
         if leettable[i.char] then 
@@ -915,7 +918,8 @@ local randomfontslower = 1
 local randomfontsupper = 0
 % 
 randomfonts = function(head)
-  if (randomfontsupper > 0) then  -- fixme: this should be done only once, no? Or at every paragraph?
+  local rfub
+  if randomfontsupper > 0 then  -- fixme: this should be done only once, no? Or at every paragraph?
     rfub = randomfontsupper  -- user-specified value
   else
     rfub = font.max()        -- or just take all fonts
@@ -1044,14 +1048,14 @@ end
 tabularasa_onlytext = false
 
 tabularasa = function(head)
-  s = nodenew(nodeid"kern")
+  local s = nodenew(nodeid"kern")
   for line in nodetraverseid(nodeid"hlist",head) do
     for n in nodetraverseid(nodeid"glyph",line.list) do
-    if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
-      s.kern = n.width
-      nodeinsertafter(line.list,n,nodecopy(s))
-      line.head = noderemove(line.list,n)
-    end
+      if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
+        s.kern = n.width
+        nodeinsertafter(line.list,n,nodecopy(s))
+        line.head = noderemove(line.list,n)
+      end
     end
   end
   return head
@@ -1107,7 +1111,7 @@ colorstretch = function (head)
   for line in nodetraverseid(Hhead,head) do 
     local rule_bad = nodenew(RULE)
 
-	if colorexpansion then  -- if also the font expansion should be shown
+    if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
         while not(g.id == 37) do
          g = g.next
@@ -1115,9 +1119,9 @@ colorstretch = function (head)
       exp_factor = g.width / f[g.char].width
       exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
       rule_bad.width = 0.5*line.width  -- we need two rules on each line!
-    else 
+    else
       rule_bad.width = line.width  -- only the space expansion should be shown, only one rule
-    end   
+    end
 %    \end{macrocode}
 % Height and depth of the rules are adapted to print a closed grey pattern, so no white interspace is left.
 %
