@@ -1,6 +1,6 @@
-This is the README file of the chickenize package. The package provides several commands and lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is /not/ intended for serious documents!
+This is the README file of the chickenize package. The package provides several commands and Lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is /not/ intended for serious documents!
 
-To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
+To produce the package files, run lualatex on chickenize.dtx, wich should result in the creation of the following files:
   chickenize.pdf  (documentation)
   chickenize.tex  (plainTeX user interface)
   chickenize.sty  (LaTeX user interface)
