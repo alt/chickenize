@@ -119,13 +119,13 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \begin{longtabu} to .95\textwidth [c]{lX[j]}
 \hbox to 0cm{\bfseries \hspace*{2cm} maybe useful functions}\\
 \cmidrule(lr){1-2}
-\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that depict the badness and font expansion of each line\\
+\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
 \hyperref[sec:letterspaceadjust]{letterspaceadjust} & uses a small amount of letterspacing to improve the greyness, especially for narrow lines\\
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
-\hyperref[sec:randomuclc]{randomuclc} & changes randomly between uppercase and lowercase\\
+\hyperref[sec:randomuclc]{randomuclc} & alternates randomly between uppercase and lowercase\\
 \hyperref[sec:randomrainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
 \hyperref[sec:randomrainbowcolor]{randomcolor} & prints every letter in a random color\\
 \hyperref[sec:tabularasa]{tabularasa} & removes every glyph from the output and leaves an empty document\\
@@ -147,56 +147,61 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \newpage
 \part{User Documentation}
 \section{How It Works}
-We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| and the |post_line|\-|break_filter|. Hooking a function into these, we can nearly arbitrarily change the content of the document. If the changes should be on the input-side (replacing with |chicken|), one can use the |pre_linebreak_filter|. However, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is used for such things.
+We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| and the |post_line|\-|break_filter|. Hooking a function into these, we can nearly arbitrarily change the content of the document. If the changes should be on the input-side (e.~g. replacing words with |chicken|), one can use the |pre_linebreak_filter|. However, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is to be preferred for such things.
 
 All functions traverse the node list of a paragraph and manipulate the nodes' properties (like |.font| or |.char|) or insert nodes (like color push/pop nodes) and return this changed node list.
 
 \hypertarget{texinterface}{}
 \section{Commands – How You Can Use It}
-There are several ways to make use of this package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are simple wrappers around the functions.
+There are several ways to make use of the \emph{chickenize} package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are simple wrappers around the functions.
 
 \subsection{\TeX\ Commands – Document Wide}
-You have a number of commands at your hand, each of which does some manipulation of the input or output. In fact, the code is easy and straightforward, but be careful, especially when combining things. Apply features step by step so your brain won't be damaged …
+You have a number of commands at your hand, each of which does some manipulation of the input or output. In fact, the code is simple and straightforward, but be careful, especially when combining things. Apply features step by step so your brain won't be damaged …
 
 The effect of the commands can be influenced, not with arguments, but only via the |\chickenizesetup| described \hyperlink{adjustment}{below}.
 
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
-\command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replaced word can be changed, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
+\command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
 \command{hammertime} STOP! —— Hammertime!
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
-\command{randomcolor} Does what it's name says.
-\command{rainbowcolor} Instead of random colors, this command causes the text color to change slowly according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
+\command{randomcolor} Does what its name says.
+\command{rainbowcolor} Instead of random colors, this command causes the text color to change gradually according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
 \command{pancakenize} This is a dummy so far, as I have no idea what it should do. If you have suggestions, please tell me.
+                      % \footnote{% Maybe just pretend that the absence of functionality is intentional... [phg]
+                      %   From an absurdist perspective, the |pancakenize| command can be perceived
+                      %   as a reminder to the user to email the package maintainer their own
+                      %   suggestions for further functionality.
+                      % }
 \command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{nyanize} A synonym for |rainbowcolor|.
-\command{matrixize} Replaces every glyph by a binary sequence representing its ASCII value.
-\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together the box greyness give you information about how well the overall greyness of the typeset page is.
+\command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
+\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \end{description}
 
 \subsection{How to Deactivate It}
 Every command has a |\un|-version that deactivates it's functionality. So once you used |\chickenize|, it will chickenize the whole document up to |\unchickenize|. However, the paragraph in which |\unchickenize| appears, will \emph{not} be chickenized. The same is true for all other manipulations. Take care that you don't |\un|-anything bevor activating it, as this will result in an error.\footnote{Which is so far not catchable due to missing functionality in luatexbase.}
 
-If you want to manipulate only a part of a paragraph, you have use the |\text|-version of the function, see below. However, feel free to set and unset every function at will at any place in your document.
+If you want to manipulate only a part of a paragraph, you will have to use the corresponding |\text|-version of the function, see below. However, feel free to set and unset every function at will at any place in your document.
 
 \subsection{\texttt{\textbackslash text}-Versions}
-The functions of this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have\footnote{If they don't have, I did miss that, sorry. Please inform me about such cases.} a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document keeps its color. However, to achieve this effect, still the whole node list has to be traversed, so it may slow down your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
+The functions provided by this package might be much more useful if applied only to a short sequence of words or single words instead of the whole document or paragraph. Therefore, most of the above-mentioned commands have\footnote{If they don't have, I did miss that, sorry. Please inform me about such cases.} a |\text|-version that takes an argument. |\textrandomcolor{foo}| results in a colored |foo| while the rest of the document remains unaffected. However, to achieve this effect, still the whole node list has to be traversed. Thus, it may slow down the compilation of your document, even if you use |\textrandomcolor| only once. Fortunately, the effect is very small and mostly negligible.\footnote{On a 500 pages text-only \LaTeX\ document the dilation is on the order of 10\% with |textrandomcolor|, but other manipulations can take much more time. However, you are not supposed to make such long documents with |chickenize|!}
 
 Please don't fool around by mixing a |\text|-version with the non-|\text|-version. If you feel like it and are not pleased with the result, it is up to \emph{you} to provide a stable and working solution.
 
 \subsection{Lua functions}
-As all features are implemented on the Lua side, you can use these functions on their own. If you do so, please consult the corresponding subsections in the \hyperlink{sec:luamodule}{implementation} part, because there are some variables that can be adapted to your need.
+As all features are implemented on the Lua side, you can use these functions independently. If you do so, please consult the corresponding subsections in the \hyperlink{sec:luamodule}{implementation} part, because there are some variables that can be adapted to your need.
 
 You can use the following code inside a |\directlua| statement or in a |luacode| environment (or the corresponding thing in your format):
 \begin{verbatim}
 luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
 \end{verbatim}
-Replace |pre| by |post| to register into the post linebreak filter. The second argument gives the function name; find a list of available functions below. You can give a label as you like in the third argument, and the last argument gives the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
+Replace |pre| by |post| to register into the post linebreak filter. The second argument (here: |chickenize|) specifies the function name; the available functions are listed below. You can supply a label as you like in the third argument. The fourth and last argument, which is omitted in the example,  determines the order in which the functions in the callback are used. If you have no fancy stuff going on, you can safely use |1|.
 
 \hypertarget{adjustment}{}
 \section{Options – How to Adjust It}
@@ -204,41 +209,41 @@ There are several ways to change the behaviour of |chickenize| and its macros. M
 
 However, |\chickenizesetup| is a macro on the \TeX\ side meaning that you can use \emph{only} |%| as comment string. If you use |--|, all of the argument will be ignored as \TeX\ does not pass an eol to |\directlua|. If you don't understand that, just ignore it and go on as usual.
 
-The following list tries to keep kind of track of the options and variables. There is no guarantee for this list, and if you find something that is missing or doesn't work as described here, please inform me!
+The following list tries to kind of keep track of the options and variables. There is no guarantee for completeness, and if you find something that is missing or doesn't work as described here, please inform me!
 
 \def\arg#1{\textcolor{red}{\ttfamily <#1>}}
 \def\opt#1{\textcolor{blue}{\ttfamily #1}}
 \def\default#1{\textcolor{black}{\ttfamily #1}}
 \begin{description}
-\item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play with them a bit to find out what they are doing.
+\item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play around with them a bit to find out what they are doing.
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
 \item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
 \item[\opt{chickencount} = \arg{true}] Activates the counting of substituted words and prints the number at the end of the terminal output.
 \item[\opt{colorstretchnumbers} = \arg{true}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
-\item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
-\item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
+\item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode code points of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
+\item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) will result in more uppercase letters. Guess what a lower number does.
 \item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
-\item[\opt{rainbow\_step} = \arg{float} \default{0.005}] This indicates the relative change of color using the rainbow functionality. A value of |1| changes the color in one step from red to yellow, while a value of |0.005| takes 200 letters for this change. Useful values are below |0.05|, but it depends on the amount of text. The longer the text and the lower the |step|, the nicer your rainbow will be.
-\item[\opt{Rgb\_lower}, \opt{rGb\_upper} = \arg{int}] To specify the color space that is used for |\randomcolor|, you can specify six values, the upper and lower value for each color. The uppercase letter in the variable denotes the color, so |rGb_upper| gives the upper value for green etc. Possible values are between |1| and |254|. If you enter anything outside this, your pdf will become invalid and break. For grey scale, use |grey_lower| and |grey_upper|, with values between |0| (black) and |1000| (white), included. Default is |0| to |900| to prevent white letters.
+\item[\opt{rainbow\_step} = \arg{float} \default{0.005}] This indicates the relative change of color using the rainbow functionality. A value of |1| changes the color in one step from red to yellow, while a value of |0.005| takes 200 letters for the transition to be completed. Useful values are below |0.05|, but it depends on the amount of text. The longer the text and the lower the |step|, the nicer your rainbow will be.
+\item[\opt{Rgb\_lower}, \opt{rGb\_upper} = \arg{int}] To specify the color space that is used for |\randomcolor|, you can specify six values, the upper and lower value for each color. The uppercase letter in the variable denotes the color, so |rGb_upper| gives the upper value for green etc. Possible values are between |1| and |254|. If you enter anything outside this range, your PDF will become invalid and break. For grey scale, use |grey_lower| and |grey_upper|, with values between |0| (black) and |1000| (white), included. Default is |0| to |900| to prevent white letters.
 \item[\opt{keeptext} = \arg{bool} \default{false}] This is for the |\colorstretch| command. If set to |true|, the text of your document will be kept. This way, it is easier to identify bad lines and the reason for the badness.
 \item[\opt{colorexpansion} = \arg{bool} \default{true}] If |true|, two bars are shown of which the second one denotes the font expansion. Only useful if font expansion is used. (You \emph{do} use font expansion, don’t you?)
 \end{description}
 
 \clearpage
 \part[Tutorial]{Tutorial\hypertarget{tutorial}}
-I thought it might be helpful to add a small tutorial to this package as it is mainly written for learning purposes. However, this is \emph{not} intended as a comprehensive Lua\TeX\ tutorial. It's just to get an idea how things work here. For a deeper understanding of Lua\TeX\ you should consult the Lua\TeX\ manual and also some Lua introduction like “Programming in Lua“.
+I thought it might be helpful to add a small tutorial to this package as it is mainly written with instructional purposes in mind. However, the following is \emph{not} intended as a comprehensive guide to Lua\TeX\. It's just to get an idea how things work here. For a deeper understanding of Lua\TeX\ you should consult both the Lua\TeX\ manual and some introduction into Lua proper like “Programming in Lua“. (See the section \hyperref[sec:literature]{Literature} at the end of the manual.)
 
 \section{Lua code}
-The crucial new thing in Lua\TeX\ is the first part of its name: The programming language Lua. One can use nearly any Lua code inside the commands |\directlua{}| or |\latelua{}|. This can be used for simple tasks like calculating a number and printing it, just as if it was entered by hand:
+The crucial novelty in Lua\TeX\ is the first part of its name: The programming language Lua. One can use nearly any Lua code inside the commands |\directlua{}| or |\latelua{}|. This alleviates simple tasks like calculating a number and printing it, just as if it was entered by hand:
 \begin{verbatim}
 \directlua{
   a = 5*2
   tex.print(a)
 }
 \end{verbatim}
-A number of additions to the Lua language make the thing useful for \TeX ing, especially the |tex.| library that offeres access to \TeX. In the simple example above, the function |tex.print()| inserts its argument into the \TeX\ input stream, so the result of the calcuation (10) is printed in the document.
+A number of additions to the Lua language renders it particularly suitable for \TeX ing, especially the |tex.| library that offers access to \TeX\ internals. In the simple example above, the function |tex.print()| inserts its argument into the \TeX\ input stream, so the result of the calcuation (10) is printed in the document.
 
-Larger parts of Lua code should not be in the same file as your \TeX\ code, but rather in a separate file. That can then be loaded using
+Larger parts of Lua code should not be embedded in your \TeX\ code, but rather in a separate file. It can then be loaded using
 \begin{verbatim}
 \directlua{dofile("filename")}
 \end{verbatim}
@@ -246,9 +251,9 @@ Larger parts of Lua code should not be in the same file as your \TeX\ code, but 
 If you use Lua\LaTeX, you can also use the |luacode| environment from the eponymous package.
 
 \section{callbacks}
-While Lua code can be inserted using |\directlua| at any point in the input, a very powerful concept allows to change the way \TeX\ behaves: The callbacks. A callback is a point where you can hook into \TeX's working and do anything that may make sense – or not. (Thus maybe breaking your document completely …)
+While Lua code can be inserted using |\directlua| at any point in the input, a very powerful concept allows to change the way \TeX\ behaves: The \emph{callbacks}. A callback is a point where you can hook into \TeX's working and do anything to it that may make sense – or not. (Thus maybe breaking your document completely …)
 
-Callbacks are used at several points of \TeX's work – e.\,g. for font loading, paragraph breaking, shipping out etc. In this package, we make heavy use of mostly two callbacks: The |pre_linebreak_filter| and the |post_linebreak| filter. These callbacks are called just before (or after, resp.) \TeX\ breaks a paragraph into lines. Normally, these callbacks are empty, so they are a great playground. In between these callbacks, the |linebreak_filter| takes care of \TeX's line breaking mechanism. We won't touch this as I have no idea of what's going on there ;)
+Callbacks are employed at several stages of \TeX's work – e.\,g. for font loading, paragraph breaking, shipping out etc. In this package, we make heavy use of mostly two callbacks: The |pre_linebreak_filter| and the |post_linebreak| filter. These callbacks are called just before (or after, resp.) \TeX\ breaks a paragraph into lines. Normally, these callbacks are empty, so they are a great playground. In between these callbacks, the |linebreak_filter| takes care of \TeX's line breaking mechanism. We won't touch this as I have no idea of what's going on there ;)
 
 \subsection{How to use a callback}
 The normal way to use a callback is to “register” a function in it. This way, the function is called each time the callback is executed. Typically, the function takes a node list (see below) as an argument, does something with it, and returns it. So a basic use of the |post_linebreak_filter| would look like:
@@ -260,16 +265,16 @@ end
 
 callback.register("post_linebreak_filter",my_new_filter)
 \end{verbatim}
-The function |callback.register| takes the name of the callback and your new function. However, there are some reasons we don't use this syntax here, but make use of the package |luatexbase| by Manuel Pégourié-Gonnard and Élie Roux that offers the function |luatexbase.add_to_callback| which has a somewhat extended syntax:
+The function |callback.register| takes the name of the callback and your new function. However, there are some reasons why we avoid this syntax here. Instead, we rely on the package |luatexbase| by Manuel Pégourié-Gonnard and Élie Roux that offers the function |luatexbase.add_to_callback| which has a somewhat extended syntax:
 \begin{verbatim}
 luatexbase.add_to_callback("post_linebreak_filter",my_new_filter,"a fancy new filter")
 \end{verbatim}
-The third argument is a name you can (have to) give to your function in the callback. That is necessary because the package also offers a possibility to remove functions from callbacks, and then you need a unique name for the function:
+The third argument is a name you can (have to) give to your function in the callback. That is necessary because the package also allows for removing functions from callbacks, and then you need a unique identifier for the function:
 \begin{verbatim}
 luatexbase.remove_from_callback("post_linebreak_filter","a fancy new filter")
 \end{verbatim}
 
-You have to consult the Lua\TeX\ manual to see what functionality a callback has, when it is executed, what arguments it expects and what return values have to be given.
+You have to consult the Lua\TeX\ manual to see what functionality a callback has when executed, what arguments it expects and what return values have to be given.
 
 Everything I have written here is not the complete truth – please consult the Lua\TeX\ manual and the |luatexbase| documentation for details!
 
@@ -278,11 +283,11 @@ Essentially everything that Lua\TeX\ deals with are nodes – letters, spaces, c
 
 A node is an object that has different properties, depending on its type which is stored in its |.id| field. For example, a node of type |glyph| has |id| 37, has a number |.char| that represents its unicode codepoint, a |.font| entry that determines the font used for this glyph, a |.height|, |.depth| and |.width| etc.
 
-Also, a node typically has a non-empty field |.next| and |.prev|. In a list, these point to the – guess it – next or previous node. Using this, one can go through a list of nodes step by step and manipulate the list.
+Also, a node typically has a non-empty field |.next| and |.prev|. In a list, these point to the – guess it – next or previous node. Using this, one can walk over a list of nodes step by step and manipulate the list.
 
-A more convenient way to adress each node of a list is the function |node.traverse(head)| which takes as first argument the first node of the list. However, often one wants to adress only a certain type of nodes in a list – e.\,g. all glyphs in a vertical list that also contains glue, rules etc. For this, the function |node.traverse_id(37,head)| can be used, with the first argument giving the respective id of the nodes.
+A more convenient way to adress each node of a list is the function |node.traverse(head)| which takes as first argument the first node of the list. However, often one wants to adress only a certain type of nodes in a list – e.\,g. all glyphs in a vertical list that also contains glue, rules etc. This is achieved by calling the function |node.traverse_id(37,head)|, with the first argument giving the respective id of the nodes.
 
-The following example removes all characters “e” from the input just before paragraph breaking. That makes no sense, but it is a good example:
+The following example removes all characters “e” from the input just before paragraph breaking. This might not make any sense, but it is a good example anyways:
 \begin{verbatim}
 function remove_e(head)
   for n in node.traverse_id(37,head) do
@@ -296,16 +301,16 @@ end
 luatexbase.add_to_callback("pre_linebreak_filter",remove_e,"remove all letters e")
 \end{verbatim}
 
-Now, don't read on, but try out this code by yourself! Change the number of the character to be removed, try to play around a bit. Also, try to remove the spaces between words. Those are glue nodes – look up their id in the Lua\TeX\ manual! Then, you have to remove the |if n.char| line as glue nodes don't have a |.char|. If everything works, you should have an input consisting of only one long word. Congratulations!
+Now, don't read on, but try out this code by yourself! Change the number of the character to be removed, try to play around a bit. Also, try to remove the spaces between words. Those are glue nodes – look up their id in the Lua\TeX\ manual! Then, you have to remove the |if n.char| condition on the third line of the listing, because glue nodes lack a |.char| field. If everything works, you should have an input consisting of only one long word. Congratulations!
 
-The |pre_linebreak_filter| is especially easy because its argument (here called |head|) is just one horizontal list. For the |post_linebreak_filter|, one has to go through a whole vertical stack of horizontal lists, vertical glue and other material. See some of the functions below to understand what is necessary then.
+The |pre_linebreak_filter| is especially easy because its argument (here called |head|) is just one horizontal list. For the |post_linebreak_filter|, one has to traverse a whole vertical stack of horizontal lists, vertical glue and other material. See some of the functions below to understand what is necessary in this more complicated case.
 
 \section{Other things}
-Lua is a very intuitive and simple language, but nonetheless powerful. Just two tips: use local variables if possible – your code will be much faster. For this reason we use synonyms like |nodetraverseid = node.traverse_id| instead of the original names.
+Lua is a very intuitive and simple language, but nonetheless powerful. Just two tips: use local variables if possible – your code will be much faster. For this reason we prefer synonyms like |nodetraverseid = node.traverse_id| instead of the original names.
 
-Also, Lua is kind of built around tables. Everything is best done using tables!
+Also, Lua is kind of built around tables. Everything is best done with tables!
 
-The namespace of this package is \emph{not} consistent. Please don't take anything here as an example for good Lua coding, for good \TeX ing or even for good Lua\TeX ing. It's not. For really good code, check out the code written by Hans Hagen or other professionals. If you understand this package here, you should be ready to go on and improve your knowledge. After that, you might come back and help me improve this package – I'm always happy for any help ☺
+The namespace of the chickenize package is \emph{not} consistent. Please don't take anything here as an example for good Lua coding, for good \TeX ing or even for good Lua\TeX ing. It's not. For high quality code check out the code written by Hans Hagen or other professionals. Once you understand the package at hand, you should be ready to go on and improve your knowledge. After that, you might come back and help me improve this package – I'm always happy for any help ☺
 
 \DocInput{chickenize.dtx}
 \end{document}
@@ -316,7 +321,7 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
 %\part{Implementation}
 %\label{sec:implementation}
 %\section{\TeX\ file}
-% This file is more-or-less just a dummy file to offer a nice interface for the functions. Basically, every macro registers the function with the same name in the corresponding callback. The |un|-macros remove the functions. If it makes sense, there are |text|-variants that activate the function only in a certain area of the text, using Lua\TeX's attributes.
+% This file is more-or-less a dummy file to offer a nice interface for the functions. Basically, every macro registers a function of the same name in the corresponding callback. The |un|-macros later remove these functions. Where it makes sense, there are |text|-variants that activate the function only in a certain area of the text, by means of Lua\TeX's attributes.
 %
 % For (un)registering, we use the |luatexbase| package. Then, the |.lua| file is loaded which does the actual work. Finally, the \TeX\ macros are defined as simple |\directlua| calls.
 %    \begin{macrocode}
@@ -428,7 +433,7 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
 \def\matrixize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
 \def\unmatrixize{
-  \directlua{lutaexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
 
 \def\milkcow{     %% to be implemented
   \directlua{}}
@@ -566,7 +571,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % \section{\LaTeX\ package}
 % I have decided to keep the \LaTeX-part of this package as small as possible. So far, it does … nothing useful, but it provides a |chickenize.sty| that loads |chickenize.tex| so the user can still say |\usepackage{chickenize}|. This file will never support package options!
 % 
-% Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you want to use anything of the features presented here, you have to load the packages on your own. Maybe this will change.
+% Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
   [2011/10/22 v0.1 chickenize package]
@@ -595,7 +600,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % \label{sec:luamodule}
 % This file contains all the necessary functions, sorted alphabetically, not by sense.
 % 
-% First, we set up some constants. These are made global so the code can be manipulated on document level, too.
+% First, we set up some constants. These are made global so the code can be manipulated at the document level, too.
 %    \begin{macrocode}
 
 local nodenew = node.new
@@ -648,7 +653,7 @@ chickenize_real_stuff = function(i,head)
 
     chicken = {}  -- constructing the node list.
 
--- Should this be done only once? No, then we loose the freedom to change the string in-document.
+-- Should this be done only once? No, otherwise we lose the freedom to change the string in-document.
 -- But it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
@@ -692,15 +697,14 @@ chickenize = function(head)
 
 -- At the end of the word, the ignoring is reset. New chance for everyone.
     if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
-      chickenize_ignore_word = false 
+      chickenize_ignore_word = false
     end
 
 -- And the random determination of the chickenization of the next word:
     if math.random() > chickenizefraction then
       chickenize_ignore_word = true
-    else if chickencount then
-        chicken_substitutions = chicken_substitutions + 1
-      end
+    elseif chickencount then
+      chicken_substitutions = chicken_substitutions + 1
     end
   end
   return head
@@ -730,13 +734,15 @@ end
 % 
 % The following Lua function will remove all quotation marks from the input. Again, the |pre_linebreak_filter| is used for this, although it should be rather removed in the input filter or so.
 % \subsubsection{guttenbergenize – preliminaries}
-% This is a nice way Lua offers for our needs. Learn it, this might be helpful for you sometime, too.
+% This is a nice solution Lua offers for our needs. Learn it, this might be helpful for you sometime, too.
 %    \begin{macrocode}
-local quotestrings = {[171] = true, [172] = true,
+local quotestrings = {
+   [171] = true,  [172] = true,
   [8216] = true, [8217] = true, [8218] = true,
   [8219] = true, [8220] = true, [8221] = true,
   [8222] = true, [8223] = true,
-  [8248] = true, [8249] = true, [8250] = true}
+  [8248] = true, [8249] = true, [8250] = true,
+}
 %    \end{macrocode}
 % \subsubsection{guttenbergenize – the function}
 %    \begin{macrocode}
@@ -853,7 +859,7 @@ leet = function(head)
 end
 %    \end{macrocode}
 % \subsection{letterspaceadjust}\label{sec:letterspaceadjust}
-% Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced and the greyness of a page (hopefully) comes out more equally.
+% Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced which will, hopefully, result in the greyness to be more equally distributed over the page.
 %
 % Why the synonym |stealsheep|? Because of a comment of Paul on the |texhax| mailing list: \url{http://tug.org/pipermail/texhax/2011-October/018374.html}
 % \subsubsection{setup of variables}
@@ -882,11 +888,11 @@ end
 %    \end{macrocode}
 % 
 % \subsection{matrixize}\label{sec:matrixize}
-% Substitutes every glyph by a representation of its ASCII value. Migth be extended to cover full unicode, but so far only 8bit is supported. The code is quite straight-forward and works OK. The line ends are not necessarily adjusted correctly. However, with microtype, i.\,e. font expansion, everything looks fine.
+% Substitutes every glyph by a representation of its ASCII value. Migth be extended to cover the entire unicode range, but so far only 8bit is supported. The code is quite straight-forward and works OK. The line ends are not necessarily adjusted correctly. However, with microtype, i.\,e. font expansion, everything looks fine.
 %    \begin{macrocode}
 matrixize = function(head)
-x = {}
-s = nodenew(nodeid"disc")
+  x = {}
+  s = nodenew(nodeid"disc")
   for n in nodetraverseid(nodeid"glyph",head) do
     j = n.char
     for m = 0,7 do -- stay ASCII for now
@@ -964,7 +970,7 @@ end
 %    \end{macrocode}
 % \subsection{randomcolor and rainbowcolor}\label{sec:randomrainbowcolor}
 % \subsubsection{randomcolor – preliminaries}
-% Setup of the boolean for grey/color or rainbowcolor, and boundaries for the colors. rgb space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
+% Setup of the boolean for grey/color or rainbowcolor, and boundaries for the colors. RGB space is fully used, but greyscale is only used in a visible range, i.\,e. to 90\% instead of 100\% white.
 %    \begin{macrocode}
 randomcolor_grey = false
 randomcolor_onlytext = false --switch between local and global colorization
@@ -1043,7 +1049,7 @@ end
 %    \begin{macrocode}
 %    \end{macrocode}
 % \subsection{tabularasa}\label{sec:tabularasa}
-% Removes every glyph from the output and replaces it by empty space. In the end, nearly nothing will be visible. Should be extended to also remove rules or just anything that is visible.
+% Removes every glyph from the output and replaces it by empty space. In the end, next to nothing will be visible. Should be extended to also remove rules or just anything visible.
 %    \begin{macrocode}
 tabularasa_onlytext = false
 
@@ -1080,12 +1086,12 @@ end
 %    \end{macrocode}
 % \subsection{colorstretch}\label{sec:colorstretch}
 % This function displays the amount of stretching that has been done for each line of an arbitrary document. A well-typeset document should be equally grey over all lines, which is not always possible.
-% 
-% In fact, two boxes are drawn: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth grey, whereas a too dense line is indicated by a dark grey box. 
 %
-%The second box is only useful if microtypographic extensions are used, e.\,g. with the |microtype| package under \LaTeX. The box color then corresponds to the amount of font expansion in the line. This can be greatly used to show the positive effect of font expansion on the badness of a line!
+% In fact, two boxes are drawn: The first (left) box shows the badness, i.\,e. the amount of stretching the spaces between words. Too much space results in ligth grey, whereas a too dense line is indicated by a dark grey box.
 %
-% The base structure of the following code is written by Paul Isambert. Thanks for the code and support, Paul!
+%The second box is only useful if microtypographic extensions are used, e.\,g. with the |microtype| package under \LaTeX. The box color then corresponds to the amount of font expansion in the line. This works great for demonstrating the positive effect of font expansion on the badness of a line!
+%
+% The base structure of the following code was provided by Paul Isambert. Thanks for the code and support, Paul!
 % \subsubsection{colorstretch – preliminaries}
 % Two booleans, |keeptext|, and |colorexpansion|, are used to control the behaviour of the function.
 %    \begin{macrocode}
@@ -1102,8 +1108,8 @@ colorstretchnumbers = true
 drawstretchthreshold = 0.1
 drawexpansionthreshold = 0.9
 %    \end{macrocode}
-% After setting the constants, the function starts. It receives the vertical list of the typeset paragraph as |head|, and loops through all horizontal lists.
-% 
+% After these constants have been set, the function starts. It receives the vertical list of the typeset paragraph as |head|, and loops through all horizontal lists.
+%
 % If font expansion should be shown (|colorexpansion == true|), then the first glyph node is determined and its width compared with the width of the unexpanded glyph. This gives a measure for the expansion factor and is translated into a grey scale.
 %    \begin{macrocode}
 colorstretch = function (head)
@@ -1353,7 +1359,7 @@ end
 % \section{Known Bugs}\label{bugs}
 % The behaviour of the |\chickenize| macro is under construction and everything it does so far is considered a feature.
 % \begin{description}
-% \item[babel] Using |chickenize| with |babel| leads to a problem with the " character, as it is made active: When using |\chickenizesetup| \emph{after} |\begin{document}|, you can \emph{not} use " for strings, but you have to use '. No problem really, but take care of this.
+% \item[babel] Using |chickenize| with |babel| leads to a problem with the " (double quote) character, as it is made active: When using |\chickenizesetup| \emph{after} |\begin{document}|, you can \emph{not} use " for strings, but you have to use ' (single quote) instead. No problem really, but take care of this.
 % \end{description}
 % \section{To Dos}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
@@ -1364,7 +1370,7 @@ end
 % \item[swing] swing dancing apes – that will be very hard, actually …
 % \item[chickenmath] chickenization of math mode
 % \end{description}
-% \section{Literature}
+% \section{Literature}\label{sec:literature}
 % The following list directs you to helpful literature that will help you to better understand the concepts used in this package and for in-depth explanation. Also, most of the code here is taken from or based on this literature, so it is also a list of references somehow:
 % \begin{itemize}
 % \item Lua\TeX\ documentation – the manual and links to presentations and talks: \url{http://www.luatex.org/documentation.html}
