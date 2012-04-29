@@ -58,7 +58,7 @@ chickenize_real_stuff = function(i,head)
     chicken = {}  -- constructing the node list.
 
 -- Should this be done only once? No, then we loose the freedom to change the string in-document.
--- but it could be done only once each paragraph as in-paragraph changes are not possible!
+-- But it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
     chicken[0] = nodenew(37,1)  -- only a dummy for the loop
@@ -104,7 +104,7 @@ chickenize = function(head)
       chickenize_ignore_word = false
     end
 
--- and the random determination of the chickenization of the next word:
+-- And the random determination of the chickenization of the next word:
     if math.random() > chickenizefraction then
       chickenize_ignore_word = true
     else if chickencount then
@@ -115,18 +115,20 @@ chickenize = function(head)
   return head
 end
 
+local separator    = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
 nicetext = function()
-  texio.write_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
-  texio.write_nl(" ")
-  texio.write_nl("============================")
-  texio.write_nl("Hello my dear user,")
-  texio.write_nl("good job, now go outside and enjoy the world!")
-  texio.write_nl(" ")
-  texio.write_nl("And don't forget to feet your chicken!")
-  texio.write_nl("============================")
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("Hello my dear user,")
+  texiowrite_nl("good job, now go outside and enjoy the world!")
+  texiowrite_nl(" ")
+  texiowrite_nl("And don't forget to feed your chicken!")
+  texiowrite_nl(separator .. "\n")
   if chickencount then
-    texio.write_nl("There were "..chicken_substitutions.." substitutions made.")
-    texio.write_nl("============================")
+    texiowrite_nl("There were "..chicken_substitutions.." substitutions made.")
+    texiowrite_nl(separator)
   end
 end
 local quotestrings = {[171] = true, [172] = true,
@@ -144,22 +146,23 @@ guttenbergenize_rq = function(head)
   return head
 end
 hammertimedelay = 1.2
+local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
 hammertime = function(head)
   if hammerfirst then
-    texio.write_nl("==============================\n")
-    texio.write_nl("============STOP!=============\n")
-    texio.write_nl("==============================\n\n\n\n")
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("============STOP!=============\n")
+    texiowrite_nl(htime_separator .. "\n\n\n")
     os.sleep (hammertimedelay*1.5)
-    texio.write_nl("==============================\n")
-    texio.write_nl("==========HAMMERTIME==========\n")
-    texio.write_nl("==============================\n\n\n")
+    texiowrite_nl(htime_separator .. "\n")
+    texiowrite_nl("==========HAMMERTIME==========\n")
+    texiowrite_nl(htime_separator .. "\n\n")
     os.sleep (hammertimedelay)
     hammerfirst = false
   else
     os.sleep (hammertimedelay)
-    texio.write_nl("==============================\n")
-    texio.write_nl("======U can't touch this!=====\n")
-    texio.write_nl("==============================\n\n\n")
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("======U can't touch this!=====\n")
+    texiowrite_nl(htime_separator .. "\n\n")
     os.sleep (hammertimedelay*0.5)
   end
   return head
@@ -199,7 +202,23 @@ for i = 3,10 do mr(i,13) end
 for i = 3,5 do mr(i,14) end
 for i = 7,10 do mr(i,14) end
 end
-leet_onlytext = false
+chickenkernamount = 0
+chickeninvertkerning = false
+
+function kernmanipulate (head)
+  if chickeninvertkerning then -- invert the kerning
+    for n in nodetraverseid(11,head) do
+      n.kern = -n.kern
+    end
+  else             -- if not, set it to the given value
+    for n in nodetraverseid(11,head) do
+      n.kern = chickenkernamount
+    end
+  end
+  return head
+end
+
+leetspeak_onlytext = false
 leettable = {
   [101] = 51, -- E
   [105] = 49, -- I
@@ -218,7 +237,7 @@ leettable = {
 leet = function(head)
   for line in nodetraverseid(Hhead,head) do
     for i in nodetraverseid(GLYPH,line.head) do
-      if not(leetspeak_onlytext) or
+      if not leetspeak_onlytext or
          node.has_attribute(i,luatexbase.attributes.leetattr)
       then
         if leettable[i.char] then
@@ -271,7 +290,8 @@ end
 local randomfontslower = 1
 local randomfontsupper = 0
 randomfonts = function(head)
-  if (randomfontsupper > 0) then  -- fixme: this should be done only once, no? Or at every paragraph?
+  local rfub
+  if randomfontsupper > 0 then  -- fixme: this should be done only once, no? Or at every paragraph?
     rfub = randomfontsupper  -- user-specified value
   else
     rfub = font.max()        -- or just take all fonts
@@ -370,14 +390,14 @@ end
 tabularasa_onlytext = false
 
 tabularasa = function(head)
-  s = nodenew(nodeid"kern")
+  local s = nodenew(nodeid"kern")
   for line in nodetraverseid(nodeid"hlist",head) do
     for n in nodetraverseid(nodeid"glyph",line.list) do
-    if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
-      s.kern = n.width
-      nodeinsertafter(line.list,n,nodecopy(s))
-      line.head = noderemove(line.list,n)
-    end
+      if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
+        s.kern = n.width
+        nodeinsertafter(line.list,n,nodecopy(s))
+        line.head = noderemove(line.list,n)
+      end
     end
   end
   return head
@@ -411,7 +431,7 @@ colorstretch = function (head)
   for line in nodetraverseid(Hhead,head) do
     local rule_bad = nodenew(RULE)
 
-if colorexpansion then  -- if also the font expansion should be shown
+    if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
         while not(g.id == 37) do
          g = g.next

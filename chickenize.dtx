@@ -4,7 +4,7 @@
 \iffalse
 %</driver>
 %<*readme>
-This is the README file of the chickenize package. The package provides several commands and lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is /not/ intended for serious documents!
+This is the README file of the chickenize package. The package provides several commands and lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It is mostly /not/ intended for serious documents!
 
 To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
   chickenize.pdf  (documentation)
@@ -136,6 +136,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
+\hyperref[sec:kernmanipulation]{kernmanipulation} & manipulates the kerning\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letters of the) whole input\\
@@ -410,6 +411,11 @@ The namespace of this package is \emph{not} consistent. Please don't take anythi
 
 % \def\itsame{
 %   \directlua{drawmario}} %%% does not exist
+
+\def\kernmanipulate{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",kernmanipulate,"kernmanipulate")}}
+\def\unkernmanipulate{
+  \directlua{lutaexbase.remove_from_callback("pre_linebreak_filter",kernmanipulate)}}
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -815,6 +821,28 @@ for i = 3,5 do mr(i,14) end
 for i = 7,10 do mr(i,14) end
 end
 %    \end{macrocode}
+% \subsection{kernmanipulate}\label{sec:kernmanipulate}
+% This function either eliminates all the kerning, inverts the sign of the kerning or changes it to a user-given value.
+% 
+% If the boolean |chickeninvertkerning| is true, the kerning amount is negative, if it is false, the kerning will be set to th e value of |chickenkernvalue|. A large value (> 100\,000) can be used to show explicitely where kerns are inserted. Good for educational use.
+%    \begin{macrocode}
+chickenkernamount = 0
+chickeninvertkerning = false
+
+function kernmanipulate (head)
+  if chickeninvertkerning then -- invert the kerning
+    for n in nodetraverseid(11,head) do
+      n.kern = -n.kern
+    end
+  else             -- if not, set it to the given value
+    for n in nodetraverseid(11,head) do
+      n.kern = chickenkernamount
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+
 % \subsection{leetspeak}\label{sec:leetspeak}
 % The |leettable| is the substitution scheme. Just add items if you feel to. Maybe we will differ between a light-weight version and a hardcore 1337.
 %    \begin{macrocode}

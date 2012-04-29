@@ -27,7 +27,7 @@
 }
 \def\unchickenize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","chickenize")
-    luatexbase.remove_from_callback("start_page_number","cstarttpage")
+    luatexbase.remove_from_callback("start_page_number","cstartpage")
     luatexbase.remove_from_callback("stop_page_number","cstoppage")}}
 
 \def\coffeestainize{  %% to be implemented.
@@ -97,10 +97,13 @@
   \directlua{hammerfirst = true
              luatexbase.add_to_callback("pre_linebreak_filter",hammertime,"hammertime")}}
 \def\unhammertime{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","hammertime")}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","hammertime")}}
 
-\def\itsame{
-  \directlua{drawmario}}
+
+\def\kernmanipulate{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",kernmanipulate,"kernmanipulate")}}
+\def\unkernmanipulate{
+  \directlua{lutaexbase.remove_from_callback("pre_linebreak_filter",kernmanipulate)}}
 
 \def\leetspeak{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",leet,"1337")}}
@@ -158,7 +161,7 @@
 \def\scorpionize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
 \def\unscorpionize{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","scorpionize_color")}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","scorpionize_color")}}
 
 \def\spankmonkey{    %% to be implemented
   \directlua{}}
