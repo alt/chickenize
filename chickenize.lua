@@ -13,6 +13,10 @@
 --  
 --  Do not distribute a modified version of this file under the same name.
 --  
+--  This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+--  modified under the conditions of the LaTeX Project Public License, either version 1.3c
+--  of this license or (at your option) any later version. This work has the LPPL mainten-
+--  ance status ‘author-maintained’.
 
 local nodenew = node.new
 local nodecopy = node.copy
@@ -57,7 +61,7 @@ chickenize_real_stuff = function(i,head)
 
     chicken = {}  -- constructing the node list.
 
--- Should this be done only once? No, then we loose the freedom to change the string in-document.
+-- Should this be done only once? No, otherwise we lose the freedom to change the string in-document.
 -- But it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
@@ -107,9 +111,8 @@ chickenize = function(head)
 -- And the random determination of the chickenization of the next word:
     if math.random() > chickenizefraction then
       chickenize_ignore_word = true
-    else if chickencount then
-        chicken_substitutions = chicken_substitutions + 1
-      end
+    elseif chickencount then
+      chicken_substitutions = chicken_substitutions + 1
     end
   end
   return head
@@ -131,11 +134,13 @@ nicetext = function()
     texiowrite_nl(separator)
   end
 end
-local quotestrings = {[171] = true, [172] = true,
+local quotestrings = {
+   [171] = true,  [172] = true,
   [8216] = true, [8217] = true, [8218] = true,
   [8219] = true, [8220] = true, [8221] = true,
   [8222] = true, [8223] = true,
-  [8248] = true, [8249] = true, [8250] = true}
+  [8248] = true, [8249] = true, [8250] = true,
+}
 guttenbergenize_rq = function(head)
   for n in nodetraverseid(nodeid"glyph",head) do
     local i = n.char
@@ -267,8 +272,8 @@ letterspaceadjust = function(head)
   return head
 end
 matrixize = function(head)
-x = {}
-s = nodenew(nodeid"disc")
+  x = {}
+  s = nodenew(nodeid"disc")
   for n in nodetraverseid(nodeid"glyph",head) do
     j = n.char
     for m = 0,7 do -- stay ASCII for now
