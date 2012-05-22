@@ -37,11 +37,6 @@ ance status ‘author-maintained’.
 
 EXPERIMENTAL CODE
 
-Do not distribute this file without also distributing the
-source files specified above.
-
-Do not distribute a modified version of this file under the same name.
-
 This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
@@ -63,7 +58,10 @@ ance status ‘author-maintained’.
 
 \generate{\file{chickenize.lua}{\from{chickenize.dtx}{lua}}}
 \nopreamble\nopostamble
-\generate{\file{README}{\from{chickenize.dtx}{readme}}}
+\catcode`\@12
+
+%\generate{\file{README.}{\from{chickenize.dtx}{readme}}}
+% readme will not be generated until I figured out how to write a file without extension
 
 
 \ifx\fmtname\nameofplainTeX
