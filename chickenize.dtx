@@ -241,17 +241,11 @@ The following list tries to kind of keep track of the options and variables. The
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
 \item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
 \item[\opt{chickencount} = \arg{true}] Activates the counting of substituted words and prints the number at the end of the terminal output.
-<<<<<<< HEAD
 \item[\opt{colorstretchnumbers} = \arg{true} \default{0}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
 \item[\opt{chickenkernamount} = \arg{int}] The amount the kerning is set to when using |\kernmanipulate|.
 \item[\opt{chickenkerninvert} = \arg{bool}] If set to true, the kerning is inverted (to be used with |\kernmanipulate|.
 \item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
 \item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
-=======
-\item[\opt{colorstretchnumbers} = \arg{true}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
-\item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode code points of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
-\item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) will result in more uppercase letters. Guess what a lower number does.
->>>>>>> d9c88b6094abe878dd97cfd77f26e514b1d66c63
 \item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
 \item[\opt{rainbow\_step} = \arg{float} \default{0.005}] This indicates the relative change of color using the rainbow functionality. A value of |1| changes the color in one step from red to yellow, while a value of |0.005| takes 200 letters for the transition to be completed. Useful values are below |0.05|, but it depends on the amount of text. The longer the text and the lower the |step|, the nicer your rainbow will be.
 \item[\opt{Rgb\_lower}, \opt{rGb\_upper} = \arg{int}] To specify the color space that is used for |\randomcolor|, you can specify six values, the upper and lower value for each color. The uppercase letter in the variable denotes the color, so |rGb_upper| gives the upper value for green etc. Possible values are between |1| and |254|. If you enter anything outside this range, your PDF will become invalid and break. For grey scale, use |grey_lower| and |grey_upper|, with values between |0| (black) and |1000| (white), included. Default is |0| to |900| to prevent white letters.
@@ -543,6 +537,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \newluatexattribute\randfontsattr
 \newluatexattribute\randuclcattr
 \newluatexattribute\tabularasaattr
+\newluatexattribute\uppercasecolorattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -556,6 +551,8 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 \long\def\texttabularasa#1%
   {\setluatexattribute\tabularasaattr{42}#1\unsetluatexattribute\tabularasaattr}
+\long\def\textuppercasecolor#1%
+  {\setluatexattribute\uppercasecolorattr{42}#1\unsetluatexattribute\uppercasecolorattr}
 %    \end{macrocode}
 % Finally, a macro to control the setup. So far, it's only a wrapper that allows \TeX-style comments to make the user feel more at home.
 %    \begin{macrocode}
@@ -1136,7 +1133,7 @@ tabularasa_onlytext = false
 tabularasa = function(head)
   local s = nodenew(nodeid"kern")
   for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.list) do
+    for n in nodetraverseid(nodeid"glyph",line.head) do
       if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
         s.kern = n.width
         nodeinsertafter(line.list,n,nodecopy(s))
@@ -1150,14 +1147,18 @@ end
 % \subsection{uppercasecolor}\label{sec:uppercasecolor}
 % Loop through all the nodes and checking whether it is uppercase. If so (and also for small caps), color it.
 %    \begin{macrocode}
+uppercasecolor_onlytext = false
+
 uppercasecolor = function (head)
   for line in nodetraverseid(Hhead,head) do 
     for upper in nodetraverseid(GLYPH,line.head) do
-      if (((upper.char > 64) and (upper.char < 91)) or
-          ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
-        color_push.data = randomcolorstring()  -- color or grey string
-        line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
-        nodeinsertafter(line.head,upper,nodecopy(color_pop))
+      if not(uppercasecolor_onlytext) or node.has_attribute(upper,luatexbase.attributes.uppercasecolorattr) then
+        if (((upper.char > 64) and (upper.char < 91)) or
+            ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
+          color_push.data = randomcolorstring()  -- color or grey string
+          line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
+          nodeinsertafter(line.head,upper,nodecopy(color_pop))
+        end
       end
     end
   end

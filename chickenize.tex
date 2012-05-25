@@ -191,6 +191,7 @@
 \newluatexattribute\randfontsattr
 \newluatexattribute\randuclcattr
 \newluatexattribute\tabularasaattr
+\newluatexattribute\uppercasecolorattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -204,6 +205,8 @@
   {\setluatexattribute\randuclcattr{42}#1\unsetluatexattribute\randuclcattr}
 \long\def\texttabularasa#1%
   {\setluatexattribute\tabularasaattr{42}#1\unsetluatexattribute\tabularasaattr}
+\long\def\textuppercasecolor#1%
+  {\setluatexattribute\uppercasecolorattr{42}#1\unsetluatexattribute\uppercasecolorattr}
 \def\chickenizesetup#1{\directlua{#1}}
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%

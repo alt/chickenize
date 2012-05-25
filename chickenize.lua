@@ -405,7 +405,7 @@ tabularasa_onlytext = false
 tabularasa = function(head)
   local s = nodenew(nodeid"kern")
   for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.list) do
+    for n in nodetraverseid(nodeid"glyph",line.head) do
       if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
         s.kern = n.width
         nodeinsertafter(line.list,n,nodecopy(s))
@@ -415,14 +415,18 @@ tabularasa = function(head)
   end
   return head
 end
+uppercasecolor_onlytext = false
+
 uppercasecolor = function (head)
   for line in nodetraverseid(Hhead,head) do
     for upper in nodetraverseid(GLYPH,line.head) do
-      if (((upper.char > 64) and (upper.char < 91)) or
-          ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
-        color_push.data = randomcolorstring()  -- color or grey string
-        line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
-        nodeinsertafter(line.head,upper,nodecopy(color_pop))
+      if not(uppercasecolor_onlytext) or node.has_attribute(upper,luatexbase.attributes.uppercasecolorattr) then
+        if (((upper.char > 64) and (upper.char < 91)) or
+            ((upper.char > 57424) and (upper.char < 57451)))  then  -- for small caps! nice ☺
+          color_push.data = randomcolorstring()  -- color or grey string
+          line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
+          nodeinsertafter(line.head,upper,nodecopy(color_pop))
+        end
       end
     end
   end
