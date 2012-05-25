@@ -89,22 +89,28 @@ ance status ‘author-maintained’.
   filecolor=blue,
   urlcolor=blue
 }
-%\geometry{a4paper}
 
 \cfoot{\directlua{if math.random() > .5 then tex.print("chicken") else tex.print("Chicken") end} \pagemark}
 \ohead{}
 \pagestyle{scrheadings}
-\setmainfont{TeX Gyre Pagella}
+\setmainfont{Linux Libertine O}
+\setsansfont{Linux Biolinum O}
 
-\author{Arno Trautmann\\ \href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+\usepackage{chickenize}
+
 \begin{document}
 {\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
-\centerline{\fontsize{35}{0}\selectfont \fontspec[Letters=Random]{Punk Nova}chickenize}
+\begin{center}
+\randomcolor
+\fontsize{35}{0}\selectfont \fontspec[Letters=Random]{Punk Nova}
+chickenize
+\end{center}
 
-\kern.5cm
+\unrandomcolor
+
 \centerline{v0.1}
 \centerline{\hspace*{2cm} Arno Trautmann}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
@@ -154,8 +160,9 @@ of this license or (at your option) any later version. This work has the LPPL ma
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
-\hyperref[sec:kernmanipulation]{kernmanipulation} & manipulates the kerning\\
+\hyperref[sec:kernmanipulation]{kernmanipulation} & manipulates the kerning (tbi)\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
+\hyperref[sec:randomerror]{randomerror} & just throws random (La)\TeX\ errors at random times\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letters of the) whole input\\
 \bottomrule
@@ -186,16 +193,12 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
 \command{hammertime} STOP! —— Hammertime!
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
+\command{randomerror} Just throws a random \TeX\ or \LaTeX\ error at a random time during the compilation. I have quite no idea what this could be used for.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
 \command{randomcolor} Does what its name says.
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change gradually according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
-\command{pancakenize} This is a dummy so far, as I have no idea what it should do. If you have suggestions, please tell me.
-                      % \footnote{% Maybe just pretend that the absence of functionality is intentional... [phg]
-                      %   From an absurdist perspective, the |pancakenize| command can be perceived
-                      %   as a reminder to the user to email the package maintainer their own
-                      %   suggestions for further functionality.
-                      % }
+\command{pancakenize} This is a dummy command that does nothing. However, every time you use it, you owe a pancake to the package author. You can either send it via mail or bring it to some (local) \TeX\ user's group meeting.
 \command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{nyanize} A synonym for |rainbowcolor|.
@@ -351,9 +354,11 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 % This file is more-or-less a dummy file to offer a nice interface for the functions. Basically, every macro registers a function of the same name in the corresponding callback. The |un|-macros later remove these functions. Where it makes sense, there are |text|-variants that activate the function only in a certain area of the text, by means of Lua\TeX's attributes.
 %
 % For (un)registering, we use the |luatexbase| package. Then, the |.lua| file is loaded which does the actual work. Finally, the \TeX\ macros are defined as simple |\directlua| calls.
+% 
+% The Lua file is not found by using a simple |dofile("chickenize.lua")| call, but we have to use kpse's |find_file|.
 %    \begin{macrocode}
 \input{luatexbase.sty}
-\directlua{dofile("chickenize.lua")}
+\directlua{dofile(kpse.find_file("chickenize.lua"))}
 
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
@@ -467,13 +472,13 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unmatrixize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
 
-\def\milkcow{     %% to be implemented
+\def\milkcow{     %% FIXME %% to be implemented
   \directlua{}}
 \def\unmilkcow{
   \directlua{}}
 
-\def\pancakenize{        %% to be implemented
-  \directlua{}}
+\def\pancakenize{   %% FIXME     %% to be implemented
+  \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
 \def\unpancakenize{
   \directlua{}}
 
@@ -489,6 +494,11 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
 \def\unrandomcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+
+\def\randomerror{ %% FIXME
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}    
+\def\unrandomerror{ %% FIXME
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
 
 \def\randomfonts{
@@ -742,7 +752,7 @@ chickenize = function(head)
   return head
 end
 
-local separator    = string.rep("=", 28)
+local separator     = string.rep("=", 28)
 local texiowrite_nl = texio.write_nl
 nicetext = function()
   texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
@@ -967,8 +977,20 @@ matrixize = function(head)
 end
 %    \end{macrocode}
 % \subsection{pancakenize}\label{sec:pancakenize}
-% Not yet completely decided what this should do, but it might come down to inserting a cooking recipe for a … well, guess what. Possible implementations are: Substitute a whole sentence, from full-stop to full-stop. OR: Substitute word-by-word at a random place. OR (expert-freak-1337-level): Substitute the n-th word of each page to a word of the recipe. That would be totally awesome!!
 %    \begin{macrocode}
+local separator     = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
+pancaketext = function()
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("Soo ... you decided to use \\pancakenize.")
+  texiowrite_nl("That means you owe me a pancake!")
+  texiowrite_nl(" ")
+  texiowrite_nl("(This goes by document, not compilation.)")
+  texiowrite_nl(separator.."\n\n")
+  texiowrite_nl("Looking forward for my pancake! :)")
+end
 %    \end{macrocode}
 % \subsection{randomfonts}\label{sec:randomfonts}
 % Traverses the output and substitutes fonts randomly. A check is done so that the font number is existing.
@@ -1097,6 +1119,10 @@ randomcolor = function(head)
   end
   return head
 end
+%    \end{macrocode}
+% \subsection{randomerror}\label{sec:randomerror}
+%    \begin{macrocode}
+% 
 %    \end{macrocode}
 % \subsection{rickroll}\label{sec:rickroll}
 % Another tribute to pop culture. Either: substitute word-by-word as in pancake. OR: substitute each link to a youtube-rickroll …
@@ -1258,13 +1284,13 @@ colorstretch = function (head)
   return head
 end
 %    \end{macrocode}
-% \subsection*{dubstepize}
+% \subsection*{dubstepize} %% FIXME – Isn't that already implemented above?
 % BROOOAR WOBWOBWOB BROOOOAR WOBWOBWOB BROOOOAR WOB WOB WOB …
 %    \begin{macrocode}
 
 %    \end{macrocode}
 % \subsection*{scorpionize}
-% These functions intentionally not documented.
+% This function's intentionally not documented. In memoriam scorpionem. %% FIXME
 %    \begin{macrocode}
 function scorpionize_color(head)
   color_push.data = ".35 .55 .75 rg"

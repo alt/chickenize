@@ -13,7 +13,7 @@
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘author-maintained’.
 \input{luatexbase.sty}
-\directlua{dofile("chickenize.lua")}
+\directlua{dofile(kpse.find_file("chickenize.lua"))}
 
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
@@ -123,13 +123,13 @@
 \def\unmatrixize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
 
-\def\milkcow{     %% to be implemented
+\def\milkcow{     %% FIXME %% to be implemented
   \directlua{}}
 \def\unmilkcow{
   \directlua{}}
 
-\def\pancakenize{        %% to be implemented
-  \directlua{}}
+\def\pancakenize{   %% FIXME     %% to be implemented
+  \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
 \def\unpancakenize{
   \directlua{}}
 
@@ -145,6 +145,11 @@
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
 \def\unrandomcolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+
+\def\randomerror{ %% FIXME
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
+\def\unrandomerror{ %% FIXME
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
 
 \def\randomfonts{

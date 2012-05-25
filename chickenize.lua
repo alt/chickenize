@@ -113,7 +113,7 @@ chickenize = function(head)
   return head
 end
 
-local separator    = string.rep("=", 28)
+local separator     = string.rep("=", 28)
 local texiowrite_nl = texio.write_nl
 nicetext = function()
   texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
@@ -286,6 +286,19 @@ matrixize = function(head)
     noderemove(head,n)
   end
   return head
+end
+local separator     = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
+pancaketext = function()
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("Soo ... you decided to use \\pancakenize.")
+  texiowrite_nl("That means you owe me a pancake!")
+  texiowrite_nl(" ")
+  texiowrite_nl("(This goes by document, not compilation.)")
+  texiowrite_nl(separator.."\n\n")
+  texiowrite_nl("Looking forward for my pancake! :)")
 end
 local randomfontslower = 1
 local randomfontsupper = 0
