@@ -128,10 +128,8 @@
 \def\unmilkcow{
   \directlua{}}
 
-\def\pancakenize{   %% FIXME     %% to be implemented
+\def\pancakenize{
   \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
-\def\unpancakenize{
-  \directlua{}}
 
 \def\rainbowcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")

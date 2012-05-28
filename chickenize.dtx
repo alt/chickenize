@@ -12,7 +12,7 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2011 or 2012, if possible) to use this package. Maybe a full MiKTeX will do, too.
+You need an up-to-date TeX Live (2011 or 2012, if possible) to use this package. Maybe a full MiKTeX will do, too. (Not tested!)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -90,13 +90,16 @@ ance status ‘author-maintained’.
   urlcolor=blue
 }
 
-\cfoot{\directlua{if math.random() > .5 then tex.print("chicken") else tex.print("Chicken") end} \pagemark}
+\cfoot{chicken \pagemark}
 \ohead{}
 \pagestyle{scrheadings}
 \setmainfont{Linux Libertine O}
 \setsansfont{Linux Biolinum O}
 
 \usepackage{chickenize}
+\chickenizesetup{
+  rainbow_step=0.3
+}
 
 \begin{document}
 {\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
@@ -104,12 +107,12 @@ ance status ‘author-maintained’.
 }
 
 \begin{center}
-\randomcolor
-\fontsize{35}{0}\selectfont \fontspec[Letters=Random]{Punk Nova}
+\rainbowcolor
+\fontsize{55}{0}\selectfont \fontspec[Letters=Random]{Punk Nova}
 chickenize
 \end{center}
 
-\unrandomcolor
+\unrainbowcolor
 
 \centerline{v0.1}
 \centerline{\hspace*{2cm} Arno Trautmann}
@@ -471,10 +474,8 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unmilkcow{
   \directlua{}}
 
-\def\pancakenize{   %% FIXME     %% to be implemented
+\def\pancakenize{
   \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
-\def\unpancakenize{
-  \directlua{}}
 
 \def\rainbowcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"rainbowcolor")
