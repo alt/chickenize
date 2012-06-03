@@ -134,16 +134,23 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \vfill
 
 \small\noindent
-This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+\fbox{\parbox{.97\textwidth}{
+This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
-of this license or (at your option) any later version. This work has the LPPL maintenance status ‘author-maintained’.
+of this license or (at your option) any later version. This work has the LPPL maintenance status ‘author-maintained’.}}
 \vspace*{1cm}
 
 \newpage
 
+\section*{\rainbowcolor For the Impatient:}
+
+\unrainbowcolor
+A small and incomplete overview of the functionalities offered by this package. I try to keep this list as complete as possible. Of course, the label “complete nonsense” depends on what you are doing …
+
 \noindent
 \tabulinesep=.5ex
 \begin{longtabu} to .95\textwidth [c]{lX[j]}
+\toprule
 \hbox to 0cm{\bfseries \hspace*{2cm} maybe useful functions}\\
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
@@ -160,10 +167,10 @@ of this license or (at your option) any later version. This work has the LPPL ma
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} complete nonsense} \\
 \cmidrule(lr){1-2}
-\hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken”\\
+\hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken” (or user-adjustable words)\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
-\hyperref[sec:kernmanipulation]{kernmanipulation} & manipulates the kerning (tbi)\\
+\hyperref[sec:kernmanipulate]{kernmanipulate} & manipulates the kerning (tbi)\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomerror]{randomerror} & just throws random (La)\TeX\ errors at random times\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
@@ -357,6 +364,31 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
+\def\BEClerize{
+  \chickenize
+  \directlua{
+    chickenstring[1] = "noise noise"
+    chickenstring[2] = "atom noise"
+    chickenstring[3] = "shot noise"
+    chickenstring[4] = "photon noise"
+    chickenstring[5] = "camera noise"
+    chickenstring[6] = "noising noise"
+    chickenstring[7] = "thermal noise"
+    chickenstring[8] = "electronic noise"
+    chickenstring[9] = "spin noise"
+    chickenstring[10] = "electron noise"
+    chickenstring[11] = "Bogoliubov noise"
+    chickenstring[12] = "white noise"
+    chickenstring[13] = "brown noise"
+    chickenstring[14] = "pink noise"
+    chickenstring[15] = "bloch sphere"
+    chickenstring[16] = "atom shot noise"
+    chickenstring[17] = "nature physics"
+
+    chickenizefraction = 1
+  }
+}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -492,9 +524,9 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
 
 \def\randomerror{ %% FIXME
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}    
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomerror,"randomerror")}}
 \def\unrandomerror{ %% FIXME
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomerror")}}
 
 \def\randomfonts{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"randomfonts")}}
@@ -618,8 +650,8 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
+% Nothing done so far, just some minor ideas. If you want to implement some cool things, contact me! :)
 %    \begin{macrocode}
-  %% We want to “chickenize” figures, too. So …
 \iffalse
   \DeclareDocumentCommand\includegraphics{O{}m}{
      \fbox{Chicken}  %% actually, I'd love to draw an MP graph showing a chicken …
@@ -638,9 +670,9 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 %\fi
 % \section{Lua Module}
 % \label{sec:luamodule}
-% This file contains all the necessary functions, sorted alphabetically, not by sense.
+% This file contains all the necessary functions and is the actual work horse of this package. The functions are sorted strictly alphabetically (or, they \emph{should} be …) and not by sense, functionality or anything.
 % 
-% First, we set up some constants. These are made global so the code can be manipulated at the document level, too.
+% First, we set up some constants that are used by many of the following functions. These are made global so the code can be manipulated at the document level, too.
 %    \begin{macrocode}
 
 local nodenew = node.new
@@ -988,14 +1020,18 @@ pancaketext = function()
   texiowrite_nl("(This goes by document, not compilation.)")
   texiowrite_nl(separator.."\n\n")
   texiowrite_nl("Looking forward for my pancake! :)")
+  texiowrite_nl("\n\n")
 end
 %    \end{macrocode}
+% \subsection{randomerror}\label{sec:randomerror}
+
+
 % \subsection{randomfonts}\label{sec:randomfonts}
 % Traverses the output and substitutes fonts randomly. A check is done so that the font number is existing.
 % One day, the fonts should be easily given explicitly in terms of |\bf| etc.
 %    \begin{macrocode}
-local randomfontslower = 1
-local randomfontsupper = 0
+randomfontslower = 1
+randomfontsupper = 0
 % 
 randomfonts = function(head)
   local rfub

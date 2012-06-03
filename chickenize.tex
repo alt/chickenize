@@ -15,6 +15,31 @@
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
+\def\BEClerize{
+  \chickenize
+  \directlua{
+    chickenstring[1] = "noise noise"
+    chickenstring[2] = "atom noise"
+    chickenstring[3] = "shot noise"
+    chickenstring[4] = "photon noise"
+    chickenstring[5] = "camera noise"
+    chickenstring[6] = "noising noise"
+    chickenstring[7] = "thermal noise"
+    chickenstring[8] = "electronic noise"
+    chickenstring[9] = "spin noise"
+    chickenstring[10] = "electron noise"
+    chickenstring[11] = "Bogoliubov noise"
+    chickenstring[12] = "white noise"
+    chickenstring[13] = "brown noise"
+    chickenstring[14] = "pink noise"
+    chickenstring[15] = "bloch sphere"
+    chickenstring[16] = "atom shot noise"
+    chickenstring[17] = "nature physics"
+
+    chickenizefraction = 1
+  }
+}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -146,9 +171,9 @@
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
 
 \def\randomerror{ %% FIXME
-  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomerror,"randomerror")}}
 \def\unrandomerror{ %% FIXME
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomcolor")}}
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomerror")}}
 
 \def\randomfonts{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomfonts,"randomfonts")}}

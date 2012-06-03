@@ -299,9 +299,11 @@ pancaketext = function()
   texiowrite_nl("(This goes by document, not compilation.)")
   texiowrite_nl(separator.."\n\n")
   texiowrite_nl("Looking forward for my pancake! :)")
+  texiowrite_nl("\n\n")
 end
-local randomfontslower = 1
-local randomfontsupper = 0
+
+randomfontslower = 1
+randomfontsupper = 0
 randomfonts = function(head)
   local rfub
   if randomfontsupper > 0 then  -- fixme: this should be done only once, no? Or at every paragraph?
