@@ -22,7 +22,7 @@ Hope you have fun with this package!
 This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
-ance status ‘author-maintained’.
+ance status ‘maintained’.
 %</readme>
 %<*driver>
 \fi
@@ -40,7 +40,7 @@ EXPERIMENTAL CODE
 This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
-ance status ‘author-maintained’.
+ance status ‘maintained’.
 \endpreamble
 \let\MetaPrefix\DoubleperCent
 \postamble
@@ -95,6 +95,8 @@ ance status ‘author-maintained’.
 \pagestyle{scrheadings}
 \setmainfont{Linux Libertine O}
 \setsansfont{Linux Biolinum O}
+\newfontfamily\XITS{XITS}
+\newfontfamily\TGChorus{TeX Gyre Chorus}
 
 \usepackage{chickenize}
 \chickenizesetup{
@@ -102,7 +104,7 @@ ance status ‘author-maintained’.
 }
 
 \begin{document}
-{\hfill \parbox{6.3cm}{{\fontspec{TeX Gyre Chorus}{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
+{\hfill \parbox{6.3cm}{{\TGChorus{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
@@ -137,7 +139,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \fbox{\parbox{.97\textwidth}{
 This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
-of this license or (at your option) any later version. This work has the LPPL maintenance status ‘author-maintained’.}}
+of this license or (at your option) any later version. This work has the LPPL maintenance status maintained’.}}
 \vspace*{1cm}
 
 \newpage
@@ -154,7 +156,8 @@ A small and incomplete overview of the functionalities offered by this package. 
 \hbox to 0cm{\bfseries \hspace*{2cm} maybe useful functions}\\
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
-\hyperref[sec:letterspaceadjust]{letterspaceadjust} & uses a small amount of letterspacing to improve the greyness, especially for narrow lines\\
+\hyperref[sec:letterspaceadjust]{letterspaceadjust} & improves the greyness by using a small amount of letterspacing\\
+\hyperref[sec:substitutewords]{substitutewords} & replaces words by other words (user-controlled!)\\
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
@@ -214,6 +217,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{nyanize} A synonym for |rainbowcolor|.
 \command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
+\command{substitutewords} You have to specify pairs of words by using |\addtosubstitutions{word1}{word2}|. Then call |\substitutewords| (or the other way round, doesn't matter) and each occurance of |word1| will be replaced by |word2|. You can add replacement pairs by repeated calls to |\addtosubstitutions|. Take care! This function warks with the input directly, therefore it does \emph{not} work on text that is inserted by macros, but it \emph{will} work on macro names itself! This way, you may use it to change macros (or environments) at will. Bug or feature? I'm not sure right now …
 \end{description}
 
 \subsection{How to Deactivate It}
@@ -384,8 +388,6 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
     chickenstring[15] = "bloch sphere"
     chickenstring[16] = "atom shot noise"
     chickenstring[17] = "nature physics"
-
-    chickenizefraction = 1
   }
 }
 
@@ -548,6 +550,15 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unspankmonkey{
   \directlua{}}
 
+\def\substitutewords{
+  \directlua{luatexbase.add_to_callback("process_input_buffer",substitutewords,"substitutewords")}}
+\def\unsubstitutewords{
+  \directlua{luatexbase.remove_from_callback("process_input_buffer","substitutewords")}}
+
+\def\addtosubstitutions#1#2{
+  \directlua{addtosubstitutions("#1","#2")}
+}
+
 \def\tabularasa{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",tabularasa,"tabularasa")}}
 \def\untabularasa{
@@ -682,6 +693,7 @@ local nodeinsertafter = node.insert_after
 local noderemove = node.remove
 local nodeid = node.id
 local nodetraverseid = node.traverse_id
+local nodeslide = node.slide
 
 Hhead = nodeid("hhead")
 RULE = nodeid("rule")
@@ -705,7 +717,7 @@ color_pop.cmd = 2
 chicken_pagenumbers = true
 
 chickenstring = {}
-chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
+chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
 chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
@@ -717,7 +729,9 @@ local shrink = tbl.parameters.space_shrink
 local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 chickenize_ignore_word = false
-
+%    \end{macrocode}
+% The function |chickenize_real_stuff| is started once the beginning of a to-be-substituted word is found.
+%    \begin{macrocode}
 chickenize_real_stuff = function(i,head)
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
@@ -750,7 +764,7 @@ chickenize_real_stuff = function(i,head)
       j = j+1
     end
 
-    node.slide(chicken[1])
+    nodeslide(chicken[1])
     lang.hyphenate(chicken[1])
     chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
     chicken[1] = node.ligaturing(chicken[1]) -- dito
@@ -758,12 +772,19 @@ chickenize_real_stuff = function(i,head)
     nodeinsertbefore(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
     chicken[string.len(chickenstring_tmp)].next = i.next
+
+    -- shift lowercase latin letter to uppercase if the original input was an uppercase
+    if (chickenize_capital and (chicken[1].char > 96 and chicken[1].char < 123)) then
+      chicken[1].char = chicken[1].char - 32
+    end
+    
   return head
 end
 
 chickenize = function(head)
   for i in nodetraverseid(37,head) do  --find start of a word
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
+      if (i.char > 64 and i.char < 91) then chickenize_capital = true else chickenize_capital = false end
       head = chickenize_real_stuff(i,head)
     end
 
@@ -782,6 +803,9 @@ chickenize = function(head)
   return head
 end
 
+%    \end{macrocode}
+% A small additional feature: Some nice text to cheer up the user. Mainly to show that and how we can access the |stop_run| callback. (see above)
+%    \begin{macrocode}
 local separator     = string.rep("=", 28)
 local texiowrite_nl = texio.write_nl
 nicetext = function()
@@ -1162,6 +1186,24 @@ end
 % Another tribute to pop culture. Either: substitute word-by-word as in pancake. OR: substitute each link to a youtube-rickroll …
 %    \begin{macrocode}
 %    \end{macrocode}
+% \subsection{substitutewords}\label{sec:substitutewords}
+% This function is one of the rather usefull ones of this package. It replaces each occurance of one word by another word, which both are specified by the user. So nothing random or funny, but a real serious function! There are three levels for this function: At user-level, the user just specifies two strings that are passed to the function |addtosubstitutions|. This is needed as the |#| has a special meaning both in \TeX s definitions and in Lua. In this second step, the list of substitutions is just extended, and the real work is done by the function |substiuteword| which is registered in the |process_input_buffer| callback. Once the substitution list is built, the rest is very simple: We just use |gsub| to substitute, do this for every item in the list, and that's it.
+%    \begin{macrocode}
+substitutewords_strings = {}
+
+addtosubstitutions = function(input,output)
+  substitutewords_strings[#substitutewords_strings + 1] = {}
+  substitutewords_strings[#substitutewords_strings][1] = input
+  substitutewords_strings[#substitutewords_strings][2] = output
+end
+
+substitutewords = function(head)
+  for i = 1,#substitutewords_strings do
+    head = string.gsub(head,substitutewords_strings[i][1],substitutewords_strings[i][2])
+  end
+  return head
+end
+%    \end{macrocode}
 % \subsection{tabularasa}\label{sec:tabularasa}
 % Removes every glyph from the output and replaces it by empty space. In the end, next to nothing will be visible. Should be extended to also remove rules or just anything visible.
 %    \begin{macrocode}
@@ -1383,9 +1425,9 @@ function zebranize(head)
   return (head)
 end
 %    \end{macrocode}
-% And that's it!\qquad {\fontsize{40}{0}\raisebox{-2ex}{\fontspec{XITS}☺}}
+% And that's it!\qquad {\fontsize{40}{0}\raisebox{-2ex}{\XITS ☺}}
 % \newpage
-% Well, it's not the whole story so far. I plan to test some drawing using only Lua code, writing directly to the pdf file. This section will grow and get better in parallel to my understandings of what's going on. I.e. it will be very slowly … Nothing here is to be taken as good and/or correct LuaTeXing, and most code is plain ugly. However, it kind of works already {\fontspec{XITS}☺}
+% Well, it's not the whole story so far. I plan to test some drawing using only Lua code, writing directly to the pdf file. This section will grow and get better in parallel to my understandings of what's going on. I.e. it will be very slowly … Nothing here is to be taken as good and/or correct LuaTeXing, and most code is plain ugly. However, it kind of works already {\XITS ☺}
 % \section{Drawing}
 % A \emph{very} first, experimental implementation of a drawing of a chicken. The parameters should be consistent, easy to change and that monster should look more like a cute chicken. However, it is chicken, it is Lua, so it belongs into this package. So far, all numbers and positions are hard coded, this will of course change!
 %    \begin{macrocode}
@@ -1479,7 +1521,7 @@ end
 % \begin{description}
 % \item[babel] Using |chickenize| with |babel| leads to a problem with the " (double quote) character, as it is made active: When using |\chickenizesetup| \emph{after} |\begin{document}|, you can \emph{not} use " for strings, but you have to use ' (single quote) instead. No problem really, but take care of this.
 % \end{description}
-% \section{To Dos}
+% \section{To Do's}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
 % \begin{description}
 % \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.

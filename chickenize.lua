@@ -11,7 +11,7 @@
 --  This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
---  ance status ‘author-maintained’.
+--  ance status ‘maintained’.
 
 local nodenew = node.new
 local nodecopy = node.copy
@@ -20,6 +20,7 @@ local nodeinsertafter = node.insert_after
 local noderemove = node.remove
 local nodeid = node.id
 local nodetraverseid = node.traverse_id
+local nodeslide = node.slide
 
 Hhead = nodeid("hhead")
 RULE = nodeid("rule")
@@ -36,7 +37,7 @@ color_pop.cmd = 2
 chicken_pagenumbers = true
 
 chickenstring = {}
-chickenstring[1] = "Chicken" -- chickenstring is a table, please remeber this!
+chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
 chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
@@ -48,7 +49,6 @@ local shrink = tbl.parameters.space_shrink
 local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 chickenize_ignore_word = false
-
 chickenize_real_stuff = function(i,head)
     while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
@@ -81,7 +81,7 @@ chickenize_real_stuff = function(i,head)
       j = j+1
     end
 
-    node.slide(chicken[1])
+    nodeslide(chicken[1])
     lang.hyphenate(chicken[1])
     chicken[1] = node.kerning(chicken[1])    -- FIXME: does not work
     chicken[1] = node.ligaturing(chicken[1]) -- dito
@@ -89,12 +89,19 @@ chickenize_real_stuff = function(i,head)
     nodeinsertbefore(head,i,chicken[1])
     chicken[1].next = chicken[2] -- seems to be necessary … to be fixed
     chicken[string.len(chickenstring_tmp)].next = i.next
+
+    -- shift lowercase latin letter to uppercase if the original input was an uppercase
+    if (chickenize_capital and (chicken[1].char > 96 and chicken[1].char < 123)) then
+      chicken[1].char = chicken[1].char - 32
+    end
+
   return head
 end
 
 chickenize = function(head)
   for i in nodetraverseid(37,head) do  --find start of a word
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
+      if (i.char > 64 and i.char < 91) then chickenize_capital = true else chickenize_capital = false end
       head = chickenize_real_stuff(i,head)
     end
 
@@ -399,6 +406,20 @@ randomcolor = function(head)
         nodeinsertafter(line.head,i,nodecopy(color_pop))
       end
     end
+  end
+  return head
+end
+substitutewords_strings = {}
+
+addtosubstitutions = function(input,output)
+  substitutewords_strings[#substitutewords_strings + 1] = {}
+  substitutewords_strings[#substitutewords_strings][1] = input
+  substitutewords_strings[#substitutewords_strings][2] = output
+end
+
+substitutewords = function(head)
+  for i = 1,#substitutewords_strings do
+    head = string.gsub(head,substitutewords_strings[i][1],substitutewords_strings[i][2])
   end
   return head
 end

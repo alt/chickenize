@@ -11,7 +11,7 @@
 %% This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
-%% ance status ‘author-maintained’.
+%% ance status ‘maintained’.
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
@@ -35,8 +35,6 @@
     chickenstring[15] = "bloch sphere"
     chickenstring[16] = "atom shot noise"
     chickenstring[17] = "nature physics"
-
-    chickenizefraction = 1
   }
 }
 
@@ -194,6 +192,15 @@
   \directlua{}}
 \def\unspankmonkey{
   \directlua{}}
+
+\def\substitutewords{
+  \directlua{luatexbase.add_to_callback("process_input_buffer",substitutewords,"substitutewords")}}
+\def\unsubstitutewords{
+  \directlua{luatexbase.remove_from_callback("process_input_buffer","substitutewords")}}
+
+\def\addtosubstitutions#1#2{
+  \directlua{addtosubstitutions("#1","#2")}
+}
 
 \def\tabularasa{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",tabularasa,"tabularasa")}}
