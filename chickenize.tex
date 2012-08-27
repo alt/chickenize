@@ -62,6 +62,13 @@
 \def\uncolorstretch{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
+\def\countglyphs{
+  \directlua{glyphnumber = 0
+             luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
+             luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
+  }
+}
+
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
@@ -136,6 +143,13 @@
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
 \def\unletterspaceadjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+
+\def\listallcommands{
+  \directlua{
+ for name in pairs(tex.hashtokens()) do
+     print(name)
+ end}
+}
 
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust

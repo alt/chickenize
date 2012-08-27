@@ -136,6 +136,18 @@ nicetext = function()
     texiowrite_nl(separator)
   end
 end
+
+countglyphs = function(head)
+  for line in nodetraverseid(0,head) do
+    for glyph in nodetraverseid(37,line.head) do
+      glyphnumber = glyphnumber + 1
+    end
+  end
+  return head
+end
+printglyphnumber = function()
+  texiowrite_nl("Number of glyphs in this document: "..glyphnumber)
+end
 local quotestrings = {
    [171] = true,  [172] = true,
   [8216] = true, [8217] = true, [8218] = true,
@@ -271,6 +283,17 @@ letterspaceadjust = function(head)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
     end
   end
+  return head
+end
+letterspaceadjust_restricted = function(head)
+  for glyph in nodetraverseid(nodeid"glyph", head) do
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
+      local g = nodecopy(letterspace_glue)
+      nodeinsertbefore(head, glyph, g)
+      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+    end
+  end
+  luatexbase.remove_from_callback()
   return head
 end
 matrixize = function(head)

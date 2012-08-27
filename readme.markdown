@@ -13,7 +13,6 @@ arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
-of this license or (at your option) any later version. This work has the LPPL mainten-
-ance status ‘author-maintained’.
+of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.

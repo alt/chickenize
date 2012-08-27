@@ -19,7 +19,7 @@ arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -121,9 +121,9 @@ chickenize
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
 \kern.5cm
-This is the documentation of the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking. Most of this package's content is just for fun and educational use, but there are also some functions that can be useful in a normal document.
+This is the documentation of the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking (and some other stuff). Most of this package's content is just for fun and educational use, but there are also some functions that can be useful in a normal document.
 
-The table on the next page informs you shortly about some of your possibilities and provides links to the Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
+The table on the next page shortly informs you about some of your possibilities and provides links to the (documented) Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
 
 The documentation of this package is far from being well-readable, consistent or even complete. This is caused either by lack of time or priority. If you miss anything that should be documented or if you have suggestions on how to increase the readability of the descriptions, please let me know.
 
@@ -139,7 +139,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \fbox{\parbox{.97\textwidth}{
 This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
-of this license or (at your option) any later version. This work has the LPPL maintenance status maintained’.}}
+of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
 \vspace*{1cm}
 
 \newpage
@@ -161,6 +161,7 @@ A small and incomplete overview of the functionalities offered by this package. 
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
+\hyperref[sec:countglyphs]{countglyphs} & counts the number of glyphs in the whole document\\
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & alternates randomly between uppercase and lowercase\\
 \hyperref[sec:randomrainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
@@ -201,6 +202,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
+\command{countglyphs} Counts every printed character that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
@@ -416,6 +418,13 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\uncolorstretch{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
+\def\countglyphs{
+  \directlua{glyphnumber = 0
+             luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
+             luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
+  }
+}
+
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
   }
@@ -493,6 +502,13 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
 \def\unletterspaceadjust{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+
+\def\listallcommands{
+  \directlua{
+ for name in pairs(tex.hashtokens()) do
+     print(name)
+ end}
+}
 
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
@@ -823,6 +839,27 @@ nicetext = function()
   end
 end
 %    \end{macrocode}
+
+% \subsection{countglyphs}\label{sec:countglyphs}
+% Counts the glyphs in your documnt. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
+% 
+% This function will be extended to allow counting of whatever you want. 
+%    \begin{macrocode}
+countglyphs = function(head)
+  for line in nodetraverseid(0,head) do
+    for glyph in nodetraverseid(37,line.head) do
+      glyphnumber = glyphnumber + 1
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
+%    \begin{macrocode}
+printglyphnumber = function()
+  texiowrite_nl("Number of glyphs in this document: "..glyphnumber)
+end
+%    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}
 % A function in honor of the German politician Guttenberg.\footnote{Thanks to Jasper for bringing me to this idea!} Please do \emph{not} confuse him with the grand master Gutenberg!
 % 
@@ -1001,6 +1038,21 @@ letterspaceadjust = function(head)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
     end
   end
+  return head
+end
+%    \end{macrocode}
+% \subsubsection{restricted letterspaceadjust}
+% To let the user choose the beginning and end of letterspaceadjust, the macros |\startlsa| and |\stoplsa| are provided. The rest ist similar to the |\text...| macros, with one big difference here: We try to use the function to unregister itself. This way, no explicit call to the function is needed anymore. FIXME: not working so far due to missing feature of luatexbase …
+%    \begin{macrocode}
+letterspaceadjust_restricted = function(head)
+  for glyph in nodetraverseid(nodeid"glyph", head) do
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
+      local g = nodecopy(letterspace_glue)
+      nodeinsertbefore(head, glyph, g)
+      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+    end
+  end
+  luatexbase.remove_from_callback()
   return head
 end
 %    \end{macrocode}
@@ -1524,6 +1576,7 @@ end
 % \section{To Do's}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
 % \begin{description}
+% \item[countglyphs] should be extended to count anything the user wants to count
 % \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.
 % \item[pancakenize] should do something funny.
 % \item[chickenize] should differ between character and punctuation.
