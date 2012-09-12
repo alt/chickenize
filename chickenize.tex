@@ -231,6 +231,7 @@
 \def\unzebranize{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","zebranize")}}
 \newluatexattribute\leetattr
+\newluatexattribute\letterspaceadjustattr
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
 \newluatexattribute\randuclcattr
@@ -239,6 +240,18 @@
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
+
+\long\def\textletterspaceadjust#1{
+  \setluatexattribute\letterspaceadjustattr{42}#1\unsetluatexattribute\letterspaceadjustattr
+  \directlua{
+    if (textletterspaceadjustactive) then else % -- if already active, do nothing
+      luatexbase.add_to_callback("pre_linebreak_filter",textletterspaceadjust,"textletterspaceadjust")
+    end
+    textletterspaceadjustactive = true         % -- set to active
+  }
+}
+\let\textlsa\textletterspaceadjust
+
 \long\def\textrandomcolor#1%
   {\setluatexattribute\randcolorattr{42}#1\unsetluatexattribute\randcolorattr}
 \long\def\textrandomfonts#1%

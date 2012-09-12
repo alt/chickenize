@@ -593,6 +593,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 % Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
 %    \begin{macrocode}
 \newluatexattribute\leetattr
+\newluatexattribute\letterspaceadjustattr
 \newluatexattribute\randcolorattr
 \newluatexattribute\randfontsattr
 \newluatexattribute\randuclcattr
@@ -601,6 +602,18 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
+
+\long\def\textletterspaceadjust#1{
+  \setluatexattribute\letterspaceadjustattr{42}#1\unsetluatexattribute\letterspaceadjustattr
+  \directlua{
+    if (textletterspaceadjustactive) then else % -- if already active, do nothing
+      luatexbase.add_to_callback("pre_linebreak_filter",textletterspaceadjust,"textletterspaceadjust")
+    end
+    textletterspaceadjustactive = true         % -- set to active
+  }
+}
+\let\textlsa\textletterspaceadjust
+
 \long\def\textrandomcolor#1%
   {\setluatexattribute\randcolorattr{42}#1\unsetluatexattribute\randcolorattr}
 \long\def\textrandomfonts#1%
@@ -1041,22 +1054,23 @@ letterspaceadjust = function(head)
   return head
 end
 %    \end{macrocode}
-% \subsubsection{restricted letterspaceadjust}
-% To let the user choose the beginning and end of letterspaceadjust, the macros |\startlsa| and |\stoplsa| are provided. The rest ist similar to the |\text...| macros, with one big difference here: We try to use the function to unregister itself. This way, no explicit call to the function is needed anymore. FIXME: not working so far due to missing feature of luatexbase …
+% \subsubsection{textletterspaceadjust}
+% The |\text...|-version of |letterspaceadjust|. Just works, without the need to call |\letterspaceadjust| globally or anything else. Just put the |\textletterspaceadjust| around the part of text you want the function to work on. Might have problems with surrounding spacing, take care!
 %    \begin{macrocode}
-letterspaceadjust_restricted = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
-      local g = nodecopy(letterspace_glue)
-      nodeinsertbefore(head, glyph, g)
-      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+textletterspaceadjust = function(head)
+  for glyph in node.traverse_id(node.id"glyph", head) do
+    if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc") then
+        local g = node.copy(letterspace_glue)
+        node.insert_before(head, glyph, g)
+        node.insert_before(head, g, node.copy(letterspace_pen))
+      end
     end
   end
-  luatexbase.remove_from_callback()
+  luatexbase.remove_from_callback("pre_linebreak_filter","textletterspaceadjust")
   return head
 end
 %    \end{macrocode}
-% 
 % \subsection{matrixize}\label{sec:matrixize}
 % Substitutes every glyph by a representation of its ASCII value. Migth be extended to cover the entire unicode range, but so far only 8bit is supported. The code is quite straight-forward and works OK. The line ends are not necessarily adjusted correctly. However, with microtype, i.\,e. font expansion, everything looks fine.
 %    \begin{macrocode}

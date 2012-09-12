@@ -285,15 +285,17 @@ letterspaceadjust = function(head)
   end
   return head
 end
-letterspaceadjust_restricted = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
-      local g = nodecopy(letterspace_glue)
-      nodeinsertbefore(head, glyph, g)
-      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+textletterspaceadjust = function(head)
+  for glyph in node.traverse_id(node.id"glyph", head) do
+    if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc") then
+        local g = node.copy(letterspace_glue)
+        node.insert_before(head, glyph, g)
+        node.insert_before(head, g, node.copy(letterspace_pen))
+      end
     end
   end
-  luatexbase.remove_from_callback()
+  luatexbase.remove_from_callback("pre_linebreak_filter","textletterspaceadjust")
   return head
 end
 matrixize = function(head)
