@@ -38,14 +38,14 @@
   }
 }
 
-\def\boustrophendon{
+\def\boustrophedon{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon,"boustrophedon")}}
-\def\unboustrophendon{
+\def\unboustrophedon{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon")}}
 
-\def\boustrophendonglyphs{
+\def\boustrophedonglyphs{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon_glyphs,"boustrophedon_glyphs")}}
-\def\unboustrophendonglyphs{
+\def\unboustrophedonglyphs{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_glyphs")}}
 
 \def\boustrophedoninverse{
