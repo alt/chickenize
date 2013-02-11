@@ -136,7 +136,66 @@ nicetext = function()
     texiowrite_nl(separator)
   end
 end
-
+boustrophedon = function(head)
+  rot = node.new(8,8)
+  rot2 = node.new(8,8)
+  odd = true
+    for line in node.traverse_id(0,head) do
+      if odd == false then
+        w = line.width/65536*0.99625 -- empirical correction factor (?)
+        rot.data  = "-1 0 0 1 "..w.." 0 cm"
+        rot2.data = "-1 0 0 1 "..-w.." 0 cm"
+        line.head = node.insert_before(line.head,line.head,node.copy(rot))
+        node.insert_after(line.head,node.tail(line.head),node.copy(rot2))
+        odd = true
+      else
+        odd = false
+      end
+    end
+  return head
+end
+boustrophedon_glyphs = function(head)
+  odd = false
+  rot = nodenew(8,8)
+  rot2 = nodenew(8,8)
+  for line in nodetraverseid(0,head) do
+    if odd==true then
+      line.dir = "TRT"
+      for g in nodetraverseid(37,line.head) do
+        w = -g.width/65536*0.99625
+        rot.data = "-1 0 0 1 " .. w .." 0 cm"
+        rot2.data = "-1 0 0 1 " .. -w .." 0 cm"
+        line.head = node.insert_before(line.head,g,node.copy(rot))
+          node.insert_after(line.head,g,node.copy(rot2))
+      end
+      odd = false
+      else
+        line.dir = "TLT"
+        odd = true
+      end
+    end
+  return head
+end
+boustrophedon_inverse = function(head)
+  rot = node.new(8,8)
+  rot2 = node.new(8,8)
+  odd = true
+    for line in node.traverse_id(0,head) do
+      if odd == false then
+texio.write_nl(line.height)
+        w = line.width/65536*0.99625 -- empirical correction factor (?)
+        h = line.height/65536*0.99625
+        rot.data  = "-1 0 0 -1 "..w.." "..h.." cm"
+        rot2.data = "-1 0 0 -1 "..-w.." "..0.5*h.." cm"
+        line.head = node.insert_before(line.head,line.head,node.copy(rot))
+        node.insert_after(line.head,node.tail(line.head),node.copy(rot2))
+        odd = true
+      else
+        odd = false
+      end
+    end
+  return head
+end
 countglyphs = function(head)
   for line in nodetraverseid(0,head) do
     for glyph in nodetraverseid(37,line.head) do
@@ -146,7 +205,7 @@ countglyphs = function(head)
   return head
 end
 printglyphnumber = function()
-  texiowrite_nl("Number of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("Number of glyphs in this document: "..glyphnumber.."\n")
 end
 local quotestrings = {
    [171] = true,  [172] = true,

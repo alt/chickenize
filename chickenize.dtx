@@ -12,7 +12,7 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2011 or 2012, if possible) to use this package. Maybe a full MiKTeX will do, too. (Not tested!)
+You need an up-to-date TeX Live (2012, if possible, maybe 2011 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.1}
+\centerline{v0.1a}
 \centerline{\hspace*{2cm} Arno Trautmann}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -147,12 +147,11 @@ of this license or (at your option) any later version. This work has the LPPL ma
 \section*{\rainbowcolor For the Impatient:}
 
 \unrainbowcolor
-A small and incomplete overview of the functionalities offered by this package. I try to keep this list as complete as possible. Of course, the label “complete nonsense” depends on what you are doing …
+A small and incomplete overview of the functionalities offered by this package. I try to keep this list as complete as possible.\footnote{If you notice that something is missing, please help me improving the documentation!} Of course, the label “complete nonsense” depends on what you are doing …\\[2ex]
 
 \noindent
 \tabulinesep=.5ex
 \begin{longtabu} to .95\textwidth [c]{lX[j]}
-\toprule
 \hbox to 0cm{\bfseries \hspace*{2cm} maybe useful functions}\\
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
@@ -161,6 +160,7 @@ A small and incomplete overview of the functionalities offered by this package. 
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
+\hyperref[sec:boustrophedon]{boustrophedon} & invert every second line in the style of archaic greek texts\\
 \hyperref[sec:countglyphs]{countglyphs} & counts the number of glyphs in the whole document\\
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
 \hyperref[sec:randomuclc]{randomuclc} & alternates randomly between uppercase and lowercase\\
@@ -202,6 +202,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
+\command{boustrophedon} Reverts every second line. This immitates archaic greek writings where one line was right-to-left, the next one left-to-right etc.\footnote{\url{en.wikipedia.org/wiki/Boustrophedon}} Interestingly, also every glyph was adaptet to the writing direction, so all glyphs are inverted in the right-to-left lines. Actually, there are two versions of this command that differ in their implementation: |\boustrophedon| rotates the whole line, while |\boustrophedonglyphs| changes the writing direction and reverses glyph-wise. The second one takes much more compilation time, but may be more reliable. A Rongorongo\footnote{\url{en.wikipedia.org/wiki/Rongorongo}} similar style boustrophedon is available with |\boustrophedoninverse| or |\rongorongonize|, where subsequent lines are rotated by 180° instead of mirrored.
 \command{countglyphs} Counts every printed character that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
@@ -393,6 +394,21 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   }
 }
 
+\def\boustrophendon{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon,"boustrophedon")}}
+\def\unboustrophendon{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon")}}
+
+\def\boustrophendonglyphs{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon_glyphs,"boustrophedon_glyphs")}}
+\def\unboustrophendonglyphs{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_glyphs")}}
+
+\def\boustrophedoninverse{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon_inverse,"boustrophedon_inverse")}}
+\def\unboustrophedoninverse{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_inverse")}}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -556,6 +572,9 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
 
+\let\rongorongonize\boustrophedoninverse
+\let\unrongorongonize\unboustrophedoninverse
+
 \def\scorpionize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
 \def\unscorpionize{
@@ -686,7 +705,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2012/05/20 v0.1 chickenize package]
+  [2012/09/16 v0.1a chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
@@ -852,7 +871,79 @@ nicetext = function()
   end
 end
 %    \end{macrocode}
-
+% \subsection{boustrophedon}\label{sec:boustrophedon}
+% There are two implementations of the boustrophedon: One reverses every line as a whole, the other one changes the writing direction and reverses glyphs one by one. The latter one might be more reliable, but takes considerably more time.
+% 
+% Linewise rotation:
+%    \begin{macrocode}
+boustrophedon = function(head)
+  rot = node.new(8,8)
+  rot2 = node.new(8,8)
+  odd = true
+    for line in node.traverse_id(0,head) do
+      if odd == false then
+        w = line.width/65536*0.99625 -- empirical correction factor (?)
+        rot.data  = "-1 0 0 1 "..w.." 0 cm"
+        rot2.data = "-1 0 0 1 "..-w.." 0 cm"
+        line.head = node.insert_before(line.head,line.head,node.copy(rot))
+        node.insert_after(line.head,node.tail(line.head),node.copy(rot2))
+        odd = true
+      else
+        odd = false
+      end
+    end
+  return head
+end
+%    \end{macrocode}
+% Glyphwise rotation:
+%    \begin{macrocode}
+boustrophedon_glyphs = function(head)
+  odd = false
+  rot = nodenew(8,8)
+  rot2 = nodenew(8,8)
+  for line in nodetraverseid(0,head) do
+    if odd==true then
+      line.dir = "TRT"
+      for g in nodetraverseid(37,line.head) do
+        w = -g.width/65536*0.99625
+        rot.data = "-1 0 0 1 " .. w .." 0 cm"
+        rot2.data = "-1 0 0 1 " .. -w .." 0 cm"
+        line.head = node.insert_before(line.head,g,node.copy(rot))
+          node.insert_after(line.head,g,node.copy(rot2))
+      end
+      odd = false
+      else
+        line.dir = "TLT"
+        odd = true
+      end
+    end
+  return head
+end 
+%    \end{macrocode}
+% Inverse boustrophedon. At least I think, this is the way Rongorongo is written. However, the top-to-bottom direction has to be inverted, too.
+%    \begin{macrocode}
+boustrophedon_inverse = function(head)
+  rot = node.new(8,8)
+  rot2 = node.new(8,8)
+  odd = true
+    for line in node.traverse_id(0,head) do
+      if odd == false then
+texio.write_nl(line.height)
+        w = line.width/65536*0.99625 -- empirical correction factor (?)
+        h = line.height/65536*0.99625
+        rot.data  = "-1 0 0 -1 "..w.." "..h.." cm"
+        rot2.data = "-1 0 0 -1 "..-w.." "..0.5*h.." cm"
+        line.head = node.insert_before(line.head,line.head,node.copy(rot))
+        node.insert_after(line.head,node.tail(line.head),node.copy(rot2))
+        odd = true
+      else
+        odd = false
+      end
+    end
+  return head
+end
+%    \end{macrocode}
+% 
 % \subsection{countglyphs}\label{sec:countglyphs}
 % Counts the glyphs in your documnt. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
 % 
@@ -870,7 +961,7 @@ end
 % To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
 %    \begin{macrocode}
 printglyphnumber = function()
-  texiowrite_nl("Number of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("Number of glyphs in this document: "..glyphnumber.."\n")
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}

@@ -38,6 +38,21 @@
   }
 }
 
+\def\boustrophendon{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon,"boustrophedon")}}
+\def\unboustrophendon{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon")}}
+
+\def\boustrophendonglyphs{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon_glyphs,"boustrophedon_glyphs")}}
+\def\unboustrophendonglyphs{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_glyphs")}}
+
+\def\boustrophedoninverse{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",boustrophedon_inverse,"boustrophedon_inverse")}}
+\def\unboustrophedoninverse{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_inverse")}}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -196,6 +211,9 @@
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",randomuclc,"randomuclc")}}
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
+
+\let\rongorongonize\boustrophedoninverse
+\let\unrongorongonize\unboustrophedoninverse
 
 \def\scorpionize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",scorpionize_color,"scorpionize_color")}}
