@@ -557,12 +557,12 @@ colorstretch = function (head)
 
     if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
-        while not(g.id == 37) do
-         g = g.next
-        end
-      exp_factor = g.width / f[g.char].width
-      exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
-      rule_bad.width = 0.5*line.width  -- we need two rules on each line!
+      while not(g.id == 37) and (g.next) do g = g.next end -- find first glyph on line. If line is empty, no glyph:
+      if (g.id == 37) then                                 -- read width only if g is a glyph!
+        exp_factor = g.width / f[g.char].width
+        exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
+        rule_bad.width = 0.5*line.width  -- we need two rules on each line!
+      end
     else
       rule_bad.width = line.width  -- only the space expansion should be shown, only one rule
     end
