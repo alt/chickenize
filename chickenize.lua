@@ -205,7 +205,7 @@ countglyphs = function(head)
   return head
 end
 printglyphnumber = function()
-  texiowrite_nl("Number of glyphs in this document: "..glyphnumber.."\n")
+  texiowrite_nl("\n Number of glyphs in this document: "..glyphnumber.."\n")
 end
 local quotestrings = {
    [171] = true,  [172] = true,

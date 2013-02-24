@@ -968,7 +968,7 @@ end
 % To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
 %    \begin{macrocode}
 printglyphnumber = function()
-  texiowrite_nl("Number of glyphs in this document: "..glyphnumber.."\n")
+  texiowrite_nl("\n Number of glyphs in this document: "..glyphnumber.."\n")
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}
@@ -1735,6 +1735,7 @@ end
 % \section{To Do's}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
 % \begin{description}
+% \item[traversing] Every function that is based on node traversing fails when boxes are involved – so far I have not implemented recursive calling of the functions. I list it here, as it is not really a bug – this package is meant to be as simple as possible!
 % \item[countglyphs] should be extended to count anything the user wants to count
 % \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.
 % \item[pancakenize] should do something funny.
@@ -1754,6 +1755,6 @@ end
 % \section{Thanks}
 % This package would not have been possible without the help of many people who patiently answered my annoying questions on mailing lists and in personal mails. And of course not without the work of the Lua\TeX\ team!
 % 
-% Special thanks go to Paul “we could have chickenized the world” Isambert who contributed a lot of ideas, code and bug fixes and made much of the code executable at all. I also think Philipp Gesang who gave me many advices on the Lua code – which I still didn't have time to correct …
+% Special thanks go to Paul “we could have chickenized the world” Isambert who contributed a lot of ideas, code and bug fixes and made much of the code executable at all. I also thank Philipp Gesang who gave me many advices on the Lua code – which I still didn't have time to correct …
 % \Finale
 % \endinput
