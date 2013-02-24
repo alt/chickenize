@@ -244,6 +244,11 @@
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
 
+\def\variantjustification{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",variantjustification,"variantjustification")}}
+\def\unvariantjustification{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","variantjustification")}}
+
 \def\zebranize{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",zebranize,"zebranize")}}
 \def\unzebranize{

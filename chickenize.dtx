@@ -156,7 +156,8 @@ A small and incomplete overview of the functionalities offered by this package. 
 \cmidrule(lr){1-2}
 \hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
 \hyperref[sec:letterspaceadjust]{letterspaceadjust} & improves the greyness by using a small amount of letterspacing\\
-\hyperref[sec:substitutewords]{substitutewords} & replaces words by other words (user-controlled!)\\
+\hyperref[sec:substitutewords]{substitutewords} & replaces words by other words (chosen by the user)\\
+\hyperref[sec:variantjustification]{variantjustification} & Justification by using glyph variants\\
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
@@ -205,22 +206,23 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{boustrophedon} Reverts every second line. This immitates archaic greek writings where one line was right-to-left, the next one left-to-right etc.\footnote{\url{en.wikipedia.org/wiki/Boustrophedon}} Interestingly, also every glyph was adaptet to the writing direction, so all glyphs are inverted in the right-to-left lines. Actually, there are two versions of this command that differ in their implementation: |\boustrophedon| rotates the whole line, while |\boustrophedonglyphs| changes the writing direction and reverses glyph-wise. The second one takes much more compilation time, but may be more reliable. A Rongorongo\footnote{\url{en.wikipedia.org/wiki/Rongorongo}} similar style boustrophedon is available with |\boustrophedoninverse| or |\rongorongonize|, where subsequent lines are rotated by 180° instead of mirrored.
 \command{countglyphs} Counts every printed character that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
+\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
 \command{hammertime} STOP! —— Hammertime!
-\command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
+\command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
+\command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
+\command{nyanize} A synonym for |rainbowcolor|.
 \command{randomerror} Just throws a random \TeX\ or \LaTeX\ error at a random time during the compilation. I have quite no idea what this could be used for.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
 \command{randomcolor} Does what its name says.
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change gradually according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
 \command{pancakenize} This is a dummy command that does nothing. However, every time you use it, you owe a pancake to the package author. You can either send it via mail or bring it to some (local) \TeX\ user's group meeting.
-\command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
-\command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
-\command{nyanize} A synonym for |rainbowcolor|.
-\command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
-\command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{substitutewords} You have to specify pairs of words by using |\addtosubstitutions{word1}{word2}|. Then call |\substitutewords| (or the other way round, doesn't matter) and each occurance of |word1| will be replaced by |word2|. You can add replacement pairs by repeated calls to |\addtosubstitutions|. Take care! This function warks with the input directly, therefore it does \emph{not} work on text that is inserted by macros, but it \emph{will} work on macro names itself! This way, you may use it to change macros (or environments) at will. Bug or feature? I'm not sure right now …
+\command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
+\command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
+\command{variantjustification} For special document types, it might be mandatory to have a fixed interword space. If you still want to have a justified type area, there must be another kind of stretchable material – one version realized by this command is using wide variants of glyphs to fill the remaining space. As the glyph substitution takes place randomly, this does \emph{not} provide the optimum justification, as this would take up much computation power.
 \end{description}
 
 \subsection{How to Deactivate It}
@@ -603,6 +605,11 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+
+\def\variantjustification{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",variantjustification,"variantjustification")}}
+\def\unvariantjustification{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","variantjustification")}}
 
 \def\zebranize{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",zebranize,"zebranize")}}
@@ -1536,6 +1543,53 @@ function scorpionize_color(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{variantjustification}\label{sec:variantjustification}
+% The list |substlist| defines which glyphs can be replaced by others. Use the unicode code points for this. So far, only wider variants are possible! Extend the list at will. If you find useful definitions, send me any glyph combination!
+% 
+% Some predefined values for hebrew typesetting; the list is not local so the user can change it in a very transparent way (using |\chickenizesetup{}|. This costs runtime, however … I guess … (?)
+%    \begin{macrocode}
+substlist = {}
+substlist[1488] = 64289
+substlist[1491] = 64290
+substlist[1492] = 64291
+substlist[1499] = 64292
+substlist[1500] = 64293
+substlist[1501] = 64294
+substlist[1512] = 64295
+substlist[1514] = 64296
+%    \end{macrocode}
+% In the function, we need reproduceable randomization so every compilation of the same document looks the same. Else this would make contracts invalid.
+% 
+% The last line is excluded from the procedure as it makes no sense to extend it this way. If you really want to typeset a rectangle, use the appropriate way to disable the space at the end of the paragraph (german “Ausgang“).
+%    \begin{macrocode}
+function variantjustification(head)
+  math.randomseed(1)
+  for line in nodetraverseid(nodeid"hhead",head) do
+    if (line.glue_sign == 1 and line.glue_order == 0) then -- exclude the last line!
+      substitutions_wide = {} -- we store all “expandable” letters of each line
+      for n in nodetraverseid(nodeid"glyph",line.head) do
+        if (substlist[n.char]) then
+          substitutions_wide[#substitutions_wide+1] = n
+        end
+      end
+      line.glue_set = 0   -- deactivate normal glue expansion
+      local width = node.dimensions(line.head)  -- check the new width of the line
+      local goal = line.width
+      while (width < goal and #substitutions_wide > 0) do
+        x = math.random(#substitutions_wide)      -- choose randomly a glyph to be substituted
+        oldchar = substitutions_wide[x].char
+        substitutions_wide[x].char = substlist[substitutions_wide[x].char] -- substitute by wide letter
+        width = node.dimensions(line.head)             -- check if the line is too wide
+        if width > goal then substitutions_wide[x].char = oldchar break end -- substitute back if the line would be too wide and break out of the loop
+        table.remove(substitutions_wide,x)          -- if further substitutions have to be done, remove the just substituted node from the list
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% That's it. Actually, the function is quite simple and should work out of the box. However, small columns will most probably not work as there typically is not much expandable stuff in a normal line of text.
+% 
 % \subsection{zebranize}\label{sec:zebranize}
 % This function is inspired by a discussion with the Heidelberg regular's table and will change the color of each paragraph linewise. Both the textcolor and background color are changed to create a true zebra like look. If you want to change or add colors, just change the values of |zebracolorarray[]| for the text colors and |zebracolorarray_bg[]| for the background. Do not mix with other color changing functions of this package, as that will turn out ugly or erroneous.
 % 

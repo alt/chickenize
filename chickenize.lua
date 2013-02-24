@@ -637,6 +637,40 @@ function scorpionize_color(head)
   nodeinsertafter(head,node.tail(head),nodecopy(color_pop))
   return head
 end
+substlist = {}
+substlist[1488] = 64289
+substlist[1491] = 64290
+substlist[1492] = 64291
+substlist[1499] = 64292
+substlist[1500] = 64293
+substlist[1501] = 64294
+substlist[1512] = 64295
+substlist[1514] = 64296
+function variantjustification(head)
+  math.randomseed(1)
+  for line in nodetraverseid(nodeid"hhead",head) do
+    if (line.glue_sign == 1 and line.glue_order == 0) then -- exclude the last line!
+      substitutions_wide = {} -- we store all “expandable” letters of each line
+      for n in nodetraverseid(nodeid"glyph",line.head) do
+        if (substlist[n.char]) then
+          substitutions_wide[#substitutions_wide+1] = n
+        end
+      end
+      line.glue_set = 0   -- deactivate normal glue expansion
+      local width = node.dimensions(line.head)  -- check the new width of the line
+      local goal = line.width
+      while (width < goal and #substitutions_wide > 0) do
+        x = math.random(#substitutions_wide)      -- choose randomly a glyph to be substituted
+        oldchar = substitutions_wide[x].char
+        substitutions_wide[x].char = substlist[substitutions_wide[x].char] -- substitute by wide letter
+        width = node.dimensions(line.head)             -- check if the line is too wide
+        if width > goal then substitutions_wide[x].char = oldchar break end -- substitute back if the line would be too wide and break out of the loop
+        table.remove(substitutions_wide,x)          -- if further substitutions have to be done, remove the just substituted node from the list
+      end
+    end
+  end
+  return head
+end
 zebracolorarray = {}
 zebracolorarray_bg = {}
 zebracolorarray[1] = "0.1 g"
