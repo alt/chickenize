@@ -15,6 +15,7 @@
 
 local nodenew = node.new
 local nodecopy = node.copy
+local nodetail = node.tail
 local nodeinsertbefore = node.insert_before
 local nodeinsertafter = node.insert_after
 local noderemove = node.remove
@@ -145,8 +146,8 @@ boustrophedon = function(head)
         w = line.width/65536*0.99625 -- empirical correction factor (?)
         rot.data  = "-1 0 0 1 "..w.." 0 cm"
         rot2.data = "-1 0 0 1 "..-w.." 0 cm"
-        line.head = node.insert_before(line.head,line.head,node.copy(rot))
-        node.insert_after(line.head,node.tail(line.head),node.copy(rot2))
+        line.head = node.insert_before(line.head,line.head,nodecopy(rot))
+        nodeinsert_fter(line.head,nodetail(line.head),nodecopy(rot2))
         odd = true
       else
         odd = false
@@ -165,8 +166,8 @@ boustrophedon_glyphs = function(head)
         w = -g.width/65536*0.99625
         rot.data = "-1 0 0 1 " .. w .." 0 cm"
         rot2.data = "-1 0 0 1 " .. -w .." 0 cm"
-        line.head = node.insert_before(line.head,g,node.copy(rot))
-          node.insert_after(line.head,g,node.copy(rot2))
+        line.head = node.insert_before(line.head,g,nodecopy(rot))
+        nodeinsertafter(line.head,g,nodecopy(rot2))
       end
       odd = false
       else
@@ -331,12 +332,12 @@ local letterspace_spec = nodenew(nodeid"glue_spec")
 local letterspace_pen = nodenew(nodeid"penalty")
 
 letterspace_spec.width   = tex.sp"0pt"
-letterspace_spec.stretch = tex.sp"2pt"
+letterspace_spec.stretch = tex.sp"0.05pt"
 letterspace_glue.spec    = letterspace_spec
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
   for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc") then
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc" or glyph.prev.id == nodeid"kern") then
       local g = nodecopy(letterspace_glue)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -345,12 +346,12 @@ letterspaceadjust = function(head)
   return head
 end
 textletterspaceadjust = function(head)
-  for glyph in node.traverse_id(node.id"glyph", head) do
+  for glyph in nodetraverseid(nodeid"glyph", head) do
     if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
-      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc") then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc" or glyph.prev.id == nodeid"kern") then
         local g = node.copy(letterspace_glue)
-        node.insert_before(head, glyph, g)
-        node.insert_before(head, g, node.copy(letterspace_pen))
+        nodeinsertbefore(head, glyph, g)
+        nodeinsertbefore(head, g, nodecopy(letterspace_pen))
       end
     end
   end
