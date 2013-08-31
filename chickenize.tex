@@ -8,7 +8,7 @@
 %% 
 %% EXPERIMENTAL CODE
 %% 
-%% This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+%% This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
@@ -78,15 +78,29 @@
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\countglyphs{
-  \directlua{glyphnumber = 0
+  \directlua{glyphnumber = 0 spacenumber = 0
              luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
              luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
   }
 }
 
+\def\countwords{
+  \directlua{wordnumber = 0
+             luatexbase.add_to_callback("pre_linebreak_filter",countwords,"countwords")
+             luatexbase.add_to_callback("stop_run",printwordnumber,"printwordnumber")
+  }
+}
+
+\def\detectdoublewords{
+  \directlua{
+             luatexbase.add_to_callback("post_linebreak_filter",detectdoublewords,"detectdoublewords")
+             luatexbase.add_to_callback("stop_run",printdoublewords,"printdoublewords")
+  }
+}
+
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
-  }
+}
 
 \def\dubstepenize{
   \chickenize
@@ -154,6 +168,19 @@
 \def\unleetspeak{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
 
+\def\leftsideright#1{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",leftsideright,"leftsideright")}
+  \directlua{
+    leftsiderightindex = {#1}
+    leftsiderightarray = {}
+    for _,i in pairs(leftsiderightindex) do
+      leftsiderightarray[i] = true
+    end
+  }
+}
+\def\unleftsideright{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","leftsideright")}}
+
 \def\letterspaceadjust{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
 \def\unletterspaceadjust{
@@ -173,12 +200,17 @@
 \def\matrixize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
 \def\unmatrixize{
-  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","matrixize")}}
 
 \def\milkcow{     %% FIXME %% to be implemented
   \directlua{}}
 \def\unmilkcow{
   \directlua{}}
+
+\def\medievalumlaut{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",medievalumlaut,"medievalumlaut")}}
+\def\unmedievalumlaut{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","medievalumlaut")}}
 
 \def\pancakenize{
   \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
@@ -243,6 +275,22 @@
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+
+\def\upsidedown#1{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",upsidedown,"upsidedown")}
+  \directlua{
+    upsidedownindex = {#1}
+    upsidedownarray = {}
+    for _,i in pairs(upsidedownindex) do
+      upsidedownarray[i] = true
+    end
+  }
+}
+\def\unupsidedown{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedown")}}
+
+\def\unuppercasecolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedow")}}
 
 \def\variantjustification{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",variantjustification,"variantjustification")}}

@@ -19,7 +19,7 @@ arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -37,7 +37,7 @@ ance status ‘maintained’.
 
 EXPERIMENTAL CODE
 
-This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2}
+\centerline{v0.2.1a}
 \centerline{\hspace*{2cm} Arno Trautmann}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -129,7 +129,7 @@ The documentation of this package is far from being well-readable, consistent or
 
 For a better understanding of what's going on in the code of this package, there is a small \hyperlink{tutorial}{tutorial} below that explains shortly the most important features used here.
 
-\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes. If, by any reason, you decide to use this package for an important document, please make a local copy of the source code and use that. This package will not be considered stable until it reaches at least v0.5.
+\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes. If, by any reason, you decide to use this package for an important document, please make a local copy of the source code and use that. This package will not be considered stable until it reaches at least v0.5, which might never happen.
 
 If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response! The latet source code is hosted on github: \url{https://github.com/alt/chickenize}. Feel free to comment or report bugs there, to fork, pull, etc.
 
@@ -137,7 +137,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 
 \small\noindent
 \fbox{\parbox{.97\textwidth}{
-This package is copyright © 2012 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
 \vspace*{1cm}
@@ -163,8 +163,10 @@ A small and incomplete overview of the functionalities offered by this package. 
 \cmidrule(lr){1-2}
 \hyperref[sec:boustrophedon]{boustrophedon} & invert every second line in the style of archaic greek texts\\
 \hyperref[sec:countglyphs]{countglyphs} & counts the number of glyphs in the whole document\\
+\hyperref[sec:countwords]{countwords} & counts the number of words in the whole document\\
 \hyperref[sec:leetspeak]{leetspeak} & translates the (latin-based) input into 1337 5p34k\\
-\hyperref[sec:randomuclc]{randomuclc} & alternates randomly between uppercase and lowercase\\
+\hyperref[sec:medievalumlaut]{medievalumlaut} & \medievalumlaut changes each umlaut to normal glyph plus “e” above it: äöü\\
+\hyperref[sec:randomuclc]{randomuclc} & \unmedievalumlaut alternates randomly between uppercase and lowercase\\
 \hyperref[sec:randomrainbowcolor]{rainbowcolor} & changes the color of letters slowly according to a rainbow\\
 \hyperref[sec:randomrainbowcolor]{randomcolor} & prints every letter in a random color\\
 \hyperref[sec:tabularasa]{tabularasa} & removes every glyph from the output and leaves an empty document\\
@@ -204,7 +206,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
 \command{boustrophedon} Reverts every second line. This immitates archaic greek writings where one line was right-to-left, the next one left-to-right etc.\footnote{\url{en.wikipedia.org/wiki/Boustrophedon}} Interestingly, also every glyph was adaptet to the writing direction, so all glyphs are inverted in the right-to-left lines. Actually, there are two versions of this command that differ in their implementation: |\boustrophedon| rotates the whole line, while |\boustrophedonglyphs| changes the writing direction and reverses glyph-wise. The second one takes much more compilation time, but may be more reliable. A Rongorongo\footnote{\url{en.wikipedia.org/wiki/Rongorongo}} similar style boustrophedon is available with |\boustrophedoninverse| or |\rongorongonize|, where subsequent lines are rotated by 180° instead of mirrored.
-\command{countglyphs} Counts every printed character that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
+\command{countglyphs} \textcolor{blue}{\texttt{\textbackslash countwords}} Counts every printed character (or word, respectively) that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
@@ -212,6 +214,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{hammertime} STOP! —— Hammertime!
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
+\command{medievalumlaut} Changes every lowercase umlaut into the corresponding vocale glyph with a small “e” glyph above it to show the origins of the german umlauts coming from ae, oe, ue. Text-variant may follow.
 \command{nyanize} A synonym for |rainbowcolor|.
 \command{randomerror} Just throws a random \TeX\ or \LaTeX\ error at a random time during the compilation. I have quite no idea what this could be used for.
 \command{randomuclc} Changes every character of the input into its uppercase or lowercase variant. Well, guess what the “random” means …
@@ -437,15 +440,29 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\countglyphs{
-  \directlua{glyphnumber = 0
+  \directlua{glyphnumber = 0 spacenumber = 0
              luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
              luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
   }
 }
 
+\def\countwords{
+  \directlua{wordnumber = 0
+             luatexbase.add_to_callback("pre_linebreak_filter",countwords,"countwords")
+             luatexbase.add_to_callback("stop_run",printwordnumber,"printwordnumber")
+  }
+}
+
+\def\detectdoublewords{
+  \directlua{
+             luatexbase.add_to_callback("post_linebreak_filter",detectdoublewords,"detectdoublewords")
+             luatexbase.add_to_callback("stop_run",printdoublewords,"printdoublewords")
+  }
+}
+
 \def\dosomethingfunny{
     %% should execute one of the “funny” commands, but randomly. So every compilation is completely different. Maybe a list of commands could be specified to exclude total nonesense-functions. Maybe also on a per-paragraph-basis?
-  }
+}
 
 \def\dubstepenize{
   \chickenize
@@ -516,6 +533,19 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unleetspeak{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","1337")}}
 
+\def\leftsideright#1{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",leftsideright,"leftsideright")}
+  \directlua{
+    leftsiderightindex = {#1}
+    leftsiderightarray = {}
+    for _,i in pairs(leftsiderightindex) do
+      leftsiderightarray[i] = true
+    end
+  }
+}
+\def\unleftsideright{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","leftsideright")}}
+
 \def\letterspaceadjust{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
 \def\unletterspaceadjust{
@@ -535,12 +565,17 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\matrixize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",matrixize,"matrixize")}}
 \def\unmatrixize{
-  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",matrixize)}}
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","matrixize")}}
 
 \def\milkcow{     %% FIXME %% to be implemented
   \directlua{}}
 \def\unmilkcow{
   \directlua{}}
+
+\def\medievalumlaut{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",medievalumlaut,"medievalumlaut")}}
+\def\unmedievalumlaut{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","medievalumlaut")}}
 
 \def\pancakenize{
   \directlua{luatexbase.add_to_callback("stop_run",pancaketext,"pancaketext")}}
@@ -605,6 +640,22 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
 \def\unuppercasecolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","uppercasecolor")}}
+
+\def\upsidedown#1{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",upsidedown,"upsidedown")}
+  \directlua{
+    upsidedownindex = {#1}
+    upsidedownarray = {}
+    for _,i in pairs(upsidedownindex) do
+      upsidedownarray[i] = true
+    end
+  }
+}
+\def\unupsidedown{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedown")}}
+
+\def\unuppercasecolor{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedow")}}
 
 \def\variantjustification{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",variantjustification,"variantjustification")}}
@@ -712,7 +763,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2013/02/24 v0.2 chickenize package]
+  [2013/08/22 v0.2.1a chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
@@ -764,8 +815,8 @@ color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
 color_pop.stack = 0
-color_push.cmd = 1
-color_pop.cmd = 2
+color_push.command = 1
+color_pop.command = 2
 %    \end{macrocode}
 % \subsection{chickenize}\label{sec:chickenize}
 % The infamous |\chickenize| macro. Substitutes every word of the input with the given string. This can be elaborated arbitrarily, and whenever I feel like, I might add functionality. So far, only the string replaces the word, and even hyphenation is not possible.
@@ -779,10 +830,6 @@ chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
-local tbl = font.getfont(font.current())
-local space = tbl.parameters.space
-local shrink = tbl.parameters.space_shrink
-local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 chickenize_ignore_word = false
 %    \end{macrocode}
@@ -894,7 +941,7 @@ boustrophedon = function(head)
         rot.data  = "-1 0 0 1 "..w.." 0 cm"
         rot2.data = "-1 0 0 1 "..-w.." 0 cm"
         line.head = node.insert_before(line.head,line.head,nodecopy(rot))
-        nodeinsert_fter(line.head,nodetail(line.head),nodecopy(rot2))
+        nodeinsertafter(line.head,nodetail(line.head),nodecopy(rot2))
         odd = true
       else
         odd = false
@@ -953,14 +1000,17 @@ end
 %    \end{macrocode}
 % 
 % \subsection{countglyphs}\label{sec:countglyphs}
-% Counts the glyphs in your documnt. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
+% Counts the glyphs in your document. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count. Also, spaces are count, but only spaces between glyphs in the output (i.\,e. nothing at the end/beginning of the lines), excluding indentation.
 % 
-% This function will be extended to allow counting of whatever you want. 
+% This function will (maybe, upon request) be extended to allow counting of whatever you want. 
 %    \begin{macrocode}
 countglyphs = function(head)
   for line in nodetraverseid(0,head) do
     for glyph in nodetraverseid(37,line.head) do
       glyphnumber = glyphnumber + 1
+      if (glyph.next.id == 10) and (glyph.next.next.id ==37) then
+        spacenumber = spacenumber + 1
+      end
     end
   end
   return head
@@ -969,7 +1019,50 @@ end
 % To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
 %    \begin{macrocode}
 printglyphnumber = function()
-  texiowrite_nl("\n Number of glyphs in this document: "..glyphnumber.."\n")
+  texiowrite_nl("\nNumber of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("Number of spaces in this document: "..spacenumber)
+  texiowrite_nl("Glyphs plus spaces: "..glyphnumber+spacenumber.."\n")
+end
+%    \end{macrocode}
+% \subsection{countwords}\label{sec:countwords}
+% Counts the number of words in the document. The function works directly before the line breaking, so all macros are expanded. A “word” then is everything that is between two spaces before paragraph formatting. The beginning of a paragraph is a word, and the last word of a paragraph is accounted for by explicit increasing the counter, as no space token follows.
+%    \begin{macrocode}
+countwords = function(head)
+  for glyph in nodetraverseid(37,head) do
+    if (glyph.next.id == 10) then
+      wordnumber = wordnumber + 1
+    end
+  end
+  wordnumber = wordnumber + 1 -- add 1 for the last word in a paragraph which is not found otherwise
+  return head
+end
+%    \end{macrocode}
+% Printing is done at the end of the compilation in the |stop_run| callback:
+%    \begin{macrocode}
+printwordnumber = function()
+  texiowrite_nl("\nNumber of words in this document: "..wordnumber)
+end
+%    \end{macrocode}
+
+% \subsection{detectdoublewords}\label{sec:detectdoublewords}
+%    \begin{macrocode}
+function detectdoublewords(head)
+  prevlastword  = {}  -- array of numbers representing the glyphs
+  prevfirstword = {}
+  newlastword   = {}
+  newfirstword  = {}
+  for line in nodetraverseid(0,head) do
+    for g in nodetraverseid(37,line.head) do
+texio.write_nl("next glyph",#newfirstword+1)
+      newfirstword[#newfirstword+1] = g.char
+      if (g.next.id == 10) then break end
+    end
+texio.write_nl("nfw:"..#newfirstword)
+  end
+end
+
+function printdoublewords()
+  texio.write_nl("finished")
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}
@@ -1125,6 +1218,24 @@ leet = function(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{leftsideright}\label{sec:leftsideright}
+% This function mirrors each glyph given in the array of \verb|leftsiderightarray| horizontally.
+%    \begin{macrocode}
+leftsideright = function(head)
+  local factor = 65536/0.99626
+  for n in nodetraverseid(GLYPH,head) do
+    if (leftsiderightarray[n.char]) then
+      shift = nodenew(8,8)
+      shift2 = nodenew(8,8)
+      shift.data = "q -1 0 0 1 " .. n.width/factor .." 0 cm"
+      shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
+      nodeinsertbefore(head,n,shift)
+      nodeinsertafter(head,n,shift2)
+    end
+  end
+  return head
+end
+%    \end{macrocode}
 % \subsection{letterspaceadjust}\label{sec:letterspaceadjust}
 % Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced which will, hopefully, result in the greyness to be more equally distributed over the page.
 %
@@ -1195,6 +1306,54 @@ matrixize = function(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{medievalumlaut}\label{sec:medievalumlaut}
+% Changes the umlauts ä, ö, ü into a, o, u with an e as an accent. The exact position of the e is adapted for each glyph, but that is only tested with one font. Other fonts might f*ck up everything.
+% 
+% For this, we define node representing the e (which then is copied every time) and two nodes that shift the e to where it belongs by using pdf matrix-nodes. An additional kern node shifts the space that the e took back so that everything ends up in the right place. All this happens in the \verb|post_linebreak_filter| to enable normal hyphenation and line breaking. Well, \verb|pre_linebreak_filter| would also have done …
+%    \begin{macrocode}
+medievalumlaut = function(head)
+  local factor = 65536/0.99626
+  local org_e_node = nodenew(37)
+  org_e_node.char = 101
+  for line in nodetraverseid(0,head) do
+    for n in nodetraverseid(37,line.head) do
+      if (n.char == 228 or n.char == 246 or n.char == 252) then
+        e_node = nodecopy(org_e_node)
+        e_node.font = n.font
+        shift = nodenew(8,8)
+        shift2 = nodenew(8,8)
+        shift2.data = "Q 1 0 0 1 " .. e_node.width/factor .." 0 cm"
+        nodeinsertafter(head,n,e_node)
+
+        nodeinsertbefore(head,e_node,shift)
+        nodeinsertafter(head,e_node,shift2)
+
+        x_node = nodenew(11)
+        x_node.kern = -e_node.width
+        nodeinsertafter(head,shift2,x_node)
+      end
+
+      if (n.char == 228) then -- ä
+        shift.data = "q 0.5 0 0 0.5 " .. 
+          -n.width/factor*0.85 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 97
+      end
+      if (n.char == 246) then -- ö
+        shift.data = "q 0.5 0 0 0.5 " .. 
+          -n.width/factor*0.75 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 111 
+      end
+      if (n.char == 252) then -- ü
+        shift.data = "q 0.5 0 0 0.5 " .. 
+          -n.width/factor*0.75 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 117
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% 
 % \subsection{pancakenize}\label{sec:pancakenize}
 %    \begin{macrocode}
 local separator     = string.rep("=", 28)
@@ -1403,6 +1562,26 @@ uppercasecolor = function (head)
           line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
           nodeinsertafter(line.head,upper,nodecopy(color_pop))
         end
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{upsidedown}\label{sec:upsidedown}
+% This function mirrors all glyphs given in the array \verb|upsidedownarray| vertically.
+%    \begin{macrocode}
+upsidedown = function(head)
+  local factor = 65536/0.99626
+  for line in nodetraverseid(Hhead,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
+      if (upsidedownarray[n.char]) then
+       shift = nodenew(8,8)
+        shift2 = nodenew(8,8)
+        shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
+        shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
+        nodeinsertbefore(head,n,shift)
+        nodeinsertafter(head,n,shift2)
       end
     end
   end
@@ -1648,7 +1827,7 @@ function pdf_print (...)
   for _, str in ipairs({...}) do
     pdf.print(str .. " ")
   end
-  pdf.print("\string\n")
+  pdf.print("\n")
 end
 
 function move (p)

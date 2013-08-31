@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 20012 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -33,8 +33,8 @@ color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
 color_pop.stack = 0
-color_push.cmd = 1
-color_pop.cmd = 2
+color_push.command = 1
+color_pop.command = 2
 chicken_pagenumbers = true
 
 chickenstring = {}
@@ -44,10 +44,6 @@ chickenizefraction = 0.5
 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
-local tbl = font.getfont(font.current())
-local space = tbl.parameters.space
-local shrink = tbl.parameters.space_shrink
-local stretch = tbl.parameters.space_stretch
 local match = unicode.utf8.match
 chickenize_ignore_word = false
 chickenize_real_stuff = function(i,head)
@@ -147,7 +143,7 @@ boustrophedon = function(head)
         rot.data  = "-1 0 0 1 "..w.." 0 cm"
         rot2.data = "-1 0 0 1 "..-w.." 0 cm"
         line.head = node.insert_before(line.head,line.head,nodecopy(rot))
-        nodeinsert_fter(line.head,nodetail(line.head),nodecopy(rot2))
+        nodeinsertafter(line.head,nodetail(line.head),nodecopy(rot2))
         odd = true
       else
         odd = false
@@ -201,12 +197,48 @@ countglyphs = function(head)
   for line in nodetraverseid(0,head) do
     for glyph in nodetraverseid(37,line.head) do
       glyphnumber = glyphnumber + 1
+      if (glyph.next.id == 10) and (glyph.next.next.id ==37) then
+        spacenumber = spacenumber + 1
+      end
     end
   end
   return head
 end
 printglyphnumber = function()
-  texiowrite_nl("\n Number of glyphs in this document: "..glyphnumber.."\n")
+  texiowrite_nl("\nNumber of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("Number of spaces in this document: "..spacenumber)
+  texiowrite_nl("Glyphs plus spaces: "..glyphnumber+spacenumber.."\n")
+end
+countwords = function(head)
+  for glyph in nodetraverseid(37,head) do
+    if (glyph.next.id == 10) then
+      wordnumber = wordnumber + 1
+    end
+  end
+  wordnumber = wordnumber + 1 -- add 1 for the last word in a paragraph which is not found otherwise
+  return head
+end
+printwordnumber = function()
+  texiowrite_nl("\nNumber of words in this document: "..wordnumber)
+end
+
+function detectdoublewords(head)
+  prevlastword  = {}  -- array of numbers representing the glyphs
+  prevfirstword = {}
+  newlastword   = {}
+  newfirstword  = {}
+  for line in nodetraverseid(0,head) do
+    for g in nodetraverseid(37,line.head) do
+texio.write_nl("next glyph",#newfirstword+1)
+      newfirstword[#newfirstword+1] = g.char
+      if (g.next.id == 10) then break end
+    end
+texio.write_nl("nfw:"..#newfirstword)
+  end
+end
+
+function printdoublewords()
+  texio.write_nl("finished")
 end
 local quotestrings = {
    [171] = true,  [172] = true,
@@ -327,6 +359,20 @@ leet = function(head)
   end
   return head
 end
+leftsideright = function(head)
+  local factor = 65536/0.99626
+  for n in nodetraverseid(GLYPH,head) do
+    if (leftsiderightarray[n.char]) then
+      shift = nodenew(8,8)
+      shift2 = nodenew(8,8)
+      shift.data = "q -1 0 0 1 " .. n.width/factor .." 0 cm"
+      shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
+      nodeinsertbefore(head,n,shift)
+      nodeinsertafter(head,n,shift2)
+    end
+  end
+  return head
+end
 local letterspace_glue = nodenew(nodeid"glue")
 local letterspace_spec = nodenew(nodeid"glue_spec")
 local letterspace_pen = nodenew(nodeid"penalty")
@@ -376,6 +422,47 @@ matrixize = function(head)
       nodeinsertafter(head,x[7-m],nodecopy(s))
     end
     noderemove(head,n)
+  end
+  return head
+end
+medievalumlaut = function(head)
+  local factor = 65536/0.99626
+  local org_e_node = nodenew(37)
+  org_e_node.char = 101
+  for line in nodetraverseid(0,head) do
+    for n in nodetraverseid(37,line.head) do
+      if (n.char == 228 or n.char == 246 or n.char == 252) then
+        e_node = nodecopy(org_e_node)
+        e_node.font = n.font
+        shift = nodenew(8,8)
+        shift2 = nodenew(8,8)
+        shift2.data = "Q 1 0 0 1 " .. e_node.width/factor .." 0 cm"
+        nodeinsertafter(head,n,e_node)
+
+        nodeinsertbefore(head,e_node,shift)
+        nodeinsertafter(head,e_node,shift2)
+
+        x_node = nodenew(11)
+        x_node.kern = -e_node.width
+        nodeinsertafter(head,shift2,x_node)
+      end
+
+      if (n.char == 228) then -- ä
+        shift.data = "q 0.5 0 0 0.5 " ..
+          -n.width/factor*0.85 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 97
+      end
+      if (n.char == 246) then -- ö
+        shift.data = "q 0.5 0 0 0.5 " ..
+          -n.width/factor*0.75 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 111
+      end
+      if (n.char == 252) then -- ü
+        shift.data = "q 0.5 0 0 0.5 " ..
+          -n.width/factor*0.75 .." ".. n.height/factor*0.75 .. " cm"
+        n.char = 117
+      end
+    end
   end
   return head
 end
@@ -535,6 +622,22 @@ uppercasecolor = function (head)
           line.head = nodeinsertbefore(line.head,upper,nodecopy(color_push))
           nodeinsertafter(line.head,upper,nodecopy(color_pop))
         end
+      end
+    end
+  end
+  return head
+end
+upsidedown = function(head)
+  local factor = 65536/0.99626
+  for line in node.traverse_id(0,head) do
+    for n in node.traverse_id(37,line.head) do
+      if (upsidedownarray[n.char]) then
+       shift = node.new(8,8)
+        shift2 = node.new(8,8)
+        shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
+        shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
+        node.insert_before(head,n,shift)
+        node.insert_after(head,n,shift2)
       end
     end
   end
@@ -712,7 +815,7 @@ function pdf_print (...)
   for _, str in ipairs({...}) do
     pdf.print(str .. " ")
   end
-  pdf.print("\string\n")
+  pdf.print("\n")
 end
 
 function move (p)
