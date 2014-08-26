@@ -8,25 +8,38 @@
 %% 
 %% EXPERIMENTAL CODE
 %% 
-%% This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+%% This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
+\def\allownumberincommands{
+  \catcode`\0=11
+  \catcode`\1=11
+  \catcode`\2=11
+  \catcode`\3=11
+  \catcode`\4=11
+  \catcode`\5=11
+  \catcode`\6=11
+  \catcode`\7=11
+  \catcode`\8=11
+  \catcode`\9=11
+}
+
 \def\BEClerize{
   \chickenize
   \directlua{
-    chickenstring[1] = "noise noise"
-    chickenstring[2] = "atom noise"
-    chickenstring[3] = "shot noise"
-    chickenstring[4] = "photon noise"
-    chickenstring[5] = "camera noise"
-    chickenstring[6] = "noising noise"
-    chickenstring[7] = "thermal noise"
-    chickenstring[8] = "electronic noise"
-    chickenstring[9] = "spin noise"
+    chickenstring[1]  = "noise noise"
+    chickenstring[2]  = "atom noise"
+    chickenstring[3]  = "shot noise"
+    chickenstring[4]  = "photon noise"
+    chickenstring[5]  = "camera noise"
+    chickenstring[6]  = "noising noise"
+    chickenstring[7]  = "thermal noise"
+    chickenstring[8]  = "electronic noise"
+    chickenstring[9]  = "spin noise"
     chickenstring[10] = "electron noise"
     chickenstring[11] = "Bogoliubov noise"
     chickenstring[12] = "white noise"
@@ -53,6 +66,11 @@
 \def\unboustrophedoninverse{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_inverse")}}
 
+\def\bubblesort{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",bubblesort,"bubblesort")}}
+\def\unbubblesort{
+  \directlua{luatexbase.remove_from_callback("bubblesort","bubblesort")}}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
@@ -78,7 +96,12 @@
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\countglyphs{
-  \directlua{glyphnumber = 0 spacenumber = 0
+  \directlua{
+             counted_glyphs_by_code = {}
+             for i = 1,10000 do
+               counted_glyphs_by_code[i] = 0
+             end
+             glyphnumber = 0 spacenumber = 0
              luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
              luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
   }
@@ -221,8 +244,8 @@
 \def\unrainbowcolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
              rainbowcolor = false}}
-  \let\nyanize\rainbowcolor
-  \let\unnyanize\unrainbowcolor
+\let\nyanize\rainbowcolor
+\let\unnyanize\unrainbowcolor
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -266,10 +289,20 @@
   \directlua{addtosubstitutions("#1","#2")}
 }
 
+\def\suppressonecharbreak{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",suppressonecharbreak,"suppressonecharbreak")}}
+\def\unsuppressonecharbreak{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","suppressonecharbreak")}}
+
 \def\tabularasa{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",tabularasa,"tabularasa")}}
 \def\untabularasa{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","tabularasa")}}
+
+\def\tanjanize{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",tanjanize,"tanjanize")}}
+\def\untanjanize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","tanjanize")}}
 
 \def\uppercasecolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}

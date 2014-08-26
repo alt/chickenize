@@ -12,14 +12,14 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2012, if possible, maybe 2011 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
+You need an up-to-date TeX Live (2014, if possible, maybe 2013 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -37,7 +37,7 @@ ance status ‘maintained’.
 
 EXPERIMENTAL CODE
 
-This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -104,7 +104,7 @@ ance status ‘maintained’.
 }
 
 \begin{document}
-{\hfill \parbox{6.3cm}{{\TGChorus{\large »\,}The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\large \textit «}}\\[1ex]
+{\hfill \parbox{6.3cm}{{\TGChorus{\Large »\,}\large The Monty Pythons, were they \TeX~users,\\\hspace*{.2em} could have written the chickenize macro.{\Large \textit «}}\\[1ex]
 \hspace*{4cm}\small Paul Isambert}\kern-2.5cm
 }
 
@@ -154,10 +154,11 @@ A small and incomplete overview of the functionalities offered by this package. 
 \begin{longtabu} to .95\textwidth [c]{lX[j]}
 \hbox to 0cm{\bfseries \hspace*{2cm} maybe useful functions}\\
 \cmidrule(lr){1-2}
-\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion of each line\\
+\hyperref[sec:colorstretch]{colorstretch} & shows grey boxes that visualise the badness and font expansion line-wise\\
 \hyperref[sec:letterspaceadjust]{letterspaceadjust} & improves the greyness by using a small amount of letterspacing\\
 \hyperref[sec:substitutewords]{substitutewords} & replaces words by other words (chosen by the user)\\
 \hyperref[sec:variantjustification]{variantjustification} & Justification by using glyph variants\\
+\hyperref[sec:suppressonecharbreak]{suppressonecharbreak} & suppresses linebreaks after single-letter words\\
 \addlinespace\addlinespace
 \hbox to 0cm{\bfseries \hspace*{2cm} less useful functions} \\
 \cmidrule(lr){1-2}
@@ -205,8 +206,9 @@ The effect of the commands can be influenced, not with arguments, but only via t
 
 \begin{description}
 \def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
+\command{allownumberincommands} Normally, you cannot use numbers as part of a control sequence (or, command) name. This makes perfect sense and is good as it is. However, just to raise awareness to this, we provide a command here that changes the chategory codes of numbers 0–9 to 11, i.\,e.~normal character. So they \emph{can} be used in command names. However, this will break many packages, so do \emph{not} expect anything to work! At least use it \emph{after} all packages are loaded.
 \command{boustrophedon} Reverts every second line. This immitates archaic greek writings where one line was right-to-left, the next one left-to-right etc.\footnote{\url{en.wikipedia.org/wiki/Boustrophedon}} Interestingly, also every glyph was adaptet to the writing direction, so all glyphs are inverted in the right-to-left lines. Actually, there are two versions of this command that differ in their implementation: |\boustrophedon| rotates the whole line, while |\boustrophedonglyphs| changes the writing direction and reverses glyph-wise. The second one takes much more compilation time, but may be more reliable. A Rongorongo\footnote{\url{en.wikipedia.org/wiki/Rongorongo}} similar style boustrophedon is available with |\boustrophedoninverse| or |\rongorongonize|, where subsequent lines are rotated by 180° instead of mirrored.
-\command{countglyphs} \textcolor{blue}{\texttt{\textbackslash countwords}} Counts every printed character (or word, respectively) that appeared in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number will be printed at the end of the log file/console output.
+\command{countglyphs} \textcolor{blue}{\texttt{\textbackslash countwords}} Counts every printed character (or word, respectively) that appears in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number of glyphs/words will be printed at the end of the log file/console output. For glyphs, also the number of use for every letter is printed separately.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
@@ -223,6 +225,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change gradually according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
 \command{pancakenize} This is a dummy command that does nothing. However, every time you use it, you owe a pancake to the package author. You can either send it via mail or bring it to some (local) \TeX\ user's group meeting.
 \command{substitutewords} You have to specify pairs of words by using |\addtosubstitutions{word1}{word2}|. Then call |\substitutewords| (or the other way round, doesn't matter) and each occurance of |word1| will be replaced by |word2|. You can add replacement pairs by repeated calls to |\addtosubstitutions|. Take care! This function warks with the input directly, therefore it does \emph{not} work on text that is inserted by macros, but it \emph{will} work on macro names itself! This way, you may use it to change macros (or environments) at will. Bug or feature? I'm not sure right now …
+\command{suppressonecharbreak} \TeX~normally does not suppress a linebreak after words with only one character (“I“, “a” etc.) This command suppresses line breaks. It is very similar to the code provided by the |impnattypo| package and based on the same ideas. However, the code in |chickenize| has been written before the author knew |impnattypo|, and the code differs a bit, might even be a bit faster. Well, test it!
 \command{tabularasa} Takes every glyph out of the document and replaces it by empty space of the same width. That could be useful if you want to hide some part of a text or similar. The |\text|-version is most likely more useful.
 \command{uppercasecolor} Makes every uppercase character in the input colored. At the moment, the color is randomized over the full rgb scale, but that will be adjustable once options are well implemented.
 \command{variantjustification} For special document types, it might be mandatory to have a fixed interword space. If you still want to have a justified type area, there must be another kind of stretchable material – one version realized by this command is using wide variants of glyphs to fill the remaining space. As the glyph substitution takes place randomly, this does \emph{not} provide the optimum justification, as this would take up much computation power.
@@ -376,18 +379,31 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
+\def\allownumberincommands{
+  \catcode`\0=11
+  \catcode`\1=11
+  \catcode`\2=11
+  \catcode`\3=11
+  \catcode`\4=11
+  \catcode`\5=11
+  \catcode`\6=11
+  \catcode`\7=11
+  \catcode`\8=11
+  \catcode`\9=11
+}
+
 \def\BEClerize{
   \chickenize
   \directlua{
-    chickenstring[1] = "noise noise"
-    chickenstring[2] = "atom noise"
-    chickenstring[3] = "shot noise"
-    chickenstring[4] = "photon noise"
-    chickenstring[5] = "camera noise"
-    chickenstring[6] = "noising noise"
-    chickenstring[7] = "thermal noise"
-    chickenstring[8] = "electronic noise"
-    chickenstring[9] = "spin noise"
+    chickenstring[1]  = "noise noise"
+    chickenstring[2]  = "atom noise"
+    chickenstring[3]  = "shot noise"
+    chickenstring[4]  = "photon noise"
+    chickenstring[5]  = "camera noise"
+    chickenstring[6]  = "noising noise"
+    chickenstring[7]  = "thermal noise"
+    chickenstring[8]  = "electronic noise"
+    chickenstring[9]  = "spin noise"
     chickenstring[10] = "electron noise"
     chickenstring[11] = "Bogoliubov noise"
     chickenstring[12] = "white noise"
@@ -414,13 +430,17 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unboustrophedoninverse{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","boustrophedon_inverse")}}
 
+\def\bubblesort{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",bubblesort,"bubblesort")}}
+\def\unbubblesort{
+  \directlua{luatexbase.remove_from_callback("bubblesort","bubblesort")}}
+
 \def\chickenize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",chickenize,"chickenize")
     luatexbase.add_to_callback("start_page_number",
     function() texio.write("["..status.total_pages) end ,"cstartpage")
     luatexbase.add_to_callback("stop_page_number",
     function() texio.write(" chickens]") end,"cstoppage")
-%    
     luatexbase.add_to_callback("stop_run",nicetext,"a nice text")
   }
 }
@@ -440,7 +460,12 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","stretch_expansion")}}
 
 \def\countglyphs{
-  \directlua{glyphnumber = 0 spacenumber = 0
+  \directlua{
+             counted_glyphs_by_code = {}
+             for i = 1,10000 do
+               counted_glyphs_by_code[i] = 0
+             end
+             glyphnumber = 0 spacenumber = 0
              luatexbase.add_to_callback("post_linebreak_filter",countglyphs,"countglyphs")
              luatexbase.add_to_callback("stop_run",printglyphnumber,"printglyphnumber")
   }
@@ -586,8 +611,8 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unrainbowcolor{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","rainbowcolor")
              rainbowcolor = false}}
-  \let\nyanize\rainbowcolor
-  \let\unnyanize\unrainbowcolor
+\let\nyanize\rainbowcolor
+\let\unnyanize\unrainbowcolor
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -631,10 +656,20 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \directlua{addtosubstitutions("#1","#2")}
 }
 
+\def\suppressonecharbreak{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",suppressonecharbreak,"suppressonecharbreak")}}
+\def\unsuppressonecharbreak{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","suppressonecharbreak")}}
+
 \def\tabularasa{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",tabularasa,"tabularasa")}}
 \def\untabularasa{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","tabularasa")}}
+
+\def\tanjanize{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",tanjanize,"tanjanize")}}
+\def\untanjanize{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","tanjanize")}}
 
 \def\uppercasecolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",uppercasecolor,"uppercasecolor")}}
@@ -766,6 +801,10 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
   [2013/08/22 v0.2.1a chickenize package]
 \input{chickenize}
 %    \end{macrocode}
+% \subsection{Free Compliments}
+%    \begin{macrocode}
+
+%    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
 % Nothing done so far, just some minor ideas. If you want to implement some cool things, contact me! :)
 %    \begin{macrocode}
@@ -886,6 +925,13 @@ end
 
 chickenize = function(head)
   for i in nodetraverseid(37,head) do  --find start of a word
+-- Random determination of the chickenization of the next word:
+    if math.random() > chickenizefraction then
+      chickenize_ignore_word = true
+    elseif chickencount then
+      chicken_substitutions = chicken_substitutions + 1
+    end
+
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
       if (i.char > 64 and i.char < 91) then chickenize_capital = true else chickenize_capital = false end
       head = chickenize_real_stuff(i,head)
@@ -894,13 +940,6 @@ chickenize = function(head)
 -- At the end of the word, the ignoring is reset. New chance for everyone.
     if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
       chickenize_ignore_word = false
-    end
-
--- And the random determination of the chickenization of the next word:
-    if math.random() > chickenizefraction then
-      chickenize_ignore_word = true
-    elseif chickencount then
-      chicken_substitutions = chicken_substitutions + 1
     end
   end
   return head
@@ -999,17 +1038,37 @@ texio.write_nl(line.height)
 end
 %    \end{macrocode}
 % 
+% \subsection{bubblesort}\label{sec:bubblesort}
+%    \begin{macrocode}
+function bubblesort(head)
+  for line in nodetraverseid(0,head) do
+    for glyph in nodetraverseid(37,line.head) do
+      
+    end
+  end
+  return head
+end
+%    \end{macrocode}
 % \subsection{countglyphs}\label{sec:countglyphs}
-% Counts the glyphs in your document. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count. Also, spaces are count, but only spaces between glyphs in the output (i.\,e. nothing at the end/beginning of the lines), excluding indentation.
+% Counts the glyphs in your document. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
 % 
-% This function will (maybe, upon request) be extended to allow counting of whatever you want. 
+% Not only the total number of glyphs is recorded, but also the number of glyphs by character code. By this, you know exactly how many “a” or “ß” you used. A feature of category “completely useless”.
+% 
+% Spaces are also counted, but only spaces between glyphs in the output (i.\,e. nothing at the end/beginning of the lines), excluding indentation.
+% 
+% This function will (maybe, upon request) be extended to allow counting of whatever you want.
+%
+%% Take care: This will slow down the compilation extremely, by about a factor of 2! Only use for playing around or counting a final version of your document!
 %    \begin{macrocode}
 countglyphs = function(head)
   for line in nodetraverseid(0,head) do
     for glyph in nodetraverseid(37,line.head) do
       glyphnumber = glyphnumber + 1
-      if (glyph.next.id == 10) and (glyph.next.next.id ==37) then
-        spacenumber = spacenumber + 1
+      if (glyph.next.next) then
+        if (glyph.next.id == 10) and (glyph.next.next.id == 37) then
+          spacenumber = spacenumber + 1
+        end
+        counted_glyphs_by_code[glyph.char] = counted_glyphs_by_code[glyph.char] + 1
       end
     end
   end
@@ -1019,7 +1078,12 @@ end
 % To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
 %    \begin{macrocode}
 printglyphnumber = function()
-  texiowrite_nl("\nNumber of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("\nNumber of glyphs by character code:")
+  for i = 1,127 do --%% FIXME: should allow for more characters, but cannot be printed to console output – print into document?
+    texiowrite_nl(string.char(i)..": "..counted_glyphs_by_code[i])
+  end
+
+  texiowrite_nl("\nTotal number of glyphs in this document: "..glyphnumber)
   texiowrite_nl("Number of spaces in this document: "..spacenumber)
   texiowrite_nl("Glyphs plus spaces: "..glyphnumber+spacenumber.."\n")
 end
@@ -1045,7 +1109,7 @@ end
 %    \end{macrocode}
 
 % \subsection{detectdoublewords}\label{sec:detectdoublewords}
-%    \begin{macrocode}
+%    \begin{macrocode} %% FIXME: Does this work? …
 function detectdoublewords(head)
   prevlastword  = {}  -- array of numbers representing the glyphs
   prevfirstword = {}
@@ -1509,6 +1573,7 @@ end
 % \subsection{rickroll}\label{sec:rickroll}
 % Another tribute to pop culture. Either: substitute word-by-word as in pancake. OR: substitute each link to a youtube-rickroll …
 %    \begin{macrocode}
+% 
 %    \end{macrocode}
 % \subsection{substitutewords}\label{sec:substitutewords}
 % This function is one of the rather usefull ones of this package. It replaces each occurance of one word by another word, which both are specified by the user. So nothing random or funny, but a real serious function! There are three levels for this function: At user-level, the user just specifies two strings that are passed to the function |addtosubstitutions|. This is needed as the |#| has a special meaning both in \TeX s definitions and in Lua. In this second step, the list of substitutions is just extended, and the real work is done by the function |substiuteword| which is registered in the |process_input_buffer| callback. Once the substitution list is built, the rest is very simple: We just use |gsub| to substitute, do this for every item in the list, and that's it.
@@ -1528,6 +1593,24 @@ substitutewords = function(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{suppressonecharbreak}\label{sec:suppressonecharbreak}
+% We rush through the node list before line breaking takes place and insert large penalties for breaks after single glyphs. To keep the code as small, simple and fast as possible, we |traverse_id| over spaces and see wether the |next.next| node is also a space. This might not be the best and most universal way of doing it, but the simplest. The penalty is not created newly each time, but copied – no significant speed gain, however.
+%    \begin{macrocode}
+suppressonecharbreakpenaltynode = node.new(12)
+suppressonecharbreakpenaltynode.penalty = 10000
+%    \end{macrocode}
+%    \begin{macrocode}
+function suppressonecharbreak(head)
+  for i in node.traverse_id(10,head) do
+    if ((i.next) and (i.next.next.id == 10)) then
+        pen = node.copy(suppressonecharbreakpenaltynode)
+        node.insert_after(head,i.next,pen)
+    end
+  end
+
+  return head
+end
+%    \end{macrocode}
 % \subsection{tabularasa}\label{sec:tabularasa}
 % Removes every glyph from the output and replaces it by empty space. In the end, next to nothing will be visible. Should be extended to also remove rules or just anything visible.
 %    \begin{macrocode}
@@ -1542,6 +1625,31 @@ tabularasa = function(head)
         nodeinsertafter(line.list,n,nodecopy(s))
         line.head = noderemove(line.list,n)
       end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{tanjanize}\label{sec:tanjanize}
+%    \begin{macrocode}
+tanjanize = function(head)
+  local s = nodenew(nodeid"kern")
+  local m = nodenew(37,1)
+  local use_letter_i = true
+  scale = nodenew(8,8)
+  scale2 = nodenew(8,8)
+  scale.data  = "0.5 0 0 0.5 0 0 cm"
+  scale2.data = "2   0 0 2   0 0 cm"
+
+  for line in nodetraverseid(nodeid"hlist",head) do
+    for n in nodetraverseid(nodeid"glyph",line.head) do
+      local tmpwidth = n.width
+      if(use_letter_i) then n.char = 109 else n.char = 105 end
+      use_letter_i = not(use_letter_i)
+line.head = nodeinsertbefore(line.head,n,nodecopy(scale))
+nodeinsertafter(line.head,n,nodecopy(scale2))
+      s.kern = (tmpwidth*2-n.width)
+      nodeinsertafter(line.head,n,nodecopy(s))
     end
   end
   return head
@@ -1576,7 +1684,7 @@ upsidedown = function(head)
   for line in nodetraverseid(Hhead,head) do
     for n in nodetraverseid(GLYPH,line.head) do
       if (upsidedownarray[n.char]) then
-       shift = nodenew(8,8)
+        shift = nodenew(8,8)
         shift2 = nodenew(8,8)
         shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
         shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"

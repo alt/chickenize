@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -97,6 +97,13 @@ end
 
 chickenize = function(head)
   for i in nodetraverseid(37,head) do  --find start of a word
+-- Random determination of the chickenization of the next word:
+    if math.random() > chickenizefraction then
+      chickenize_ignore_word = true
+    elseif chickencount then
+      chicken_substitutions = chicken_substitutions + 1
+    end
+
     if (chickenize_ignore_word == false) then  -- normal case: at the beginning of a word, we jump into chickenization
       if (i.char > 64 and i.char < 91) then chickenize_capital = true else chickenize_capital = false end
       head = chickenize_real_stuff(i,head)
@@ -105,13 +112,6 @@ chickenize = function(head)
 -- At the end of the word, the ignoring is reset. New chance for everyone.
     if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
       chickenize_ignore_word = false
-    end
-
--- And the random determination of the chickenization of the next word:
-    if math.random() > chickenizefraction then
-      chickenize_ignore_word = true
-    elseif chickencount then
-      chicken_substitutions = chicken_substitutions + 1
     end
   end
   return head
@@ -193,19 +193,36 @@ texio.write_nl(line.height)
     end
   return head
 end
+function bubblesort(head)
+  for line in nodetraverseid(0,head) do
+    for glyph in nodetraverseid(37,line.head) do
+
+    end
+  end
+  return head
+end
+--  Take care: This will slow down the compilation extremely, by about a factor of 2! Only use for playing around or counting a final version of your document!
 countglyphs = function(head)
   for line in nodetraverseid(0,head) do
     for glyph in nodetraverseid(37,line.head) do
       glyphnumber = glyphnumber + 1
-      if (glyph.next.id == 10) and (glyph.next.next.id ==37) then
-        spacenumber = spacenumber + 1
+      if (glyph.next.next) then
+        if (glyph.next.id == 10) and (glyph.next.next.id == 37) then
+          spacenumber = spacenumber + 1
+        end
+        counted_glyphs_by_code[glyph.char] = counted_glyphs_by_code[glyph.char] + 1
       end
     end
   end
   return head
 end
 printglyphnumber = function()
-  texiowrite_nl("\nNumber of glyphs in this document: "..glyphnumber)
+  texiowrite_nl("\nNumber of glyphs by character code:")
+  for i = 1,127 do --%% FIXME: should allow for more characters, but cannot be printed to console output – print into document?
+    texiowrite_nl(string.char(i)..": "..counted_glyphs_by_code[i])
+  end
+
+  texiowrite_nl("\nTotal number of glyphs in this document: "..glyphnumber)
   texiowrite_nl("Number of spaces in this document: "..spacenumber)
   texiowrite_nl("Glyphs plus spaces: "..glyphnumber+spacenumber.."\n")
 end
@@ -595,6 +612,18 @@ substitutewords = function(head)
   end
   return head
 end
+suppressonecharbreakpenaltynode = node.new(12)
+suppressonecharbreakpenaltynode.penalty = 10000
+function suppressonecharbreak(head)
+  for i in node.traverse_id(10,head) do
+    if ((i.next) and (i.next.next.id == 10)) then
+        pen = node.copy(suppressonecharbreakpenaltynode)
+        node.insert_after(head,i.next,pen)
+    end
+  end
+
+  return head
+end
 tabularasa_onlytext = false
 
 tabularasa = function(head)
@@ -606,6 +635,28 @@ tabularasa = function(head)
         nodeinsertafter(line.list,n,nodecopy(s))
         line.head = noderemove(line.list,n)
       end
+    end
+  end
+  return head
+end
+tanjanize = function(head)
+  local s = nodenew(nodeid"kern")
+  local m = nodenew(37,1)
+  local use_letter_i = true
+  scale = nodenew(8,8)
+  scale2 = nodenew(8,8)
+  scale.data  = "0.5 0 0 0.5 0 0 cm"
+  scale2.data = "2   0 0 2   0 0 cm"
+
+  for line in nodetraverseid(nodeid"hlist",head) do
+    for n in nodetraverseid(nodeid"glyph",line.head) do
+      local tmpwidth = n.width
+      if(use_letter_i) then n.char = 109 else n.char = 105 end
+      use_letter_i = not(use_letter_i)
+line.head = nodeinsertbefore(line.head,n,nodecopy(scale))
+nodeinsertafter(line.head,n,nodecopy(scale2))
+      s.kern = (tmpwidth*2-n.width)
+      nodeinsertafter(line.head,n,nodecopy(s))
     end
   end
   return head
@@ -629,15 +680,15 @@ uppercasecolor = function (head)
 end
 upsidedown = function(head)
   local factor = 65536/0.99626
-  for line in node.traverse_id(0,head) do
-    for n in node.traverse_id(37,line.head) do
+  for line in nodetraverseid(Hhead,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if (upsidedownarray[n.char]) then
-       shift = node.new(8,8)
-        shift2 = node.new(8,8)
+        shift = nodenew(8,8)
+        shift2 = nodenew(8,8)
         shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
         shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
-        node.insert_before(head,n,shift)
-        node.insert_after(head,n,shift2)
+        nodeinsertbefore(head,n,shift)
+        nodeinsertafter(head,n,shift2)
       end
     end
   end
