@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2015 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -24,10 +24,11 @@ local nodetraverseid = node.traverse_id
 local nodeslide = node.slide
 
 Hhead = nodeid("hhead")
-RULE = nodeid("rule")
-GLUE = nodeid("glue")
-WHAT = nodeid("whatsit")
-COL = node.subtype("pdf_colorstack")
+RULE  = nodeid("rule")
+GLUE  = nodeid("glue")
+WHAT  = nodeid("whatsit")
+COL   = node.subtype("pdf_colorstack")
+PDF_LITERAL = node.subtype("pdf_literal")
 GLYPH = nodeid("glyph")
 color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
@@ -47,7 +48,7 @@ chicken_substitutions = 0 -- value to count the substituted chickens. Makes sens
 local match = unicode.utf8.match
 chickenize_ignore_word = false
 chickenize_real_stuff = function(i,head)
-    while ((i.next.id == 37) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
+    while ((i.next.id == GLYPH) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
       i.next = i.next.next
     end
 
@@ -57,9 +58,9 @@ chickenize_real_stuff = function(i,head)
 -- But it could be done only once each paragraph as in-paragraph changes are not possible!
 
     chickenstring_tmp = chickenstring[math.random(1,#chickenstring)]
-    chicken[0] = nodenew(37,1)  -- only a dummy for the loop
+    chicken[0] = nodenew(GLYPH,1)  -- only a dummy for the loop
     for i = 1,string.len(chickenstring_tmp) do
-      chicken[i] = nodenew(37,1)
+      chicken[i] = nodenew(GLYPH,1)
       chicken[i].font = font.current()
       chicken[i-1].next = chicken[i]
     end
@@ -96,8 +97,8 @@ chickenize_real_stuff = function(i,head)
 end
 
 chickenize = function(head)
-  for i in nodetraverseid(37,head) do  --find start of a word
--- Random determination of the chickenization of the next word:
+  for i in nodetraverseid(GLYPH,head) do  --find start of a word
+    -- Random determination of the chickenization of the next word:
     if math.random() > chickenizefraction then
       chickenize_ignore_word = true
     elseif chickencount then
@@ -110,7 +111,7 @@ chickenize = function(head)
     end
 
 -- At the end of the word, the ignoring is reset. New chance for everyone.
-    if not((i.next.id == 37) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
+    if not((i.next.id == GLYPH) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
       chickenize_ignore_word = false
     end
   end
@@ -134,8 +135,8 @@ nicetext = function()
   end
 end
 boustrophedon = function(head)
-  rot = node.new(8,8)
-  rot2 = node.new(8,8)
+  rot = node.new(8,PDF_LITERAL)
+  rot2 = node.new(8,PDF_LITERAL)
   odd = true
     for line in node.traverse_id(0,head) do
       if odd == false then
@@ -153,12 +154,12 @@ boustrophedon = function(head)
 end
 boustrophedon_glyphs = function(head)
   odd = false
-  rot = nodenew(8,8)
-  rot2 = nodenew(8,8)
+  rot = nodenew(8,PDF_LITERAL)
+  rot2 = nodenew(8,PDF_LITERAL)
   for line in nodetraverseid(0,head) do
     if odd==true then
       line.dir = "TRT"
-      for g in nodetraverseid(37,line.head) do
+      for g in nodetraverseid(GLYPH,line.head) do
         w = -g.width/65536*0.99625
         rot.data = "-1 0 0 1 " .. w .." 0 cm"
         rot2.data = "-1 0 0 1 " .. -w .." 0 cm"
@@ -174,8 +175,8 @@ boustrophedon_glyphs = function(head)
   return head
 end
 boustrophedon_inverse = function(head)
-  rot = node.new(8,8)
-  rot2 = node.new(8,8)
+  rot = node.new(8,PDF_LITERAL)
+  rot2 = node.new(8,PDF_LITERAL)
   odd = true
     for line in node.traverse_id(0,head) do
       if odd == false then
@@ -195,7 +196,7 @@ texio.write_nl(line.height)
 end
 function bubblesort(head)
   for line in nodetraverseid(0,head) do
-    for glyph in nodetraverseid(37,line.head) do
+    for glyph in nodetraverseid(GLYPH,line.head) do
 
     end
   end
@@ -204,10 +205,10 @@ end
 --  Take care: This will slow down the compilation extremely, by about a factor of 2! Only use for playing around or counting a final version of your document!
 countglyphs = function(head)
   for line in nodetraverseid(0,head) do
-    for glyph in nodetraverseid(37,line.head) do
+    for glyph in nodetraverseid(GLYPH,line.head) do
       glyphnumber = glyphnumber + 1
       if (glyph.next.next) then
-        if (glyph.next.id == 10) and (glyph.next.next.id == 37) then
+        if (glyph.next.id == 10) and (glyph.next.next.id == GLYPH) then
           spacenumber = spacenumber + 1
         end
         counted_glyphs_by_code[glyph.char] = counted_glyphs_by_code[glyph.char] + 1
@@ -227,7 +228,7 @@ printglyphnumber = function()
   texiowrite_nl("Glyphs plus spaces: "..glyphnumber+spacenumber.."\n")
 end
 countwords = function(head)
-  for glyph in nodetraverseid(37,head) do
+  for glyph in nodetraverseid(GLYPH,head) do
     if (glyph.next.id == 10) then
       wordnumber = wordnumber + 1
     end
@@ -245,7 +246,7 @@ function detectdoublewords(head)
   newlastword   = {}
   newfirstword  = {}
   for line in nodetraverseid(0,head) do
-    for g in nodetraverseid(37,line.head) do
+    for g in nodetraverseid(GLYPH,line.head) do
 texio.write_nl("next glyph",#newfirstword+1)
       newfirstword[#newfirstword+1] = g.char
       if (g.next.id == 10) then break end
@@ -380,8 +381,8 @@ leftsideright = function(head)
   local factor = 65536/0.99626
   for n in nodetraverseid(GLYPH,head) do
     if (leftsiderightarray[n.char]) then
-      shift = nodenew(8,8)
-      shift2 = nodenew(8,8)
+      shift = nodenew(8,PDF_LITERAL)
+      shift2 = nodenew(8,PDF_LITERAL)
       shift.data = "q -1 0 0 1 " .. n.width/factor .." 0 cm"
       shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
       nodeinsertbefore(head,n,shift)
@@ -444,15 +445,15 @@ matrixize = function(head)
 end
 medievalumlaut = function(head)
   local factor = 65536/0.99626
-  local org_e_node = nodenew(37)
+  local org_e_node = nodenew(GLYPH)
   org_e_node.char = 101
   for line in nodetraverseid(0,head) do
-    for n in nodetraverseid(37,line.head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if (n.char == 228 or n.char == 246 or n.char == 252) then
         e_node = nodecopy(org_e_node)
         e_node.font = n.font
-        shift = nodenew(8,8)
-        shift2 = nodenew(8,8)
+        shift = nodenew(8,PDF_LITERAL)
+        shift2 = nodenew(8,PDF_LITERAL)
         shift2.data = "Q 1 0 0 1 " .. e_node.width/factor .." 0 cm"
         nodeinsertafter(head,n,e_node)
 
@@ -518,7 +519,7 @@ randomfonts = function(head)
 end
 uclcratio = 0.5 -- ratio between uppercase and lower case
 randomuclc = function(head)
-  for i in nodetraverseid(37,head) do
+  for i in nodetraverseid(GLYPH,head) do
     if not(randomuclc_onlytext) or node.has_attribute(i,luatexbase.attributes.randuclcattr) then
       if math.random() < uclcratio then
         i.char = tex.uccode[i.char]
@@ -586,7 +587,7 @@ randomcolorstring = function()
 end
 randomcolor = function(head)
   for line in nodetraverseid(0,head) do
-    for i in nodetraverseid(37,line.head) do
+    for i in nodetraverseid(GLYPH,line.head) do
       if not(randomcolor_onlytext) or
          (node.has_attribute(i,luatexbase.attributes.randcolorattr))
       then
@@ -641,18 +642,34 @@ tabularasa = function(head)
 end
 tanjanize = function(head)
   local s = nodenew(nodeid"kern")
-  local m = nodenew(37,1)
+  local m = nodenew(GLYPH,1)
   local use_letter_i = true
-  scale = nodenew(8,8)
-  scale2 = nodenew(8,8)
+  scale = nodenew(8,PDF_LITERAL)
+  scale2 = nodenew(8,PDF_LITERAL)
   scale.data  = "0.5 0 0 0.5 0 0 cm"
   scale2.data = "2   0 0 2   0 0 cm"
 
   for line in nodetraverseid(nodeid"hlist",head) do
     for n in nodetraverseid(nodeid"glyph",line.head) do
-      local tmpwidth = n.width
-      if(use_letter_i) then n.char = 109 else n.char = 105 end
+      mimicount = 0
+      tmpwidth  = 0
+      while ((n.next.id == GLYPH) or (n.next.id == 11) or (n.next.id == 7) or (n.next.id == 0)) do  --find end of a word
+        n.next = n.next.next
+        mimicount = mimicount + 1
+        tmpwidth = tmpwidth + n.width
+      end
+
+    mimi = {}  -- constructing the node list.
+    mimi[0] = nodenew(GLYPH,1)  -- only a dummy for the loop
+    for i = 1,string.len(mimicount) do
+      mimi[i] = nodenew(GLYPH,1)
+      mimi[i].font = font.current()
+      if(use_letter_i) then mimi[i].char = 109 else mimi[i].char = 105 end
       use_letter_i = not(use_letter_i)
+      mimi[i-1].next = mimi[i]
+    end
+--]]
+
 line.head = nodeinsertbefore(line.head,n,nodecopy(scale))
 nodeinsertafter(line.head,n,nodecopy(scale2))
       s.kern = (tmpwidth*2-n.width)
@@ -683,8 +700,8 @@ upsidedown = function(head)
   for line in nodetraverseid(Hhead,head) do
     for n in nodetraverseid(GLYPH,line.head) do
       if (upsidedownarray[n.char]) then
-        shift = nodenew(8,8)
-        shift2 = nodenew(8,8)
+        shift = nodenew(8,PDF_LITERAL)
+        shift2 = nodenew(8,PDF_LITERAL)
         shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
         shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
         nodeinsertbefore(head,n,shift)
@@ -712,8 +729,8 @@ colorstretch = function (head)
 
     if colorexpansion then  -- if also the font expansion should be shown
       local g = line.head
-      while not(g.id == 37) and (g.next) do g = g.next end -- find first glyph on line. If line is empty, no glyph:
-      if (g.id == 37) then                                 -- read width only if g is a glyph!
+      while not(g.id == GLYPH) and (g.next) do g = g.next end -- find first glyph on line. If line is empty, no glyph:
+      if (g.id == GLYPH) then                                 -- read width only if g is a glyph!
         exp_factor = g.width / f[g.char].width
         exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
         rule_bad.width = 0.5*line.width  -- we need two rules on each line!
@@ -765,7 +782,7 @@ colorstretch = function (head)
       glue_ratio_output = {}
       for s in string.utfvalues(math.abs(glue_ratio)) do -- using math.abs here gets us rid of the minus sign
         local char = unicode.utf8.char(s)
-        glue_ratio_output[j] = nodenew(37,1)
+        glue_ratio_output[j] = nodenew(GLYPH,1)
         glue_ratio_output[j].font = font.current()
         glue_ratio_output[j].char = s
         j = j+1

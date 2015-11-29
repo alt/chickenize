@@ -8,12 +8,21 @@
 %% 
 %% EXPERIMENTAL CODE
 %% 
-%% This package is copyright © 2014 Arno L. Trautmann. It may be distributed and/or
+%% This package is copyright © 2015 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
+
+\def\ALT{%
+  \bgroup%
+  \fontspec{Latin Modern Sans}%
+  A%
+  \kern-.37em \raisebox{.7ex}{\scalebox{0.25}{L}}%
+  \kern-.0em \raisebox{-0.98ex}{T}%
+  \egroup%
+}
 
 \def\allownumberincommands{
   \catcode`\0=11
