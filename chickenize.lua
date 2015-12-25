@@ -218,7 +218,7 @@ countglyphs = function(head)
   return head
 end
 printglyphnumber = function()
-  texiowrite_nl("\nNumber of glyphs by character code:")
+  texiowrite_nl("\nNumber of glyphs by character code (only up to 127):")
   for i = 1,127 do --%% FIXME: should allow for more characters, but cannot be printed to console output – print into document?
     texiowrite_nl(string.char(i)..": "..counted_glyphs_by_code[i])
   end

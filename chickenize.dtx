@@ -379,7 +379,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 % 
 % The Lua file is not found by using a simple |dofile("chickenize.lua")| call, but we have to use kpse's |find_file|.
 %    \begin{macrocode}
-\input{luatexbase.sty}
+%%%%\input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
 \def\ALT{%
@@ -716,13 +716,13 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 %    \end{macrocode}
 % Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
 %    \begin{macrocode}
-\newluatexattribute\leetattr
-\newluatexattribute\letterspaceadjustattr
-\newluatexattribute\randcolorattr
-\newluatexattribute\randfontsattr
-\newluatexattribute\randuclcattr
-\newluatexattribute\tabularasaattr
-\newluatexattribute\uppercasecolorattr
+\newattribute\leetattr
+\newattribute\letterspaceadjustattr
+\newattribute\randcolorattr
+\newattribute\randfontsattr
+\newattribute\randuclcattr
+\newattribute\tabularasaattr
+\newattribute\uppercasecolorattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
@@ -1063,11 +1063,11 @@ function bubblesort(head)
 end
 %    \end{macrocode}
 % \subsection{countglyphs}\label{sec:countglyphs}
-% Counts the glyphs in your document. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
+% Counts the glyphs in your document. Where “glyph” means every printed character in everything that is a paragraph – formulas do \emph{not} work! Captions of floats etc.~also will \emph{not} work. However, hyphenations \emph{do} work and the hyphen sign \emph{is counted}! And that is the sole reason for this function – every simple script could read the letters in a doucment, but only after the hyphenation it is possible to count the real number of printed characters – where the hyphen does count.
 % 
 % Not only the total number of glyphs is recorded, but also the number of glyphs by character code. By this, you know exactly how many “a” or “ß” you used. A feature of category “completely useless”.
 % 
-% Spaces are also counted, but only spaces between glyphs in the output (i.\,e. nothing at the end/beginning of the lines), excluding indentation.
+% Spaces are also counted, but only spaces between glyphs in the output (i.\,e.~nothing at the end/beginning of the lines), excluding indentation.
 % 
 % This function will (maybe, upon request) be extended to allow counting of whatever you want.
 %
@@ -1091,7 +1091,7 @@ end
 % To print out the number at the end of the document, the following function is registered in the |stop_run| callback. This will prevent the normal message from being printed, informing the user about page and memory stats etc. But I guess when counting characters, everything else does not matter at all? …
 %    \begin{macrocode}
 printglyphnumber = function()
-  texiowrite_nl("\nNumber of glyphs by character code:")
+  texiowrite_nl("\nNumber of glyphs by character code (only up to 127):")
   for i = 1,127 do --%% FIXME: should allow for more characters, but cannot be printed to console output – print into document?
     texiowrite_nl(string.char(i)..": "..counted_glyphs_by_code[i])
   end

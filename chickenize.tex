@@ -12,7 +12,7 @@
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
-\input{luatexbase.sty}
+%%%%\input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
 \def\ALT{%
@@ -343,13 +343,13 @@
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",zebranize,"zebranize")}}
 \def\unzebranize{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","zebranize")}}
-\newluatexattribute\leetattr
-\newluatexattribute\letterspaceadjustattr
-\newluatexattribute\randcolorattr
-\newluatexattribute\randfontsattr
-\newluatexattribute\randuclcattr
-\newluatexattribute\tabularasaattr
-\newluatexattribute\uppercasecolorattr
+\newattribute\leetattr
+\newattribute\letterspaceadjustattr
+\newattribute\randcolorattr
+\newattribute\randfontsattr
+\newattribute\randuclcattr
+\newattribute\tabularasaattr
+\newattribute\uppercasecolorattr
 
 \long\def\textleetspeak#1%
   {\setluatexattribute\leetattr{42}#1\unsetluatexattribute\leetattr}
