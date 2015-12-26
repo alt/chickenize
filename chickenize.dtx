@@ -12,7 +12,7 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2015, if possible, maybe 2014/2013 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
+You need an up-to-date TeX Live (2015, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -317,7 +317,7 @@ end
 
 callback.register("post_linebreak_filter",my_new_filter)
 \end{verbatim}
-The function |callback.register| takes the name of the callback and your new function. However, there are some reasons why we avoid this syntax here. Instead, we rely on the package |luatexbase| by Manuel Pégourié-Gonnard and Élie Roux that offers the function |luatexbase.add_to_callback| which has a somewhat extended syntax:
+The function |callback.register| takes the name of the callback and your new function. However, there are some reasons why we avoid this syntax here. Instead, we rely on the function |luatexbase.add_to_callback|. This is provided by the \LaTeX\ kernel table |luatexbase| which was initially a package by Manuel Pégourié-Gonnard and Élie Roux.\footnote{Since the late 2015 release of \LaTeX, the package has not to be loaded anymore since the functionality is absorbed by the kernel. Plain\TeX~users can load the |ltluatex| file which provides the needed functionality.} This function has a more extended syntax:
 \begin{verbatim}
 luatexbase.add_to_callback("post_linebreak_filter",my_new_filter,"a fancy new filter")
 \end{verbatim}
@@ -328,7 +328,7 @@ luatexbase.remove_from_callback("post_linebreak_filter","a fancy new filter")
 
 You have to consult the Lua\TeX\ manual to see what functionality a callback has when executed, what arguments it expects and what return values have to be given.
 
-Everything I have written here is not the complete truth – please consult the Lua\TeX\ manual and the |luatexbase| documentation for details!
+Everything I have written here is not the complete truth – please consult the Lua\TeX\ manual and the |luatexbase| section in the \LaTeX\ kernel documentation for details!
 
 \section{Nodes}
 Essentially everything that Lua\TeX\ deals with are nodes – letters, spaces, colors, rules etc. In this package, we make heavy use of different types of nodes, so an understanding of the concept is crucial for the functionality.
@@ -375,11 +375,10 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 %\section{\TeX\ file}
 % This file is more-or-less a dummy file to offer a nice interface for the functions. Basically, every macro registers a function of the same name in the corresponding callback. The |un|-macros later remove these functions. Where it makes sense, there are |text|-variants that activate the function only in a certain area of the text, by means of Lua\TeX's attributes.
 %
-% For (un)registering, we use the |luatexbase| package. Then, the |.lua| file is loaded which does the actual work. Finally, the \TeX\ macros are defined as simple |\directlua| calls.
+% For (un)registering, we use the |luatexbase| \LaTeX\ kernel functionality. Then, the |.lua| file is loaded which does the actual work. Finally, the \TeX\ macros are defined as simple |\directlua| calls.
 % 
 % The Lua file is not found by using a simple |dofile("chickenize.lua")| call, but we have to use kpse's |find_file|.
 %    \begin{macrocode}
-%%%%\input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("chickenize.lua"))}
 
 \def\ALT{%
