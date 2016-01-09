@@ -8,7 +8,7 @@
 %% 
 %% EXPERIMENTAL CODE
 %% 
-%% This package is copyright © 2015 Arno L. Trautmann. It may be distributed and/or
+%% This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
@@ -329,9 +329,6 @@
 }
 \def\unupsidedown{
   \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedown")}}
-
-\def\unuppercasecolor{
-  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","upsidedow")}}
 
 \def\variantjustification{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",variantjustification,"variantjustification")}}

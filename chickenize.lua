@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 2015 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -30,6 +30,10 @@ WHAT  = nodeid("whatsit")
 COL   = node.subtype("pdf_colorstack")
 PDF_LITERAL = node.subtype("pdf_literal")
 GLYPH = nodeid("glyph")
+GLUE  = nodeid("glue")
+PENALTY = nodeid("penalty")
+GLUE_SPEc = nodeid("glue_spec")
+KERN  = nodeid("kern")
 color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
@@ -70,8 +74,8 @@ chickenize_real_stuff = function(i,head)
       local char = unicode.utf8.char(s)
       chicken[j].char = s
       if match(char,"%s") then
-        chicken[j] = nodenew(10)
-        chicken[j].spec = nodenew(47)
+        chicken[j] = nodenew(GLUE)
+        chicken[j].spec = nodenew(GLUE_SPEC)
         chicken[j].spec.width = space
         chicken[j].spec.shrink = shrink
         chicken[j].spec.stretch = stretch
@@ -135,8 +139,8 @@ nicetext = function()
   end
 end
 boustrophedon = function(head)
-  rot = node.new(8,PDF_LITERAL)
-  rot2 = node.new(8,PDF_LITERAL)
+  rot = node.new(WHAT,PDF_LITERAL)
+  rot2 = node.new(WHAT,PDF_LITERAL)
   odd = true
     for line in node.traverse_id(0,head) do
       if odd == false then
@@ -154,8 +158,8 @@ boustrophedon = function(head)
 end
 boustrophedon_glyphs = function(head)
   odd = false
-  rot = nodenew(8,PDF_LITERAL)
-  rot2 = nodenew(8,PDF_LITERAL)
+  rot = nodenew(WHAT,PDF_LITERAL)
+  rot2 = nodenew(WHAT,PDF_LITERAL)
   for line in nodetraverseid(0,head) do
     if odd==true then
       line.dir = "TRT"
@@ -175,8 +179,8 @@ boustrophedon_glyphs = function(head)
   return head
 end
 boustrophedon_inverse = function(head)
-  rot = node.new(8,PDF_LITERAL)
-  rot2 = node.new(8,PDF_LITERAL)
+  rot = node.new(WHAT,PDF_LITERAL)
+  rot2 = node.new(WHAT,PDF_LITERAL)
   odd = true
     for line in node.traverse_id(0,head) do
       if odd == false then
@@ -381,8 +385,8 @@ leftsideright = function(head)
   local factor = 65536/0.99626
   for n in nodetraverseid(GLYPH,head) do
     if (leftsiderightarray[n.char]) then
-      shift = nodenew(8,PDF_LITERAL)
-      shift2 = nodenew(8,PDF_LITERAL)
+      shift = nodenew(WHAT,PDF_LITERAL)
+      shift2 = nodenew(WHAT,PDF_LITERAL)
       shift.data = "q -1 0 0 1 " .. n.width/factor .." 0 cm"
       shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
       nodeinsertbefore(head,n,shift)
@@ -452,15 +456,15 @@ medievalumlaut = function(head)
       if (n.char == 228 or n.char == 246 or n.char == 252) then
         e_node = nodecopy(org_e_node)
         e_node.font = n.font
-        shift = nodenew(8,PDF_LITERAL)
-        shift2 = nodenew(8,PDF_LITERAL)
+        shift = nodenew(WHAT,PDF_LITERAL)
+        shift2 = nodenew(WHAT,PDF_LITERAL)
         shift2.data = "Q 1 0 0 1 " .. e_node.width/factor .." 0 cm"
         nodeinsertafter(head,n,e_node)
 
         nodeinsertbefore(head,e_node,shift)
         nodeinsertafter(head,e_node,shift2)
 
-        x_node = nodenew(11)
+        x_node = nodenew(KERN)
         x_node.kern = -e_node.width
         nodeinsertafter(head,shift2,x_node)
       end
@@ -613,11 +617,11 @@ substitutewords = function(head)
   end
   return head
 end
-suppressonecharbreakpenaltynode = node.new(12)
+suppressonecharbreakpenaltynode = node.new(PENALTY)
 suppressonecharbreakpenaltynode.penalty = 10000
 function suppressonecharbreak(head)
-  for i in node.traverse_id(10,head) do
-    if ((i.next) and (i.next.next.id == 10)) then
+  for i in node.traverse_id(GLUE,head) do
+    if ((i.next) and (i.next.next.id == GLUE)) then
         pen = node.copy(suppressonecharbreakpenaltynode)
         node.insert_after(head,i.next,pen)
     end
@@ -644,8 +648,8 @@ tanjanize = function(head)
   local s = nodenew(nodeid"kern")
   local m = nodenew(GLYPH,1)
   local use_letter_i = true
-  scale = nodenew(8,PDF_LITERAL)
-  scale2 = nodenew(8,PDF_LITERAL)
+  scale = nodenew(WHAT,PDF_LITERAL)
+  scale2 = nodenew(WHAT,PDF_LITERAL)
   scale.data  = "0.5 0 0 0.5 0 0 cm"
   scale2.data = "2   0 0 2   0 0 cm"
 
@@ -700,8 +704,8 @@ upsidedown = function(head)
   for line in nodetraverseid(Hhead,head) do
     for n in nodetraverseid(GLYPH,line.head) do
       if (upsidedownarray[n.char]) then
-        shift = nodenew(8,PDF_LITERAL)
-        shift2 = nodenew(8,PDF_LITERAL)
+        shift = nodenew(WHAT,PDF_LITERAL)
+        shift2 = nodenew(WHAT,PDF_LITERAL)
         shift.data = "q 1 0 0 -1 0 " .. n.height/factor .." cm"
         shift2.data = "Q 1 0 0 1 " .. n.width/factor .." 0 cm"
         nodeinsertbefore(head,n,shift)
