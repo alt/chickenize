@@ -216,6 +216,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
+\command{explainbackslashes} A small list that gives hints on how many |\| characters you actually need for a backslash. I's supposed to be funny. At least my head thinks it's funny. Inspired (and mostly copied from, actually) xkcd.
 \command{hammertime} STOP! —— Hammertime!
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
@@ -523,6 +524,19 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   }
 }
 \let\dubstepize\dubstepenize
+
+\def\explainbackslashes{ %% inspired by xkcd #1638
+  {\tt\noindent
+\textbackslash escape character\\
+\textbackslash\textbackslash line end or escaped escape character in tex.print("")\\
+\textbackslash\textbackslash\textbackslash real, real backslash\\
+\textbackslash\textbackslash\textbackslash\textbackslash line end in tex.print("")\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash elder backslash \\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash which escapes the screen and enters your brain\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash so real it transcends time and space \\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash to end all other text\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
+}
 
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{

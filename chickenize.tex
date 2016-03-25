@@ -157,6 +157,19 @@
 }
 \let\dubstepize\dubstepenize
 
+\def\explainbackslashes{ %% inspired by xkcd #1638
+  {\tt\noindent
+\textbackslash escape character\\
+\textbackslash\textbackslash line end or escaped escape character in tex.print("")\\
+\textbackslash\textbackslash\textbackslash real, real backslash\\
+\textbackslash\textbackslash\textbackslash\textbackslash line end in tex.print("")\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash elder backslash \\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash which escapes the screen and enters your brain\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash so real it transcends time and space \\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash backslash to end all other text\\
+\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
+}
+
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
     \let\grqq\relax\let\glqq\relax
