@@ -13,27 +13,29 @@
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
 
-local nodenew = node.new
+local nodeid   = node.id
 local nodecopy = node.copy
+local nodenew  = node.new
 local nodetail = node.tail
-local nodeinsertbefore = node.insert_before
-local nodeinsertafter = node.insert_after
-local noderemove = node.remove
-local nodeid = node.id
-local nodetraverseid = node.traverse_id
 local nodeslide = node.slide
+local noderemove = node.remove
+local nodetraverseid = node.traverse_id
+local nodeinsertafter = node.insert_after
+local nodeinsertbefore = node.insert_before
 
 Hhead = nodeid("hhead")
 RULE  = nodeid("rule")
 GLUE  = nodeid("glue")
 WHAT  = nodeid("whatsit")
 COL   = node.subtype("pdf_colorstack")
-PDF_LITERAL = node.subtype("pdf_literal")
+DISC  = nodeid("disc")
 GLYPH = nodeid("glyph")
 GLUE  = nodeid("glue")
-PENALTY = nodeid("penalty")
-GLUE_SPEc = nodeid("glue_spec")
+HLIST = nodeid("hlist")
 KERN  = nodeid("kern")
+PUNCT = nodeid("punct")
+PENALTY = nodeid("penalty")
+PDF_LITERAL = node.subtype("pdf_literal")
 color_push = nodenew(WHAT,COL)
 color_pop = nodenew(WHAT,COL)
 color_push.stack = 0
@@ -52,7 +54,7 @@ chicken_substitutions = 0 -- value to count the substituted chickens. Makes sens
 local match = unicode.utf8.match
 chickenize_ignore_word = false
 chickenize_real_stuff = function(i,head)
-    while ((i.next.id == GLYPH) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
+    while ((i.next.id == GLYPH) or (i.next.id == KERN) or (i.next.id == DISC) or (i.next.id == HLIST)) do  --find end of a word
       i.next = i.next.next
     end
 
@@ -75,10 +77,9 @@ chickenize_real_stuff = function(i,head)
       chicken[j].char = s
       if match(char,"%s") then
         chicken[j] = nodenew(GLUE)
-        chicken[j].spec = nodenew(GLUE_SPEC)
-        chicken[j].spec.width = space
-        chicken[j].spec.shrink = shrink
-        chicken[j].spec.stretch = stretch
+        chicken[j].width = space
+        chicken[j].shrink = shrink
+        chicken[j].stretch = stretch
       end
       j = j+1
     end
@@ -115,7 +116,7 @@ chickenize = function(head)
     end
 
 -- At the end of the word, the ignoring is reset. New chance for everyone.
-    if not((i.next.id == GLYPH) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
+    if not((i.next.id == GLYPH) or (i.next.id == DISC) or (i.next.id == PUNCT) or (i.next.id == KERN)) then
       chickenize_ignore_word = false
     end
   end
@@ -395,13 +396,11 @@ leftsideright = function(head)
   end
   return head
 end
-local letterspace_glue = nodenew(nodeid"glue")
-local letterspace_spec = nodenew(nodeid"glue_spec")
-local letterspace_pen = nodenew(nodeid"penalty")
+local letterspace_glue   = nodenew(nodeid"glue")
+local letterspace_pen    = nodenew(nodeid"penalty")
 
-letterspace_spec.width   = tex.sp"0pt"
-letterspace_spec.stretch = tex.sp"0.05pt"
-letterspace_glue.spec    = letterspace_spec
+letterspace_glue.width   = tex.sp"0pt"
+letterspace_glue.stretch = tex.sp"0.5pt"
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
   for glyph in nodetraverseid(nodeid"glyph", head) do

@@ -18,7 +18,7 @@
   \bgroup%
   \fontspec{Latin Modern Sans}%
   A%
-  \kern-.37em \raisebox{.7ex}{\scalebox{0.25}{L}}%
+  \kern-.4em \raisebox{.65ex}{\scalebox{0.3}{L}}%
   \kern-.0em \raisebox{-0.98ex}{T}%
   \egroup%
 }
@@ -170,6 +170,10 @@
 \textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
 }
 
+\def\gameoflife{
+  Your Life Is Tetris. Stop Playing It Like Chess.
+}
+
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
     \let\grqq\relax\let\glqq\relax
@@ -267,6 +271,11 @@
              rainbowcolor = false}}
 \let\nyanize\rainbowcolor
 \let\unnyanize\unrainbowcolor
+
+\def\randomchars{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomchars,"randomchars")}}
+\def\unrandomchars{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomchars")}}
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -394,40 +403,35 @@
   }%
 }
 \long\def\drawchicken{
-\luadraw{90}{
-kopf = {200,50} % Kopfmitte
-kopf_rad = 20
+  \luadraw{90}{
+    chickenhead     = {200,50} % chicken head center
+    chickenhead_rad = 20
 
-d = {215,35} % Halsansatz
-e = {230,10} %
+    neckstart = {215,35} % neck
+    neckstop  = {230,10} %
 
-korper = {260,-10}
-korper_rad = 40
+    chickenbody     = {260,-10}
+    chickenbody_rad = 40
+    chickenleg = {
+      {{260,-50},{250,-70},{235,-70}},
+      {{270,-50},{260,-75},{245,-75}}
+    }
 
-bein11 = {260,-50}
-bein12 = {250,-70}
-bein13 = {235,-70}
+    beak_top = {185,55}
+    beak_front = {165,45}
+    beak_bottom = {185,35}
 
-bein21 = {270,-50}
-bein22 = {260,-75}
-bein23 = {245,-75}
+    wing_front = {260,-10}
+    wing_bottom = {280,-40}
+    wing_back = {275,-15}
 
-schnabel_oben = {185,55}
-schnabel_vorne = {165,45}
-schnabel_unten = {185,35}
-
-flugel_vorne = {260,-10}
-flugel_unten = {280,-40}
-flugel_hinten = {275,-15}
-
-sloppycircle(kopf,kopf_rad)
-sloppyline(d,e)
-sloppycircle(korper,korper_rad)
-sloppyline(bein11,bein12) sloppyline(bein12,bein13)
-sloppyline(bein21,bein22) sloppyline(bein22,bein23)
-sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
-sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
-}
+    sloppycircle(chickenhead,chickenhead_rad) sloppyline(neckstart,neckstop)
+    sloppycircle(chickenbody,chickenbody_rad)
+    sloppyline(chickenleg[1][1],chickenleg[1][2]) sloppyline(chickenleg[1][2],chickenleg[1][3])
+    sloppyline(chickenleg[2][1],chickenleg[2][2]) sloppyline(chickenleg[2][2],chickenleg[2][3])
+    sloppyline(beak_front,beak_top) sloppyline(beak_front,beak_bottom)
+    sloppyline(wing_front,wing_bottom) sloppyline(wing_back,wing_bottom)
+  }
 }
 %% 
 %%

@@ -4,7 +4,7 @@
 \iffalse
 %</driver>
 %<*readme>
-This is the README file of the chickenize package. The package provides several commands and Lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It serves mostly educational and playful usage, but some functions may be used in serious documents.
+The package chickenize provides several commands and Lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It serves mostly educational and playful usage, but some functions may be used in serious documents.
 
 To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
   chickenize.pdf  (documentation)
@@ -12,7 +12,7 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2015, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
+You need an up-to-date TeX Live (2016, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!) Lua\TeX > 0.90 is required for some features since the corresponding syntax has changed!
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -60,8 +60,7 @@ ance status ‘maintained’.
 \nopreamble\nopostamble
 \catcode`\@12
 
-%\generate{\file{README.}{\from{chickenize.dtx}{readme}}}
-% readme will not be generated until I figured out how to write a file without extension
+\generate{\file{README.md}{\from{chickenize.dtx}{readme}}}
 
 
 \ifx\fmtname\nameofplainTeX
@@ -117,12 +116,12 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.3}
-\centerline{\hspace*{2cm} Arno L. Trautmann \ALT}
+\centerline{v0.2.4}
+\centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
 \kern.5cm
-\textcolor{blue}{How to read this document.}
+\textcolor{blue}{\Large How to read this document.}
 
 This is the documentation of the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking (and some other stuff). Most of this package's content is just for fun and educational use, but there are also some functions that can be useful in a normal document.
 
@@ -194,7 +193,7 @@ A small and incomplete overview of the functionalities offered by this package. 
 \newpage
 \part{User Documentation}
 \section{How It Works}
-We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| and the |post_line|\-|break_filter|. Hooking a function into these, we can nearly arbitrarily change the content of the document. If the changes should be on the input-side (e.~g. replacing words with |chicken|), one can use the |pre_linebreak_filter|. However, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is to be preferred for such things.
+We make use of Lua\TeX s callbacks, especially the |pre_line|\-|break_filter| and the |post_line|\-|break_filter|. Hooking a function into these, we can nearly arbitrarily change the content of the document. If the changes should be on the input-side (e.\,g.~replacing words with |chicken|), one can use the |pre_linebreak_filter|. However, changes like inserting color are best made after the linebreak is finalized, so |post_linebreak_filter| is to be preferred for such things.
 
 All functions traverse the node list of a paragraph and manipulate the nodes' properties (like |.font| or |.char|) or insert nodes (like color push/pop nodes) and return this changed node list.
 
@@ -217,6 +216,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
 \command{explainbackslashes} A small list that gives hints on how many |\| characters you actually need for a backslash. I's supposed to be funny. At least my head thinks it's funny. Inspired (and mostly copied from, actually) xkcd.
+\command{gameoflife} Try it.
 \command{hammertime} STOP! —— Hammertime!
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
 \command{matrixize} Replaces every glyph by a binary representation of its ASCII value.
@@ -386,7 +386,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \bgroup%
   \fontspec{Latin Modern Sans}%
   A%
-  \kern-.37em \raisebox{.7ex}{\scalebox{0.25}{L}}%
+  \kern-.4em \raisebox{.65ex}{\scalebox{0.3}{L}}%
   \kern-.0em \raisebox{-0.98ex}{T}%
   \egroup%
 }
@@ -538,6 +538,10 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
 }
 
+\def\gameoflife{
+  Your Life Is Tetris. Stop Playing It Like Chess.
+}
+
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
     \let\grqq\relax\let\glqq\relax
@@ -638,6 +642,11 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
              rainbowcolor = false}}
 \let\nyanize\rainbowcolor
 \let\unnyanize\unrainbowcolor
+
+\def\randomchars{
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomchars,"randomchars")}}
+\def\unrandomchars{
+  \directlua{luatexbase.remove_from_callback("post_linebreak_filter","randomchars")}}
 
 \def\randomcolor{
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",randomcolor,"randomcolor")}}
@@ -774,40 +783,35 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   }%
 }
 \long\def\drawchicken{
-\luadraw{90}{
-kopf = {200,50} % Kopfmitte
-kopf_rad = 20
+  \luadraw{90}{
+    chickenhead     = {200,50} % chicken head center
+    chickenhead_rad = 20
 
-d = {215,35} % Halsansatz
-e = {230,10} % 
+    neckstart = {215,35} % neck
+    neckstop  = {230,10} % 
 
-korper = {260,-10}
-korper_rad = 40
+    chickenbody     = {260,-10}
+    chickenbody_rad = 40
+    chickenleg = {
+      {{260,-50},{250,-70},{235,-70}},
+      {{270,-50},{260,-75},{245,-75}}
+    }
 
-bein11 = {260,-50}
-bein12 = {250,-70}
-bein13 = {235,-70}
+    beak_top = {185,55}
+    beak_front = {165,45}
+    beak_bottom = {185,35}
 
-bein21 = {270,-50}
-bein22 = {260,-75}
-bein23 = {245,-75}
+    wing_front = {260,-10}
+    wing_bottom = {280,-40}
+    wing_back = {275,-15}
 
-schnabel_oben = {185,55}
-schnabel_vorne = {165,45}
-schnabel_unten = {185,35}
-
-flugel_vorne = {260,-10}
-flugel_unten = {280,-40}
-flugel_hinten = {275,-15}
-
-sloppycircle(kopf,kopf_rad)
-sloppyline(d,e)
-sloppycircle(korper,korper_rad)
-sloppyline(bein11,bein12) sloppyline(bein12,bein13)
-sloppyline(bein21,bein22) sloppyline(bein22,bein23)
-sloppyline(schnabel_vorne,schnabel_oben) sloppyline(schnabel_vorne,schnabel_unten)
-sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
-}
+    sloppycircle(chickenhead,chickenhead_rad) sloppyline(neckstart,neckstop)
+    sloppycircle(chickenbody,chickenbody_rad)
+    sloppyline(chickenleg[1][1],chickenleg[1][2]) sloppyline(chickenleg[1][2],chickenleg[1][3])
+    sloppyline(chickenleg[2][1],chickenleg[2][2]) sloppyline(chickenleg[2][2],chickenleg[2][3])
+    sloppyline(beak_front,beak_top) sloppyline(beak_front,beak_bottom)
+    sloppyline(wing_front,wing_bottom) sloppyline(wing_back,wing_bottom)
+  }
 }
 %    \end{macrocode}
 % \iffalse
@@ -820,7 +824,7 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2016/01/09 v0.2.3 chickenize package]
+  [2016/05/27 v0.2.4 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -853,27 +857,29 @@ sloppyline(flugel_vorne,flugel_unten) sloppyline(flugel_hinten,flugel_unten)
 % First, we set up some constants that are used by many of the following functions. These are made global so the code can be manipulated at the document level, too.
 %    \begin{macrocode}
 
-local nodenew = node.new
+local nodeid   = node.id
 local nodecopy = node.copy
+local nodenew  = node.new
 local nodetail = node.tail
-local nodeinsertbefore = node.insert_before
-local nodeinsertafter = node.insert_after
-local noderemove = node.remove
-local nodeid = node.id
-local nodetraverseid = node.traverse_id
 local nodeslide = node.slide
+local noderemove = node.remove
+local nodetraverseid = node.traverse_id
+local nodeinsertafter = node.insert_after
+local nodeinsertbefore = node.insert_before
 
 Hhead = nodeid("hhead")
 RULE  = nodeid("rule")
 GLUE  = nodeid("glue")
 WHAT  = nodeid("whatsit")
 COL   = node.subtype("pdf_colorstack")
-PDF_LITERAL = node.subtype("pdf_literal")
+DISC  = nodeid("disc")
 GLYPH = nodeid("glyph")
 GLUE  = nodeid("glue")
-PENALTY = nodeid("penalty")
-GLUE_SPEc = nodeid("glue_spec")
+HLIST = nodeid("hlist")
 KERN  = nodeid("kern")
+PUNCT = nodeid("punct")
+PENALTY = nodeid("penalty")
+PDF_LITERAL = node.subtype("pdf_literal")
 %    \end{macrocode}
 % Now we set up the nodes used for all color things. The nodes are whatsits of subtype |pdf_colorstack|.
 %    \begin{macrocode}
@@ -902,7 +908,7 @@ chickenize_ignore_word = false
 % The function |chickenize_real_stuff| is started once the beginning of a to-be-substituted word is found.
 %    \begin{macrocode}
 chickenize_real_stuff = function(i,head)
-    while ((i.next.id == GLYPH) or (i.next.id == 11) or (i.next.id == 7) or (i.next.id == 0)) do  --find end of a word
+    while ((i.next.id == GLYPH) or (i.next.id == KERN) or (i.next.id == DISC) or (i.next.id == HLIST)) do  --find end of a word
       i.next = i.next.next
     end
 
@@ -925,10 +931,9 @@ chickenize_real_stuff = function(i,head)
       chicken[j].char = s
       if match(char,"%s") then 
         chicken[j] = nodenew(GLUE)
-        chicken[j].spec = nodenew(GLUE_SPEC)
-        chicken[j].spec.width = space
-        chicken[j].spec.shrink = shrink
-        chicken[j].spec.stretch = stretch
+        chicken[j].width = space
+        chicken[j].shrink = shrink
+        chicken[j].stretch = stretch
       end
       j = j+1
     end
@@ -965,7 +970,7 @@ chickenize = function(head)
     end
 
 -- At the end of the word, the ignoring is reset. New chance for everyone.
-    if not((i.next.id == GLYPH) or (i.next.id == 7) or (i.next.id == 22) or (i.next.id == 11)) then
+    if not((i.next.id == GLYPH) or (i.next.id == DISC) or (i.next.id == PUNCT) or (i.next.id == KERN)) then
       chickenize_ignore_word = false
     end
   end
@@ -1066,6 +1071,7 @@ end
 %    \end{macrocode}
 % 
 % \subsection{bubblesort}\label{sec:bubblesort}
+% Bubllesort is to be implemented. Why? Because it's funny.
 %    \begin{macrocode}
 function bubblesort(head)
   for line in nodetraverseid(0,head) do
@@ -1328,18 +1334,16 @@ leftsideright = function(head)
 end
 %    \end{macrocode}
 % \subsection{letterspaceadjust}\label{sec:letterspaceadjust}
-% Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced which will, hopefully, result in the greyness to be more equally distributed over the page.
+% Yet another piece of code by Paul. This is primarily intended for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced which will, hopefully, result in the greyness to be more equally distributed over the page.
 %
 % Why the synonym |stealsheep|? Because of a comment of Paul on the |texhax| mailing list: \url{http://tug.org/pipermail/texhax/2011-October/018374.html}
 % \subsubsection{setup of variables}
 %    \begin{macrocode}
-local letterspace_glue = nodenew(nodeid"glue")
-local letterspace_spec = nodenew(nodeid"glue_spec")
-local letterspace_pen = nodenew(nodeid"penalty")
+local letterspace_glue   = nodenew(nodeid"glue")
+local letterspace_pen    = nodenew(nodeid"penalty")
 
-letterspace_spec.width   = tex.sp"0pt"
-letterspace_spec.stretch = tex.sp"0.05pt"
-letterspace_glue.spec    = letterspace_spec
+letterspace_glue.width   = tex.sp"0pt"
+letterspace_glue.stretch = tex.sp"0.5pt"
 letterspace_pen.penalty  = 10000
 %    \end{macrocode}
 % \subsubsection{function implementation}
@@ -2058,10 +2062,13 @@ end
 % </lua>
 %\fi
 % \newpage
-% \section{Known Bugs}\label{bugs}
+% \section{Known Bugs and Fun Facts}\label{bugs}
 % The behaviour of the |\chickenize| macro is under construction and everything it does so far is considered a feature.
 % \begin{description}
 % \item[babel] Using |chickenize| with |babel| leads to a problem with the " (double quote) character, as it is made active: When using |\chickenizesetup| \emph{after} |\begin{document}|, you can \emph{not} use " for strings, but you have to use ' (single quote) instead. No problem really, but take care of this.
+% \item[medievalumlaut] You should use a decent OpenType font to get the best result. The standard font will not nicely support the positioning of the e character.
+% \item[boustrophedon and chickenize] do not work together nicely. There is an additional shift I cannot explain so far. However, if you really, really need a boustrophedon of chickenize, you do have some serious problems.
+% \item[letterspaceadjust and chickenize] When using both letterspaceadjust and chickenize, make sure to activate |\chickenize| before |\letterspaceadjust|. Elsewise the chickenization will not work due to the implementation of letterspaceadjust.
 % \end{description}
 % \section{To Do's}
 % Some things that should be implemented but aren’t so far or are very poor at the moment:
@@ -2070,7 +2077,7 @@ end
 % \item[countglyphs] should be extended to count anything the user wants to count
 % \item[rainbowcolor] should be more flexible – the angle of the rainbow should be easily adjustable.
 % \item[pancakenize] should do something funny.
-% \item[chickenize] should differ between character and punctuation.
+% \item[chickenize] should differentiate between character and punctuation.
 % \item[swing] swing dancing apes – that will be very hard, actually …
 % \item[chickenmath] chickenization of math mode
 % \end{description}
