@@ -316,7 +316,7 @@
   \directlua{luatexbase.remove_from_callback("process_input_buffer","substitutewords")}}
 
 \def\addtosubstitutions#1#2{
-  \directlua{addtosubstitutions("#1","#2")}
+  \directlua{addtosubstitutions("\luaescapestring{#1}","\luaescapestring{#2}")}
 }
 
 \def\suppressonecharbreak{
