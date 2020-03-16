@@ -8,7 +8,7 @@
 %% 
 %% EXPERIMENTAL CODE
 %% 
-%% This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
+%% This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
 %% modified under the conditions of the LaTeX Project Public License, either version 1.3c
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
@@ -18,8 +18,8 @@
   \bgroup%
   \fontspec{Latin Modern Sans}%
   A%
-  \kern-.4em \raisebox{.65ex}{\scalebox{0.3}{L}}%
-  \kern-.0em \raisebox{-0.98ex}{T}%
+  \kern-.375em \raisebox{.65ex}{\scalebox{0.3}{L}}%
+  \kern.03em \raisebox{-.99ex}{T}%
   \egroup%
 }
 
@@ -170,6 +170,12 @@
 \textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
 }
 
+\def\francize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",francize,"francize")}}
+
+\def\unfrancize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",francize)}}
+
 \def\gameoflife{
   Your Life Is Tetris. Stop Playing It Like Chess.
 }
@@ -204,6 +210,19 @@
              luatexbase.add_to_callback("pre_linebreak_filter",hammertime,"hammertime")}}
 \def\unhammertime{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","hammertime")}}
+
+\let\hendlnize\chickenize     % homage to Hendl/Chicken
+\let\unhendlnize\unchickenize % may the soldering strength always be with him
+
+\def\italianizerandword{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianizerandword,"italianizerandword")}}
+\def\unitalianizerandword{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianizerandword")}}
+
+\def\italianize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianize,"italianize")}}
+\def\unitalianize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianize")}}
 
 
 \def\kernmanipulate{
@@ -399,7 +418,7 @@
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%
     \vfil
-    \luatexlatelua{pdf_print("q") #2 pdf_print("Q")}%
+    \latelua{pdf_print("q") #2 pdf_print("Q")}%
   }%
 }
 \long\def\drawchicken{

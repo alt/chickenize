@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -47,8 +47,7 @@ chicken_pagenumbers = true
 chickenstring = {}
 chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 0.5
--- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
+chickenizefraction = 0.5 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
 local match = unicode.utf8.match
@@ -245,7 +244,7 @@ printwordnumber = function()
   texiowrite_nl("\nNumber of words in this document: "..wordnumber)
 end
 
-function detectdoublewords(head)
+detectdoublewords = function(head)
   prevlastword  = {}  -- array of numbers representing the glyphs
   prevfirstword = {}
   newlastword   = {}
@@ -260,8 +259,17 @@ texio.write_nl("nfw:"..#newfirstword)
   end
 end
 
-function printdoublewords()
+printdoublewords = function()
   texio.write_nl("finished")
+end
+francize = function(head)
+  for n in nodetraverseid(nodeid"glyph",head) do
+    if ((n.char > 47) and (n.char < 58)) then
+    texio.write_nl("numbaa")
+      n.char = math.random(48,57)
+    end
+  end
+  return head
 end
 local quotestrings = {
    [171] = true,  [172] = true,
@@ -301,6 +309,134 @@ hammertime = function(head)
   end
   return head
 end
+italianizefraction = 0.5 --%% gives the amount of italianization
+mynode = nodenew(GLYPH) -- prepare a dummy glyph
+
+italianize = function(head)
+  -- skip "h/H" randomly
+  for n in node.traverse_id(GLYPH,head) do -- go through all glyphs
+      if n.prev.id ~= GLYPH then -- check if it's a word start
+      if ((n.char == 72) or (n.char == 104)) and (tex.normal_rand() < italianizefraction) then -- if it's h/H, remove randomly
+        n.prev.next = n.next
+      end
+    end
+  end
+
+  -- add h or H in front of vowels
+  for n in nodetraverseid(GLYPH,head) do
+    if math.random() < italianizefraction then
+    x = n.char
+    if x == 97 or x == 101 or x == 105 or x == 111 or x == 117 or
+       x == 65 or x ==  69 or x ==  73 or x == 79 or x == 85 then
+      if (n.prev.id == GLUE) then
+        mynode.font = n.font
+        if x > 90 then  -- lower case
+          mynode.char = 104
+        else
+          mynode.char = 72 -- upper case – convert into lower case
+          n.char = x + 32
+        end
+          node.insert_before(head,n,node.copy(mynode))
+        end
+      end
+    end
+  end
+
+  -- add e after words, but only after consonants
+  for n in node.traverse_id(GLUE,head) do
+    if n.prev.id == GLYPH then
+    x = n.prev.char
+    -- skip vowels and randomize
+    if not(x == 97 or x == 101 or x == 105 or x == 111 or x == 117 or x == 44 or x == 46) and math.random() > 0.2 then
+        mynode.char = 101           -- it's always a lower case e, no?
+        mynode.font = n.prev.font -- adapt the current font
+        node.insert_before(head,n,node.copy(mynode)) -- insert the e in the node list
+      end
+    end
+  end
+
+  return head
+end
+italianizerandwords = function(head)
+words = {}
+-- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
+wordnumber = 0
+  for n in nodetraverseid(nodeid"glue",head) do -- let's try to count words by their separators
+    wordnumber = wordnumber + 1
+    if n.next then
+      texio.write_nl(n.next.char)
+      words[wordnumber] = {}
+      words[wordnumber][1] = node.copy(n.next)
+
+      glyphnumber = 1
+      myglyph = n.next
+        while myglyph.next do
+          node.tail(words[wordnumber][1]).next = node.copy(myglyph.next)
+          myglyph = myglyph.next
+        end
+      end
+    end
+myinsertnode = head.next.next -- first letter
+node.tail(words[1][1]).next = myinsertnode.next
+myinsertnode.next = words[1][1]
+
+  return head
+end
+
+italianize_old = function(head)
+  local wordlist = {} -- here we will store the number of words of the sentence.
+  local words = {} -- here we will store the words of the sentence.
+  local wordnumber = 0
+  -- let's first count all words in one sentence, howboutdat?
+  wordlist[wordnumber] = 1 -- let's save the word *length* in here …
+
+  for n in nodetraverseid(nodeid"glyph",head) do
+    if (n.next.id == nodeid"glue") then -- this is a space
+      wordnumber = wordnumber + 1
+      wordlist[wordnumber] = 1
+      words[wordnumber] = n.next.next
+    end
+    if (n.next.id == nodeid"glyph") then  -- it's a glyph
+    if (n.next.char == 46) then -- this is a full stop.
+      wordnumber = wordnumber + 1
+      texio.write_nl("this sentence had "..wordnumber.."words.")
+      for i=0,wordnumber-1 do
+      texio.write_nl("word "..i.." had " .. wordlist[i] .. "glyphs")
+      end
+      texio.write_nl(" ")
+      wordnumber = -1 -- to compensate the fact that the next node will be a space, this would count one word too much.
+    else
+
+      wordlist[wordnumber] = wordlist[wordnumber] + 1 -- the current word got 1 glyph longer
+      end
+    end
+  end
+  return head
+end
+
+hammertimedelay = 1.2
+local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
+hammertime = function(head)
+  if hammerfirst then
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("============STOP!=============\n")
+    texiowrite_nl(htime_separator .. "\n\n\n")
+    os.sleep (hammertimedelay*1.5)
+    texiowrite_nl(htime_separator .. "\n")
+    texiowrite_nl("==========HAMMERTIME==========\n")
+    texiowrite_nl(htime_separator .. "\n\n")
+    os.sleep (hammertimedelay)
+    hammerfirst = false
+  else
+    os.sleep (hammertimedelay)
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("======U can't touch this!=====\n")
+    texiowrite_nl(htime_separator .. "\n\n")
+    os.sleep (hammertimedelay*0.5)
+  end
+  return head
+end
+
 itsame = function()
 local mr = function(a,b) rectangle({a*10,b*-10},10,10) end
 color = "1 .6 0"
@@ -731,11 +867,18 @@ colorstretch = function (head)
     local rule_bad = nodenew(RULE)
 
     if colorexpansion then  -- if also the font expansion should be shown
+--%% here use first_glyph function!!
       local g = line.head
+n = node.first_glyph(line.head.next)
+texio.write_nl(line.head.id)
+texio.write_nl(line.head.next.id)
+texio.write_nl(line.head.next.next.id)
+texio.write_nl(n.id)
       while not(g.id == GLYPH) and (g.next) do g = g.next end -- find first glyph on line. If line is empty, no glyph:
       if (g.id == GLYPH) then                                 -- read width only if g is a glyph!
-        exp_factor = g.width / f[g.char].width
-        exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
+        exp_factor = g.expansion_factor/10000 --%% neato, luatex now directly gives me this!!
+        exp_color = colorstretch_coloroffset + (exp_factor*0.1) .. " g"
+texio.write_nl(exp_factor)
         rule_bad.width = 0.5*line.width  -- we need two rules on each line!
       end
     else

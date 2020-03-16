@@ -12,14 +12,14 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2016, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!) Lua\TeX > 0.90 is required for some features since the corresponding syntax has changed!
+You need an up-to-date TeX Live (2019, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!) Lua\TeX > 1.0.4 is required for some features since the corresponding syntax has changed; tested with Lua\TeX~1.10.0 (TeX Live 2019)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -37,7 +37,7 @@ ance status ‘maintained’.
 
 EXPERIMENTAL CODE
 
-This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -116,14 +116,14 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.4}
+\centerline{v0.2.6}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
 \kern.5cm
 \textcolor{blue}{\Large How to read this document.}
 
-This is the documentation of the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is tested under  plain Lua\TeX\ and Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking (and some other stuff). Most of this package's content is just for fun and educational use, but there are also some functions that can be useful in a normal document.
+This is the documentation of the package |chickenize|. It allows manipulations of any Lua\TeX\ document\footnote{The code is based on pure Lua\TeX\ features, so don't even try to use it with any other \TeX\ flavour. The package is (partially) tested under  plain Lua\TeX\ and (fully) under Lua\LaTeX. If you tried using it with Con\TeX t, please share your experience, I will gladly try to make it compatible!} exploiting the possibilities offered by the callbacks that influence line breaking (and~some other stuff). Most of this package's content is just for fun and educational use, but there are also some functions that can be useful in a normal production document.
 
 The table on the next page shortly informs you about some of your possibilities and provides links to the (documented) Lua functions. The \TeX\ interface is presented \hyperlink{texinterface}{below}.
 
@@ -131,7 +131,7 @@ The documentation of this package is far from being well-readable, consistent or
 
 For a better understanding of what's going on in the code of this package, there is a small \hyperlink{tutorial}{tutorial} below that explains shortly the most important features used here.
 
-\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes. If, by any reason, you decide to use this package for an important document, please make a local copy of the source code and use that. This package will not be considered stable until it reaches at least v0.5, which might never happen.
+\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes. If, by any reason, you decide to use this package for an important document, please make a local copy of the source code and use that. This package will only be considered stable and long-term compatible should it reach version 1.0.
 
 If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response! The latet source code is hosted on github: \url{https://github.com/alt/chickenize}. Feel free to comment or report bugs there, to fork, pull, etc.
 
@@ -139,7 +139,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 
 \small\noindent
 \fbox{\parbox{.97\textwidth}{
-This package is copyright © 2016 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
 \vspace*{1cm}
@@ -180,6 +180,8 @@ A small and incomplete overview of the functionalities offered by this package. 
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken” (or user-adjustable words)\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
+\hyperref[sec:italianize]{italianize} & Mamma mia!! \\
+\hyperref[sec:italianizerandword]{italianizerandword} & Will put the word order in a sentence at random.\\
 \hyperref[sec:kernmanipulate]{kernmanipulate} & manipulates the kerning (tbi)\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
 \hyperref[sec:randomerror]{randomerror} & just throws random (La)\TeX\ errors at random times\\
@@ -267,7 +269,8 @@ The following list tries to kind of keep track of the options and variables. The
 \def\default#1{\textcolor{black}{\ttfamily #1}}
 \begin{description}
 \item[\opt{randomfontslower}, \opt{randomfontsupper} = \arg{int}] These two integer variables determine the span of fonts used for the font randomization. Just play around with them a bit to find out what they are doing.
-\item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index: |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
+\item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index:\\
+ |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
 \item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
 \item[\opt{chickencount} = \arg{true}] Activates the counting of substituted words and prints the number at the end of the terminal output.
 \item[\opt{colorstretchnumbers} = \arg{true} \default{0}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
@@ -386,8 +389,8 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \bgroup%
   \fontspec{Latin Modern Sans}%
   A%
-  \kern-.4em \raisebox{.65ex}{\scalebox{0.3}{L}}%
-  \kern-.0em \raisebox{-0.98ex}{T}%
+  \kern-.375em \raisebox{.65ex}{\scalebox{0.3}{L}}%
+  \kern.03em \raisebox{-.99ex}{T}%
   \egroup%
 }
 
@@ -538,6 +541,12 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash\textbackslash... the true name of Ba'al, the soul-eater}
 }
 
+\def\francize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",francize,"francize")}}
+
+\def\unfrancize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter",francize)}}
+
 \def\gameoflife{
   Your Life Is Tetris. Stop Playing It Like Chess.
 }
@@ -574,6 +583,19 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\unhammertime{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","hammertime")}}
 
+\let\hendlnize\chickenize     % homage to Hendl/Chicken
+\let\unhendlnize\unchickenize % may the soldering strength always be with him
+
+\def\italianizerandword{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianizerandword,"italianizerandword")}}
+\def\unitalianizerandword{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianizerandword")}}
+  
+\def\italianize{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianize,"italianize")}}
+\def\unitalianize{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianize")}}
+ 
 % \def\itsame{
 %   \directlua{drawmario}} %%% does not exist
 
@@ -779,7 +801,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%
     \vfil
-    \luatexlatelua{pdf_print("q") #2 pdf_print("Q")}%
+    \latelua{pdf_print("q") #2 pdf_print("Q")}%
   }%
 }
 \long\def\drawchicken{
@@ -824,7 +846,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2016/05/27 v0.2.4 chickenize package]
+  [2020/02/17 v0.2.6 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -898,8 +920,7 @@ chicken_pagenumbers = true
 chickenstring = {}
 chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 0.5
--- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
+chickenizefraction = 0.5 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
 local match = unicode.utf8.match
@@ -1143,7 +1164,7 @@ end
 
 % \subsection{detectdoublewords}\label{sec:detectdoublewords}
 %    \begin{macrocode} %% FIXME: Does this work? …
-function detectdoublewords(head)
+detectdoublewords = function(head)
   prevlastword  = {}  -- array of numbers representing the glyphs
   prevfirstword = {}
   newlastword   = {}
@@ -1158,8 +1179,21 @@ texio.write_nl("nfw:"..#newfirstword)
   end
 end
 
-function printdoublewords()
+printdoublewords = function()
   texio.write_nl("finished")
+end
+%    \end{macrocode}
+% \subsection{francize}\label{sec:francize}
+% This function is intentionally undocumented. It randomizes all numbers digit by digit. Why? Because.
+%    \begin{macrocode}
+francize = function(head)
+  for n in nodetraverseid(nodeid"glyph",head) do
+    if ((n.char > 47) and (n.char < 58)) then
+    texio.write_nl("numbaa")
+      n.char = math.random(48,57)
+    end
+  end
+  return head
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}
@@ -1217,6 +1251,147 @@ hammertime = function(head)
   return head
 end
 %    \end{macrocode}
+% \subsection{italianize}\label{sec:italianize}
+% This is inspired by some of the more melodic pronounciations of the english language. The command will add randomly an |h| in front of every word starting with a vowel or remove |h| from words starting with one. Also, it will ad randomly an |e| to words ending in consonants. This is tricky and might fail – I'm happy to receive and try to solve ayn bug reports.
+%    \begin{macrocode}
+italianizefraction = 0.5 --%% gives the amount of italianization
+mynode = nodenew(GLYPH) -- prepare a dummy glyph
+
+italianize = function(head)
+  -- skip "h/H" randomly
+  for n in node.traverse_id(GLYPH,head) do -- go through all glyphs
+      if n.prev.id ~= GLYPH then -- check if it's a word start
+      if ((n.char == 72) or (n.char == 104)) and (tex.normal_rand() < italianizefraction) then -- if it's h/H, remove randomly
+        n.prev.next = n.next
+      end
+    end
+  end
+ 
+  -- add h or H in front of vowels
+  for n in nodetraverseid(GLYPH,head) do
+    if math.random() < italianizefraction then 
+    x = n.char 
+    if x == 97 or x == 101 or x == 105 or x == 111 or x == 117 or
+       x == 65 or x ==  69 or x ==  73 or x == 79 or x == 85 then
+      if (n.prev.id == GLUE) then
+        mynode.font = n.font
+        if x > 90 then  -- lower case 
+          mynode.char = 104
+        else
+          mynode.char = 72 -- upper case – convert into lower case
+          n.char = x + 32
+        end
+          node.insert_before(head,n,node.copy(mynode))
+        end
+      end
+    end
+  end
+
+  -- add e after words, but only after consonants
+  for n in node.traverse_id(GLUE,head) do
+    if n.prev.id == GLYPH then
+    x = n.prev.char
+    -- skip vowels and randomize
+    if not(x == 97 or x == 101 or x == 105 or x == 111 or x == 117 or x == 44 or x == 46) and math.random() > 0.2 then
+        mynode.char = 101           -- it's always a lower case e, no?
+        mynode.font = n.prev.font -- adapt the current font
+        node.insert_before(head,n,node.copy(mynode)) -- insert the e in the node list
+      end
+    end
+  end
+  
+  return head
+end
+% \subsection{italianize}\label{sec:italianizerandword}
+% This is inspired by my dearest colleagues and their artistic interpretation of the english grammar. The command will cause LuaTeX to read a sentence (i.\,e.~text until the next full stop), then randomizes the words (i.\,e.~units separated by a space) in it and throws the result back to the typesetting. Useless? Very.
+%    \begin{macrocode}
+italianizerandwords = function(head)
+words = {}
+-- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
+wordnumber = 0
+  for n in nodetraverseid(nodeid"glue",head) do -- let's try to count words by their separators
+    wordnumber = wordnumber + 1
+    if n.next then
+      texio.write_nl(n.next.char)
+      words[wordnumber] = {}
+      words[wordnumber][1] = node.copy(n.next)
+
+      glyphnumber = 1
+      myglyph = n.next
+        while myglyph.next do
+          node.tail(words[wordnumber][1]).next = node.copy(myglyph.next)
+          myglyph = myglyph.next
+        end
+      end
+    end
+myinsertnode = head.next.next -- first letter
+node.tail(words[1][1]).next = myinsertnode.next
+myinsertnode.next = words[1][1]
+
+  return head
+end
+
+italianize_old = function(head)
+  local wordlist = {} -- here we will store the number of words of the sentence.
+  local words = {} -- here we will store the words of the sentence.  
+  local wordnumber = 0
+  -- let's first count all words in one sentence, howboutdat?
+  wordlist[wordnumber] = 1 -- let's save the word *length* in here …
+
+ 
+  for n in nodetraverseid(nodeid"glyph",head) do
+    if (n.next.id == nodeid"glue") then -- this is a space
+      wordnumber = wordnumber + 1
+      wordlist[wordnumber] = 1
+      words[wordnumber] = n.next.next
+    end
+    if (n.next.id == nodeid"glyph") then  -- it's a glyph
+    if (n.next.char == 46) then -- this is a full stop.
+      wordnumber = wordnumber + 1
+      texio.write_nl("this sentence had "..wordnumber.."words.")
+      for i=0,wordnumber-1 do
+      texio.write_nl("word "..i.." had " .. wordlist[i] .. "glyphs")
+      end
+      texio.write_nl(" ")
+      wordnumber = -1 -- to compensate the fact that the next node will be a space, this would count one word too much.
+    else
+        
+      wordlist[wordnumber] = wordlist[wordnumber] + 1 -- the current word got 1 glyph longer
+      end
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+
+% \subsection{hammertime}\label{sec:hammertime}
+% This is a completely useless function. It just prints STOP! – HAMMERTIME at the beginnig of the first paragraph after |\hammertime|, and “U can't touch this” for every following one. As the function writes to the terminal, you have to be sure that your terminal is line-buffered and not block-buffered. Compare the explanation by Taco on the Lua\TeX\ mailing list.\footnote{\url{http://tug.org/pipermail/luatex/2011-November/003355.html}}
+%    \begin{macrocode}
+hammertimedelay = 1.2
+local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
+hammertime = function(head)
+  if hammerfirst then
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("============STOP!=============\n")
+    texiowrite_nl(htime_separator .. "\n\n\n")
+    os.sleep (hammertimedelay*1.5)
+    texiowrite_nl(htime_separator .. "\n")
+    texiowrite_nl("==========HAMMERTIME==========\n")
+    texiowrite_nl(htime_separator .. "\n\n")
+    os.sleep (hammertimedelay)
+    hammerfirst = false
+  else
+    os.sleep (hammertimedelay)
+    texiowrite_nl(htime_separator)
+    texiowrite_nl("======U can't touch this!=====\n")
+    texiowrite_nl(htime_separator .. "\n\n")
+    os.sleep (hammertimedelay*0.5)
+  end
+  return head
+end
+%    \end{macrocode}
+
+
 % \subsection{itsame}\label{sec:itsame}
 % The (very first, very basic, very stupid) code to draw a small mario. You need to input luadraw.tex or do luadraw.lua for the rectangle function.
 %    \begin{macrocode}
@@ -1467,7 +1642,7 @@ pancaketext = function()
 end
 %    \end{macrocode}
 % \subsection{randomerror}\label{sec:randomerror}
-
+% Not yet implemented, sorry.
 
 % \subsection{randomfonts}\label{sec:randomfonts}
 % Traverses the output and substitutes fonts randomly. A check is done so that the font number is existing.
@@ -1777,11 +1952,18 @@ colorstretch = function (head)
     local rule_bad = nodenew(RULE)
 
     if colorexpansion then  -- if also the font expansion should be shown
+--%% here use first_glyph function!!
       local g = line.head
+n = node.first_glyph(line.head.next)
+texio.write_nl(line.head.id)
+texio.write_nl(line.head.next.id)
+texio.write_nl(line.head.next.next.id)
+texio.write_nl(n.id)
       while not(g.id == GLYPH) and (g.next) do g = g.next end -- find first glyph on line. If line is empty, no glyph:
       if (g.id == GLYPH) then                                 -- read width only if g is a glyph!
-        exp_factor = g.width / f[g.char].width
-        exp_color = colorstretch_coloroffset + (1-exp_factor)*10 .. " g"
+        exp_factor = g.expansion_factor/10000 --%% neato, luatex now directly gives me this!!
+        exp_color = colorstretch_coloroffset + (exp_factor*0.1) .. " g"
+texio.write_nl(exp_factor)
         rule_bad.width = 0.5*line.width  -- we need two rules on each line!
       end
     else
