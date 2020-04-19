@@ -271,6 +271,92 @@ francize = function(head)
   end
   return head
 end
+function gameofchicken()
+  GOC_lifetab = {}
+  GOC_spawntab = {}
+  GOC_antilifetab = {}
+  GOC_antispawntab = {}
+  -- translate the rules into an easily-manageable table
+  for i=1,#GOCrule_live do; GOC_lifetab[GOCrule_live[i]] = true end
+  for i=1,#GOCrule_spawn do; GOC_spawntab[GOCrule_spawn[i]] = true end
+  for i=1,#GOCrule_antilive do; GOC_antilifetab[GOCrule_antilive[i]] = true end
+  for i=1,#GOCrule_antispawn do; GOC_antispawntab[GOCrule_antispawn[i]] = true end
+-- initialize the arrays
+local life = {}
+local antilife = {}
+local newlife = {}
+local newantilife = {}
+for i = 0, GOCx do life[i] = {}; newlife[i] = {} for j = 0, GOCy do life[i][j] = 0 end end
+for i = 0, GOCx do antilife[i] = {}; newantilife[i] = {} for j = 0, GOCy do antilife[i][j] = 0 end end
+function applyruleslife(neighbors, lifeij, antineighbors, antilifeij)
+  if GOC_spawntab[neighbors] then myret = 1 else -- new cell
+  if GOC_lifetab[neighbors] and (lifeij == 1) then myret = 1 else myret =  0 end end
+  if antineighbors > 1 then myret =  0 end
+  return myret
+end
+function applyrulesantilife(neighbors, lifeij, antineighbors, antilifeij)
+  if (antineighbors == 3) then myret = 1 else -- new cell or keep cell
+  if (((antineighbors > 1) and (antineighbors < 4)) and (lifeij == 1)) then myret = 1 else myret =  0 end end
+  if neighbors > 1 then myret =  0 end
+  return myret
+end
+-- prepare some special patterns as starter
+life[53][26] = 1 life[53][25] = 1 life[54][25] = 1 life[55][25] = 1 life[54][24] = 1
+  print("start");
+  for i = 1,GOCx do
+    for j = 1,GOCy do
+      if (life[i][j]==1) then texio.write("X") else if (antilife[i][j]==1) then texio.write("O") else texio.write("_") end end
+    end
+    texio.write_nl(" ");
+  end
+  os.sleep(GOCsleep)
+
+  for i = 0, GOCx do
+    for j = 0, GOCy do
+        newlife[i][j] = 0 -- Fill the values from the start settings here
+        newantilife[i][j] = 0 -- Fill the values from the start settings here
+    end
+  end
+
+  for k = 1,GOCiter do -- iterate over the cycles
+    texio.write_nl(k);
+    for i = 1, GOCx-1 do -- iterate over lines
+      for j = 1, GOCy-1 do -- iterate over columns -- prevent edge effects
+        local neighbors = (life[i-1][j-1] + life[i-1][j] + life[i-1][j+1] + life[i][j-1] + life[i][j+1] +  life[i+1][j-1] + life[i+1][j] + life[i+1][j+1])
+        local antineighbors = (antilife[i-1][j-1] + antilife[i-1][j] + antilife[i-1][j+1] + antilife[i][j-1] + antilife[i][j+1] +  antilife[i+1][j-1] + antilife[i+1][j] + antilife[i+1][j+1])
+
+        newlife[i][j] = applyruleslife(neighbors, life[i][j],antineighbors, antilife[i][j])
+        newantilife[i][j] = applyrulesantilife(neighbors,life[i][j], antineighbors,antilife[i][j])
+      end
+    end
+
+    for i = 1, GOCx do
+      for j = 1, GOCy do
+        life[i][j] = newlife[i][j] -- copy the values
+        antilife[i][j] = newantilife[i][j] -- copy the values
+      end
+    end
+
+    for i = 1,GOCx do
+      for j = 1,GOCy do
+        if GOC_console then
+          if (life[i][j]==1) then texio.write("X") else if (antilife[i][j]==1) then texio.write("O") else texio.write("_") end end
+        end
+        if GOC_pdf then
+          if (life[i][j]==1) then tex.print("\\placeat("..(i/10)..","..(j/10).."){"..GOCcellcode.."}") end
+          if (antilife[i][j]==1) then tex.print("\\placeat("..(i/10)..","..(j/10).."){"..GOCanticellcode.."}") end
+        end
+      end
+    end
+    tex.print(".\\newpage")
+    os.sleep(GOCsleep)
+  end
+end --end function gameofchicken
+--  Now, this is a function calling some tool from your operating system. This requires of course that you have them present – that should be the case on a typical Linux distribution. Take care that |convert| normally does not allow for conversion from pdf, please check that this is allowed by the rules. So this is more an example code that can help you to add it to your game so you can enjoy your chickens developing as a gif.
+function make_a_gif()
+  os.execute("convert -verbose -dispose previous -background white -alpha remove -alpha off -density "..GOCdensity.." "..tex.jobname ..".pdf " ..tex.jobname..".gif")
+  os.execute("gwenview "..tex.jobname..".gif")
+end
 local quotestrings = {
    [171] = true,  [172] = true,
   [8216] = true, [8217] = true, [8218] = true,

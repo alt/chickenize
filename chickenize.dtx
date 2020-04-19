@@ -12,7 +12,7 @@ To produce the package files, run lualatex on chickinize.dtx, wich should result
   chickenize.sty  (LaTeX user interface)
   chickenize.lua  (Lua package code) [does the actual work]
 
-You need an up-to-date TeX Live (2019, if possible) to use this package. Maybe a full MiKTeX will will also work. (Not tested!) Lua\TeX > 1.0.4 is required for some features since the corresponding syntax has changed; tested with Lua\TeX~1.10.0 (TeX Live 2019)
+You need an up-to-date TeX Live (2020, if possible) to use this package. Maybe a full MiKTeX will also work. (Not tested!) Lua\TeX > 1.0.4 is required for some features since the corresponding syntax has changed; tested with Lua\TeX~1.12.0 (TeX Live 2020)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.6}
+\centerline{v0.2.7}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -149,7 +149,7 @@ of this license or (at your option) any later version. This work has the LPPL ma
 \section*{\rainbowcolor For the Impatient:}
 
 \unrainbowcolor
-A small and incomplete overview of the functionalities offered by this package. I try to keep this list as complete as possible.\footnote{If you notice that something is missing, please help me improving the documentation!} Of course, the label “complete nonsense” depends on what you are doing …\\[2ex]
+A small and incomplete overview of the functionalities offered by this package.\footnote{If you notice that something is missing, please help me improving the documentation!} Of course, the label “complete nonsense” depends on what you are doing … The links will take you to the source code, while a more complete list with explanations is given \hyperlink{texinterface}{further below}.
 
 \noindent
 \tabulinesep=.5ex
@@ -178,13 +178,14 @@ A small and incomplete overview of the functionalities offered by this package. 
 \hbox to 0cm{\bfseries \hspace*{2cm} complete nonsense} \\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken” (or user-adjustable words)\\
+\hyperref[sec:drawchicken]{drawchicken} & draws a nice chicken with random, “hand-sketch”-type lines\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
 \hyperref[sec:italianize]{italianize} & Mamma mia!! \\
-\hyperref[sec:italianizerandword]{italianizerandword} & Will put the word order in a sentence at random.\\
+\hyperref[sec:italianizerandword]{italianizerandword} & Will put the word order in a sentence at random. (tbi)\\
 \hyperref[sec:kernmanipulate]{kernmanipulate} & manipulates the kerning (tbi)\\
 \hyperref[sec:matrixize]{matrixize} & replaces every glyph by its ASCII value in binary code\\
-\hyperref[sec:randomerror]{randomerror} & just throws random (La)\TeX\ errors at random times\\
+\hyperref[sec:randomerror]{randomerror} & just throws random (La)\TeX\ errors at random times (tbi)\\
 \hyperref[sec:randomfonts]{randomfonts} & changes the font randomly between every letter\\
 \hyperref[sec:randomchars]{randomchars} & randomizes the (letters of the) whole input\\
 \bottomrule
@@ -201,23 +202,26 @@ All functions traverse the node list of a paragraph and manipulate the nodes' pr
 
 \hypertarget{texinterface}{}
 \section{Commands – How You Can Use It}
-There are several ways to make use of the \emph{chickenize} package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are simple wrappers around the functions.
+There are several ways to make use of the \emph{chickenize} package – you can either stay on the \TeX\ side or use the Lua functions directly. In fact, the \TeX\ macros are in most cases simple wrappers around the functions.
 
 \subsection{\TeX\ Commands – Document Wide}
 You have a number of commands at your hand, each of which does some manipulation of the input or output. In fact, the code is simple and straightforward, but be careful, especially when combining things. Apply features step by step so your brain won't be damaged …
 
-The effect of the commands can be influenced, not with arguments, but only via the |\chickenizesetup| described \hyperlink{adjustment}{below}.
+The effect of the commands can be influenced, not with arguments, but only via the |\chickenizesetup| described \hyperlink{adjustment}{below}. The links provide here will bring you to the more relevant part of the implementation, i.\,e.~either the \TeX\ code or the Lua code, depending on what is doing the main job. Mostly it's the Lua part.
 
 \begin{description}
-\def\command#1{\item[\ttfamily \color{blue} \textbackslash#1]}
+\def\command#1{\item[{\hyperref[sec:#1]{\textbackslash #1}}]}
+
 \command{allownumberincommands} Normally, you cannot use numbers as part of a control sequence (or, command) name. This makes perfect sense and is good as it is. However, just to raise awareness to this, we provide a command here that changes the chategory codes of numbers 0–9 to 11, i.\,e.~normal character. So they \emph{can} be used in command names. However, this will break many packages, so do \emph{not} expect anything to work! At least use it \emph{after} all packages are loaded.
 \command{boustrophedon} Reverts every second line. This immitates archaic greek writings where one line was right-to-left, the next one left-to-right etc.\footnote{\url{en.wikipedia.org/wiki/Boustrophedon}} Interestingly, also every glyph was adaptet to the writing direction, so all glyphs are inverted in the right-to-left lines. Actually, there are two versions of this command that differ in their implementation: |\boustrophedon| rotates the whole line, while |\boustrophedonglyphs| changes the writing direction and reverses glyph-wise. The second one takes much more compilation time, but may be more reliable. A Rongorongo\footnote{\url{en.wikipedia.org/wiki/Rongorongo}} similar style boustrophedon is available with |\boustrophedoninverse| or |\rongorongonize|, where subsequent lines are rotated by 180° instead of mirrored.
 \command{countglyphs} \textcolor{blue}{\texttt{\textbackslash countwords}} Counts every printed character (or word, respectively) that appears in anything that is a paragraph. Which is quite everything, in fact, \emph{exept} math mode! The total number of glyphs/words will be printed at the end of the log file/console output. For glyphs, also the number of use for every letter is printed separately.
 \command{chickenize} Replaces every word of the input with the word “chicken”. Maybe sometime the replacement will be made configurable, but up to now, it's only chicken. To be a bit less static, about every 10\textsuperscript{th} chicken is uppercase. However, the beginning of a sentence is not recognized automatically.\footnote{If you have a nice implementation idea, I'd love to include this!}
+\command{drawchicken} Draws a chicken based on some low-level lua drawing code. Each stroke is parameterized with random numbers so the chicken will always look different.
 \command{colorstretch} Inspired by Paul Isambert's code, this command prints boxes instead of lines. The greyness of the first (left-hand) box corresponds to the badness of the line, i.\,e. it is a measure for how much the space between words has been extended to get proper paragraph justification. The second box on the right-hand side shows the amount of stretching/shrinking when font expansion is used. Together, the greyness of both boxes indicate how well the greyness is distributed over the typeset page.
 \command{dubstepize} wub wub wub wub wub BROOOOOAR WOBBBWOBBWOBB BZZZRRRRRRROOOOOOAAAAA … (inspired by   \url{http://www.youtube.com/watch?v=ZFQ5EpO7iHk} and \url{http://www.youtube.com/watch?v=nGxpSsbodnw})
 \command{dubstepenize} synomym for |\dubstepize| as I am not sure what is the better name. Both macros are just a special case of |chickenize| with a very special “zoo” … there is no |\undubstepize| – once you go dubstep, you cannot go back …
 \command{explainbackslashes} A small list that gives hints on how many |\| characters you actually need for a backslash. I's supposed to be funny. At least my head thinks it's funny. Inspired (and mostly copied from, actually) xkcd.
+\command{gameofchicken} This is a temptative implementation of Conway's classic Game of Life. This is actually a rather powerful code with some choices for you. The game itself is played on a matrix in Lua and can be output either on the console (for quick checks) or in a pdf. The latter case needs a LaTeX document, and the packages |geometry|, |placeat|, and |graphicx|. You can choose which \LaTeX\ code represents the cells or you take the pre-defined – a \kern-1.5em\raisebox{.75ex}{\scalebox{0.075}{\drawchicken}}\kern2.5em , of course! Additionally, there are |anticells| which is basically just a second set of cells. However, they can interact, and you have full control over the rules, i.\,e.~how many neighbors a cell or anticell may need to be born, die, or stay alive, and what happens if cell and anticell collide. See below for parameters; all of them start with GOC for clarity.
 \command{gameoflife} Try it.
 \command{hammertime} STOP! —— Hammertime!
 \command{leetspeak} Translates the input into 1337 speak. If you don't understand that, lern it, n00b.
@@ -285,6 +289,40 @@ The following list tries to kind of keep track of the options and variables. The
 \item[\opt{colorexpansion} = \arg{bool} \default{true}] If |true|, two bars are shown of which the second one denotes the font expansion. Only useful if font expansion is used. (You \emph{do} use font expansion, don’t you?)
 \end{description}
 
+\subsection{Options for Game of Chicken}
+This deserves a separate section since there are some more options and they need some explanation. So here goes the parameters for the GOC:
+\begin{description}
+\item[\opt{GOCrule\_live} = \arg{\{int,int,...\}} \default{\{2,3\}}] This gives the number of neighbors for an existing cell to keep it alive. This is a list, so you can say |\chickenizesetup{GOCrule_live = {2,3,7}| or similar.
+\item[\opt{GOCrule\_spawn} = \arg{\{int,int,...\}} \default{\{3\}}] The number of neighbors to spawn a new cell.
+\item[\opt{GOCrule\_antilive} = \arg{int} \default{2,3}] The number of neighbors to keep an anticell alive.
+\item[\opt{GOCrule\_antispawn} = \arg{int} \default{3}] The number of neighbors to spawn a new anticell.
+\item[\opt{GOCcellcode} = \arg{string} \default {"\\scalebox\{0.03\}\{\\drawchicken\}"}] The \LaTeX\ code for graphical representation of a living cell. You can use basically any valid \LaTeX\ code in here. A chicken is the default, of course.
+\item[\opt{GOCanticellcode} = \arg{string} \default {"O"}] The \LaTeX\ code for graphical representation of a living anticell.
+\item[\opt{GOCx} = \arg{int} \default{100}] Grid size in |x| direction (vertical).
+\item[\opt{GOCy} = \arg{int} \default{100}] Grid size in |y| direction (horizontal).
+\item[\opt{GOCiter} = \arg{int} \default{150}] Number of iterations to run the game.
+\item[\opt{GOC\_console} = \arg{bool} \default{false}] Activate output on the console.
+\item[\opt{GOC\_pdf} = \arg{bool} \default{true}] Activate output in the pdf.
+\item[\opt{GOCsleep} = \arg{int} \default{0}] Wait after one cycle of the game. This helps especially on the console, or for debugging. By dafault no wait time is added.
+\item[\opt{GOCmakegif} = \arg{bool} \default{false}] Produce a gif. This requires the command line tool |convert| since I use it for the creation. If you have troubles with this feel free to contact me.
+\item[\opt{GOCdensity} = \arg{int} \default{100}] Defines the density of the gif export. 100 is quite dense and it might take quite some time to get your gif done.
+\end{description}
+I recommend to use the |\gameofchicken| with a code roughly like this:
+\begin{verbatim}
+\documentclass{scrartcl}
+\usepackage{chickenize}
+\usepackage[paperwidth=10cm,paperheight=10cm,margin=5mm]{geometry}
+\usepackage{graphicx}
+\usepackage{placeat}
+\placeatsetup{final}
+\begin{document}
+\gameofchicken{GOCiter=50}
+%\gameofchicken{GOCiter=50 GOCmakegif = true}
+% \directlua{  os.execute("gwenview test.gif")} % substitute your filename
+\end{document}
+\end{verbatim}
+Keep in mind that for convenience |\gameofchicken{}| has one argument which is equivalent to using |\chickenizesetup{}| and actually just executes the argument as Lua code …
+
 \clearpage
 \part[Tutorial]{Tutorial\hypertarget{tutorial}}
 I thought it might be helpful to add a small tutorial to this package as it is mainly written with instructional purposes in mind. However, the following is \emph{not} intended as a comprehensive guide to Lua\TeX\. It's just to get an idea how things work here. For a deeper understanding of Lua\TeX\ you should consult both the Lua\TeX\ manual and some introduction into Lua proper like “Programming in Lua“. (See the section \hyperref[sec:literature]{Literature} at the end of the manual.)
@@ -315,15 +353,15 @@ Callbacks are employed at several stages of \TeX's work – e.\,g. for font load
 The normal way to use a callback is to “register” a function in it. This way, the function is called each time the callback is executed. Typically, the function takes a node list (see below) as an argument, does something with it, and returns it. So a basic use of the |post_linebreak_filter| would look like:
 
 \begin{verbatim}
-function my_new_filter(head)
+function my_filter(head)
   return head
 end
 
-callback.register("post_linebreak_filter",my_new_filter)
+callback.register("post_linebreak_filter",my_filter)
 \end{verbatim}
 The function |callback.register| takes the name of the callback and your new function. However, there are some reasons why we avoid this syntax here. Instead, we rely on the function |luatexbase.add_to_callback|. This is provided by the \LaTeX\ kernel table |luatexbase| which was initially a package by Manuel Pégourié-Gonnard and Élie Roux.\footnote{Since the late 2015 release of \LaTeX, the package has not to be loaded anymore since the functionality is absorbed by the kernel. Plain\TeX~users can load the |ltluatex| file which provides the needed functionality.} This function has a more extended syntax:
 \begin{verbatim}
-luatexbase.add_to_callback("post_linebreak_filter",my_new_filter,"a fancy new filter")
+luatexbase.add_to_callback("post_linebreak_filter",my_filter,"a fancy new filter")
 \end{verbatim}
 The third argument is a name you can (have to) give to your function in the callback. That is necessary because the package also allows for removing functions from callbacks, and then you need a unique identifier for the function:
 \begin{verbatim}
@@ -337,7 +375,7 @@ Everything I have written here is not the complete truth – please consult the 
 \section{Nodes}
 Essentially everything that Lua\TeX\ deals with are nodes – letters, spaces, colors, rules etc. In this package, we make heavy use of different types of nodes, so an understanding of the concept is crucial for the functionality.
 
-A node is an object that has different properties, depending on its type which is stored in its |.id| field. For example, a node of type |glyph| has |id| 27 (up to Lua\TeX~0.80., it was 37) has a number |.char| that represents its unicode codepoint, a |.font| entry that determines the font used for this glyph, a |.height|, |.depth| and |.width| etc.
+A node is an object that has different properties, depending on its type which is stored in its |.id| field. For example, a node of type |glyph| has |id| 27 (up to Lua\TeX~0.80, it was 37) has a number |.char| that represents its unicode codepoint, a |.font| entry that determines the font used for this glyph, a |.height|, |.depth| and |.width| etc.
 
 Also, a node typically has a non-empty field |.next| and |.prev|. In a list, these point to the – guess it – next or previous node. Using this, one can walk over a list of nodes step by step and manipulate the list.
 
@@ -393,7 +431,9 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
   \kern.03em \raisebox{-.99ex}{T}%
   \egroup%
 }
-
+%    \end{macrocode}
+% \subsection{allownumberincommands}\label{sec:allownumberincommands}
+%    \begin{macrocode}
 \def\allownumberincommands{
   \catcode`\0=11
   \catcode`\1=11
@@ -550,6 +590,31 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 \def\gameoflife{
   Your Life Is Tetris. Stop Playing It Like Chess.
 }
+%    \end{macrocode}
+% This is just the activation of the command, the typesetting is done in the Lua code/loop as explained below. Use this macro \emph{after} |\begin{document}|. Remember that |graphicx| and |placeat| are required!
+%    \begin{macrocode}
+\def\gameofchicken#1{\directlua{
+GOCrule_live = {2,3}
+GOCrule_spawn = {3}
+GOCrule_antilive = {2,3}
+GOCrule_antispawn = {3}
+GOCcellcode = "\\scalebox{0.03}{\\drawchicken}"
+GOCanticellcode = "O"
+GOCx = 100
+GOCy = 100
+GOCiter = 150
+GOC_console = false
+GOC_pdf = true
+GOCsleep = 0
+GOCdensity = 100
+#1
+gameofchicken()
+
+if (GOCmakegif == true) then
+  luatexbase.add_to_callback("wrapup_run",make_a_gif,"makeagif")
+end
+}}
+\let\gameofchimken\gameofchicken % yeah, that had to be.
 
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
@@ -796,7 +861,8 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 %    \begin{macrocode}
 \def\chickenizesetup#1{\directlua{#1}}
 %    \end{macrocode}
-% The following is the very first try of implementing a small drawing language in Lua. It draws a beautiful chicken.
+% \subsection{drawchicken}\label{sec:drawchicken}
+% The following is the very first try of implementing a small drawing language in Lua. It draws a beautiful (?) chicken. TODO: Make it scalable by giving relative sizes. Also: Allow it to look to the other side if wanted.
 %    \begin{macrocode}
 \long\def\luadraw#1#2{%
   \vbox to #1bp{%
@@ -846,7 +912,7 @@ The namespace of the chickenize package is \emph{not} consistent. Please don't t
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2020/02/17 v0.2.6 chickenize package]
+  [2020/04/19 v0.2.7 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -1194,6 +1260,112 @@ francize = function(head)
     end
   end
   return head
+end
+%    \end{macrocode}
+% \subsection{gamofchicken}\label{sec:gamofchicken}
+% The |gameofchicken| is an implementation of the Game of Life by Conway. The standard cell here is a chicken, while there are also anticells. For both you can adapt the \LaTeX\ code to represent the cells.
+% 
+% I also kick in some code to convert the pdf into a gif after the pdf has been finalized and Lua\TeX\ is about to end. This uses a system call to |convert|; especially the latter one will change. For now this is a convenient implementation for me and maybe most Linux environments to get the gif by one-click-compiling the |tex| document. 
+%    \begin{macrocode}
+function gameofchicken()
+  GOC_lifetab = {}
+  GOC_spawntab = {}
+  GOC_antilifetab = {}
+  GOC_antispawntab = {}
+  -- translate the rules into an easily-manageable table
+  for i=1,#GOCrule_live do; GOC_lifetab[GOCrule_live[i]] = true end
+  for i=1,#GOCrule_spawn do; GOC_spawntab[GOCrule_spawn[i]] = true end
+  for i=1,#GOCrule_antilive do; GOC_antilifetab[GOCrule_antilive[i]] = true end
+  for i=1,#GOCrule_antispawn do; GOC_antispawntab[GOCrule_antispawn[i]] = true end
+%    \end{macrocode}
+% Initialize the arrays for cells and anticells with zeros.
+%    \begin{macrocode}
+-- initialize the arrays
+local life = {}
+local antilife = {}
+local newlife = {}
+local newantilife = {}
+for i = 0, GOCx do life[i] = {}; newlife[i] = {} for j = 0, GOCy do life[i][j] = 0 end end
+for i = 0, GOCx do antilife[i] = {}; newantilife[i] = {} for j = 0, GOCy do antilife[i][j] = 0 end end
+%    \end{macrocode}
+% These are the functions doing the actual work, checking the neighbors and applying the rules defined above.
+%    \begin{macrocode}
+function applyruleslife(neighbors, lifeij, antineighbors, antilifeij)
+  if GOC_spawntab[neighbors] then myret = 1 else -- new cell
+  if GOC_lifetab[neighbors] and (lifeij == 1) then myret = 1 else myret =  0 end end
+  if antineighbors > 1 then myret =  0 end
+  return myret
+end
+function applyrulesantilife(neighbors, lifeij, antineighbors, antilifeij)
+  if (antineighbors == 3) then myret = 1 else -- new cell or keep cell
+  if (((antineighbors > 1) and (antineighbors < 4)) and (lifeij == 1)) then myret = 1 else myret =  0 end end
+  if neighbors > 1 then myret =  0 end
+  return myret
+end
+%    \end{macrocode}
+% Preparing the initial state with a default pattern:
+%    \begin{macrocode}
+-- prepare some special patterns as starter
+life[53][26] = 1 life[53][25] = 1 life[54][25] = 1 life[55][25] = 1 life[54][24] = 1
+%    \end{macrocode}
+% And the main loop running from here:
+%    \begin{macrocode}
+  print("start");
+  for i = 1,GOCx do
+    for j = 1,GOCy do
+      if (life[i][j]==1) then texio.write("X") else if (antilife[i][j]==1) then texio.write("O") else texio.write("_") end end
+    end
+    texio.write_nl(" ");
+  end 
+  os.sleep(GOCsleep)
+
+  for i = 0, GOCx do
+    for j = 0, GOCy do
+        newlife[i][j] = 0 -- Fill the values from the start settings here
+        newantilife[i][j] = 0 -- Fill the values from the start settings here
+    end
+  end
+
+  for k = 1,GOCiter do -- iterate over the cycles
+    texio.write_nl(k);
+    for i = 1, GOCx-1 do -- iterate over lines
+      for j = 1, GOCy-1 do -- iterate over columns -- prevent edge effects
+        local neighbors = (life[i-1][j-1] + life[i-1][j] + life[i-1][j+1] + life[i][j-1] + life[i][j+1] +  life[i+1][j-1] + life[i+1][j] + life[i+1][j+1])
+        local antineighbors = (antilife[i-1][j-1] + antilife[i-1][j] + antilife[i-1][j+1] + antilife[i][j-1] + antilife[i][j+1] +  antilife[i+1][j-1] + antilife[i+1][j] + antilife[i+1][j+1])
+
+        newlife[i][j] = applyruleslife(neighbors, life[i][j],antineighbors, antilife[i][j])
+        newantilife[i][j] = applyrulesantilife(neighbors,life[i][j], antineighbors,antilife[i][j])
+      end
+    end
+
+    for i = 1, GOCx do
+      for j = 1, GOCy do
+        life[i][j] = newlife[i][j] -- copy the values
+        antilife[i][j] = newantilife[i][j] -- copy the values
+      end
+    end
+
+    for i = 1,GOCx do
+      for j = 1,GOCy do
+        if GOC_console then
+          if (life[i][j]==1) then texio.write("X") else if (antilife[i][j]==1) then texio.write("O") else texio.write("_") end end
+        end
+        if GOC_pdf then
+          if (life[i][j]==1) then tex.print("\\placeat("..(i/10)..","..(j/10).."){"..GOCcellcode.."}") end
+          if (antilife[i][j]==1) then tex.print("\\placeat("..(i/10)..","..(j/10).."){"..GOCanticellcode.."}") end
+        end
+      end
+    end 
+    tex.print(".\\newpage")
+    os.sleep(GOCsleep)
+  end
+end --end function gameofchicken
+%    \end{macrocode}
+%% Now, this is a function calling some tool from your operating system. This requires of course that you have them present – that should be the case on a typical Linux distribution. Take care that |convert| normally does not allow for conversion from pdf, please check that this is allowed by the rules. So this is more an example code that can help you to add it to your game so you can enjoy your chickens developing as a gif.
+%    \begin{macrocode}
+function make_a_gif()
+  os.execute("convert -verbose -dispose previous -background white -alpha remove -alpha off -density "..GOCdensity.." "..tex.jobname ..".pdf " ..tex.jobname..".gif")
+  os.execute("gwenview "..tex.jobname..".gif")
 end
 %    \end{macrocode}
 % \subsection{guttenbergenize}\label{sec:guttenbergenize}

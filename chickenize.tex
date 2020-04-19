@@ -22,7 +22,6 @@
   \kern.03em \raisebox{-.99ex}{T}%
   \egroup%
 }
-
 \def\allownumberincommands{
   \catcode`\0=11
   \catcode`\1=11
@@ -179,6 +178,28 @@
 \def\gameoflife{
   Your Life Is Tetris. Stop Playing It Like Chess.
 }
+\def\gameofchicken#1{\directlua{
+GOCrule_live = {2,3}
+GOCrule_spawn = {3}
+GOCrule_antilive = {2,3}
+GOCrule_antispawn = {3}
+GOCcellcode = "\\scalebox{0.03}{\\drawchicken}"
+GOCanticellcode = "O"
+GOCx = 100
+GOCy = 100
+GOCiter = 150
+GOC_console = false
+GOC_pdf = true
+GOCsleep = 0
+GOCdensity = 100
+#1
+gameofchicken()
+
+if (GOCmakegif == true) then
+  luatexbase.add_to_callback("wrapup_run",make_a_gif,"makeagif")
+end
+}}
+\let\gameofchimken\gameofchicken % yeah, that had to be.
 
 \def\guttenbergenize{ %% makes only sense when using LaTeX
   \AtBeginDocument{
