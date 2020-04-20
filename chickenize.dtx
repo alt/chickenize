@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.7}
+\centerline{v0.2.9}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -233,6 +233,7 @@ The effect of the commands can be influenced, not with arguments, but only via t
 \command{randomfonts} Changes the font randomly for every character. If no parameters are given, all fonts that have been loaded are used, especially including math fonts.
 \command{randomcolor} Does what its name says.
 \command{rainbowcolor} Instead of random colors, this command causes the text color to change gradually according to the colors of a rainbow. Do not mix this with |randomcolor|, as that doesn't make any sense.
+\command{relationship} Draws the relationship. A ship made of relations.
 \command{pancakenize} This is a dummy command that does nothing. However, every time you use it, you owe a pancake to the package author. You can either send it via mail or bring it to some (local) \TeX\ user's group meeting.
 \command{substitutewords} You have to specify pairs of words by using |\addtosubstitutions{word1}{word2}|. Then call |\substitutewords| (or the other way round, doesn't matter) and each occurance of |word1| will be replaced by |word2|. You can add replacement pairs by repeated calls to |\addtosubstitutions|. Take care! This function works with the input stream directly, therefore it does \emph{not} work on text that is inserted by macros, but it \emph{will} work on macro names itself! This way, you may use it to change macros (or environments) at will. Bug or feature? I'm not sure right now …
 \command{suppressonecharbreak} \TeX~normally does not suppress a linebreak after words with only one character (“I“, “a” etc.) This command suppresses line breaks. It is very similar to the code provided by the |impnattypo| package and based on the same ideas. However, the code in |chickenize| has been written before the author knew |impnattypo|, and the code differs a bit, might even be a bit faster. Well, test it!
@@ -599,7 +600,7 @@ GOCrule_spawn = {3}
 GOCrule_antilive = {2,3}
 GOCrule_antispawn = {3}
 GOCcellcode = "\\scalebox{0.03}{\\drawchicken}"
-GOCanticellcode = "O"
+GOCcellcode = "\\scalebox{0.03}{\\drawcov}"
 GOCx = 100
 GOCy = 100
 GOCiter = 150
@@ -755,6 +756,12 @@ end
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
 
+\def\relationship{%
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",cutparagraph,"cut paragraph")
+    relationship()
+  }
+}
+
 \let\rongorongonize\boustrophedoninverse
 \let\unrongorongonize\unboustrophedoninverse
 
@@ -902,6 +909,39 @@ end
   }
 }
 %    \end{macrocode}
+% \subsection{drawcov}\label{sec:drawcov}
+% This draws a corona virus since I had some time to work on this package due to the shutdown caused by COVID-19.
+%    \begin{macrocode}
+\long\def\drawcov{
+  \luadraw{90}{
+    covbody = {200,50}
+    covbody_rad = 50
+
+    covcrown_rad = 5
+    crownno = 13
+    for i=1,crownno do
+      crownpos = {covbody[1]+1.4*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+1.4*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      crownconnect = {covbody[1]+covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+covbody_rad*math.cos(2*math.pi/crownno*i)}
+     sloppycircle(crownpos,covcrown_rad)
+     sloppyline(crownpos,crownconnect)
+   end
+
+    covcrown_rad = 6
+    crownno = 8
+    for i=1,crownno do
+      crownpos = {covbody[1]+0.8*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+0.8*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      crownconnect = {covbody[1]+0.5*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+0.5*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      sloppycircle(crownpos,covcrown_rad)
+      sloppyline(crownpos,crownconnect)
+    end
+
+    covcrown_rad = 8
+    sloppycircle(covbody,covcrown_rad)
+    sloppycircle(covbody,covbody_rad)
+    sloppyline(covbody,covbody)
+  }
+}
+%    \end{macrocode}
 % \iffalse
 %</tex>
 %<*package>
@@ -912,12 +952,12 @@ end
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2020/04/19 v0.2.7 chickenize package]
+  [2020/04/20 v0.2.9 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
 %    \begin{macrocode}
-
+% 
 %    \end{macrocode}
 % \subsection{Definition of User-Level Macros}
 % Nothing done so far, just some minor ideas. If you want to implement some cool things, contact me! :)
@@ -940,7 +980,7 @@ end
 %\fi
 % \section{Lua Module}
 % \label{sec:luamodule}
-% This file contains all the necessary functions and is the actual work horse of this package. The functions are sorted strictly alphabetically (or, they \emph{should} be …) and not by sense, functionality or anything.
+% This file contains all the necessary functions and is the actual work horse of this package. The functions are sorted alphabetically (or, they \emph{should} be …) and not by sense, functionality or anything.
 % 
 % First, we set up some constants that are used by many of the following functions. These are made global so the code can be manipulated at the document level, too.
 %    \begin{macrocode}
@@ -1253,9 +1293,8 @@ end
 % This function is intentionally undocumented. It randomizes all numbers digit by digit. Why? Because.
 %    \begin{macrocode}
 francize = function(head)
-  for n in nodetraverseid(nodeid"glyph",head) do
+  for n in nodetraverseid(GLYPH,head) do
     if ((n.char > 47) and (n.char < 58)) then
-    texio.write_nl("numbaa")
       n.char = math.random(48,57)
     end
   end
@@ -1361,7 +1400,7 @@ life[53][26] = 1 life[53][25] = 1 life[54][25] = 1 life[55][25] = 1 life[54][24]
   end
 end --end function gameofchicken
 %    \end{macrocode}
-%% Now, this is a function calling some tool from your operating system. This requires of course that you have them present – that should be the case on a typical Linux distribution. Take care that |convert| normally does not allow for conversion from pdf, please check that this is allowed by the rules. So this is more an example code that can help you to add it to your game so you can enjoy your chickens developing as a gif.
+% The following is a function calling some tool from your operating system. This requires of course that you have them present – that should be the case on a typical Linux distribution. Take care that |convert| normally does not allow for conversion from pdf, please check that this is allowed by the rules. So this is more an example code that can help you to add it to your game so you can enjoy your chickens developing as a gif.
 %    \begin{macrocode}
 function make_a_gif()
   os.execute("convert -verbose -dispose previous -background white -alpha remove -alpha off -density "..GOCdensity.." "..tex.jobname ..".pdf " ..tex.jobname..".gif")
@@ -1388,7 +1427,7 @@ local quotestrings = {
 % \subsubsection{guttenbergenize – the function}
 %    \begin{macrocode}
 guttenbergenize_rq = function(head)
-  for n in nodetraverseid(nodeid"glyph",head) do
+  for n in nodetraverseid(GLYPH,head) do
     local i = n.char
     if quotestrings[i] then
       noderemove(head,n)
@@ -1481,7 +1520,7 @@ italianizerandwords = function(head)
 words = {}
 -- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
 wordnumber = 0
-  for n in nodetraverseid(nodeid"glue",head) do -- let's try to count words by their separators
+  for n in nodetraverseid(GLUE,head) do -- let's try to count words by their separators
     wordnumber = wordnumber + 1
     if n.next then
       texio.write_nl(n.next.char)
@@ -1511,13 +1550,13 @@ italianize_old = function(head)
   wordlist[wordnumber] = 1 -- let's save the word *length* in here …
 
  
-  for n in nodetraverseid(nodeid"glyph",head) do
-    if (n.next.id == nodeid"glue") then -- this is a space
+  for n in nodetraverseid(GLYPH,head) do
+    if (n.next.id == GLUE) then -- this is a space
       wordnumber = wordnumber + 1
       wordlist[wordnumber] = 1
       words[wordnumber] = n.next.next
     end
-    if (n.next.id == nodeid"glyph") then  -- it's a glyph
+    if (n.next.id == GLYPH) then  -- it's a glyph
     if (n.next.char == 46) then -- this is a full stop.
       wordnumber = wordnumber + 1
       texio.write_nl("this sentence had "..wordnumber.."words.")
@@ -1686,8 +1725,8 @@ end
 % Why the synonym |stealsheep|? Because of a comment of Paul on the |texhax| mailing list: \url{http://tug.org/pipermail/texhax/2011-October/018374.html}
 % \subsubsection{setup of variables}
 %    \begin{macrocode}
-local letterspace_glue   = nodenew(nodeid"glue")
-local letterspace_pen    = nodenew(nodeid"penalty")
+local letterspace_glue   = nodenew(GLUE)
+local letterspace_pen    = nodenew(PENALTY)
 
 letterspace_glue.width   = tex.sp"0pt"
 letterspace_glue.stretch = tex.sp"0.5pt"
@@ -1696,8 +1735,8 @@ letterspace_pen.penalty  = 10000
 % \subsubsection{function implementation}
 %    \begin{macrocode}
 letterspaceadjust = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc" or glyph.prev.id == nodeid"kern") then
+  for glyph in nodetraverseid(GLYPH, head) do
+    if glyph.prev and (glyph.prev.id == GLYPH or glyph.prev.id == DISC or glyph.prev.id == KERN) then
       local g = nodecopy(letterspace_glue)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -1710,9 +1749,9 @@ end
 % The |\text...|-version of |letterspaceadjust|. Just works, without the need to call |\letterspaceadjust| globally or anything else. Just put the |\textletterspaceadjust| around the part of text you want the function to work on. Might have problems with surrounding spacing, take care!
 %    \begin{macrocode}
 textletterspaceadjust = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
+  for glyph in nodetraverseid(GLYPH, head) do
     if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
-      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc" or glyph.prev.id == nodeid"kern") then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc" or glyph.prev.id == KERN) then
         local g = node.copy(letterspace_glue)
         nodeinsertbefore(head, glyph, g)
         nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -1728,8 +1767,8 @@ end
 %    \begin{macrocode}
 matrixize = function(head)
   x = {}
-  s = nodenew(nodeid"disc")
-  for n in nodetraverseid(nodeid"glyph",head) do
+  s = nodenew(DISC)
+  for n in nodetraverseid(GLYPH,head) do
     j = n.char
     for m = 0,7 do -- stay ASCII for now
       x[7-m] = nodecopy(n) -- to get the same font etc.
@@ -1948,6 +1987,45 @@ end
 %    \begin{macrocode}
 % 
 %    \end{macrocode}
+% \subsection{relationship}\label{sec:relationship}
+% It literally is what is says: A ship made of relations. Or a boat, rather. There are four parameters, |sailheight|, |mastheight|, |hullheight|, and |relnumber| which you can adjust. 
+%    \begin{macrocode}
+function relationship()
+  sailheight = 12
+  mastheight = 4
+  hullheight = 5
+  relnumber = 402
+  shipheight = sailheight + mastheight + hullheight
+  tex.print("\\parshape "..(shipheight))
+  for i =1,sailheight do
+    tex.print(" "..(4.5-i/3.8).."cm "..((i-0.5)/2.5).."cm ")
+   end
+  for i =1,mastheight do
+    tex.print(" "..(3.2).."cm "..(1).."cm ")
+  end
+  for i =1,hullheight do
+    tex.print(" "..((i-1)/2).."cm "..(10-i).."cm ")
+  end
+  tex.print("\\noindent")
+  for i=1,relnumber do
+    tex.print("\\ \\char"..math.random(8756,8842))
+  end
+  tex.print("\\break")
+end
+%    \end{macrocode}
+% And this is a helper function to prevent too many relations to be typeset. Problem: The relations are chosen randomly, and each might take different horizontial space. So we cannot make sure the same number of lines for each version. To catch this, we typeset more lines and just remove excess lines with a simple function in our beloved |post_linebreak_filter|.
+%    \begin{macrocode}
+function cutparagraph(head)
+  local parsum = 0
+  for n in nodetraverseid(HLIST,head) do
+    parsum = parsum + 1
+    if parsum > shipheight then
+      node.remove(head,n)
+    end
+  end
+  return head
+end
+%    \end{macrocode}
 % \subsection{rickroll}\label{sec:rickroll}
 % Another tribute to pop culture. Either: substitute word-by-word as in pancake. OR: substitute each link to a youtube-rickroll …
 %    \begin{macrocode}
@@ -1995,9 +2073,9 @@ end
 tabularasa_onlytext = false
 
 tabularasa = function(head)
-  local s = nodenew(nodeid"kern")
-  for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+  local s = nodenew(KERN)
+  for line in nodetraverseid(HLIST,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
         s.kern = n.width
         nodeinsertafter(line.list,n,nodecopy(s))
@@ -2011,7 +2089,7 @@ end
 % \subsection{tanjanize}\label{sec:tanjanize}
 %    \begin{macrocode}
 tanjanize = function(head)
-  local s = nodenew(nodeid"kern")
+  local s = nodenew(KERN)
   local m = nodenew(GLYPH,1)
   local use_letter_i = true
   scale = nodenew(WHAT,PDF_LITERAL)
@@ -2019,8 +2097,8 @@ tanjanize = function(head)
   scale.data  = "0.5 0 0 0.5 0 0 cm"
   scale2.data = "2   0 0 2   0 0 cm"
 
-  for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+  for line in nodetraverseid(HLIST,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       mimicount = 0
       tmpwidth  = 0
       while ((n.next.id == GLYPH) or (n.next.id == 11) or (n.next.id == 7) or (n.next.id == 0)) do  --find end of a word
@@ -2253,10 +2331,10 @@ substlist[1514] = 64296
 %    \begin{macrocode}
 function variantjustification(head)
   math.randomseed(1)
-  for line in nodetraverseid(nodeid"hhead",head) do
+  for line in nodetraverseid(Hhead,head) do
     if (line.glue_sign == 1 and line.glue_order == 0) then -- exclude the last line!
       substitutions_wide = {} -- we store all “expandable” letters of each line
-      for n in nodetraverseid(nodeid"glyph",line.head) do
+      for n in nodetraverseid(GLYPH,line.head) do
         if (substlist[n.char]) then
           substitutions_wide[#substitutions_wide+1] = n
         end
@@ -2297,12 +2375,12 @@ zebracolorarray_bg[2] = "0.1 g"
 %    \begin{macrocode}
 function zebranize(head)
   zebracolor = 1
-  for line in nodetraverseid(nodeid"hhead",head) do
+  for line in nodetraverseid(Hhead,head) do
     if zebracolor == #zebracolorarray then zebracolor = 0 end
     zebracolor = zebracolor + 1
     color_push.data = zebracolorarray[zebracolor]
     line.head =     nodeinsertbefore(line.head,line.head,nodecopy(color_push))
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if n.next then else
         nodeinsertafter(line.head,n,nodecopy(color_pull))
       end
@@ -2330,6 +2408,7 @@ end
 % Well, it's not the whole story so far. I plan to test some drawing using only Lua code, writing directly to the pdf file. This section will grow and get better in parallel to my understandings of what's going on. I.e. it will be very slowly … Nothing here is to be taken as good and/or correct LuaTeXing, and most code is plain ugly. However, it kind of works already {\XITS ☺}
 % \section{Drawing}
 % A \emph{very} first, experimental implementation of a drawing of a chicken. The parameters should be consistent, easy to change and that monster should look more like a cute chicken. However, it is chicken, it is Lua, so it belongs into this package. So far, all numbers and positions are hard coded, this will of course change!
+% The parameters |sloppinessh| and |sloppinessv| give the amount of sloppiness, i.\,e.~how strongly the points are “wiggled” randomly to make the drawings more dynamically. You can set them at any time in the document
 %    \begin{macrocode}
 --
 function pdf_print (...)
@@ -2380,9 +2459,12 @@ function strictcircle(center,radius)
 stroke()
 end
 
+sloppynessh = 5
+sloppynessv = 5
+
 function disturb_point(point)
-  return {point[1] + math.random()*5 - 2.5,
-          point[2] + math.random()*5 - 2.5}
+  return {point[1] + (math.random() - 1/2)*sloppynessh,
+          point[2] + (math.random() - 1/2)*sloppynessv}
 end
 
 function sloppycircle(center,radius)
@@ -2392,6 +2474,23 @@ function sloppycircle(center,radius)
   local right = disturb_point({center[1] + radius, center[2]})
   local righttop = disturb_point({right[1], right[2] + 1.45*radius})
   local rightbot = disturb_point({right[1], right[2] - 1.45*radius})
+
+  local right_end = disturb_point(right)
+
+  move (right)
+  curve (rightbot, leftbot, left)
+  curve (lefttop, righttop, right_end)
+  linewidth(math.random()+0.5)
+  stroke()
+end
+
+function sloppyellipsis(center,radiusx,radiusy)
+  local left = disturb_point({center[1] - radiusx, center[2]})
+  local lefttop = disturb_point({left[1], left[2] + 1.45*radiusy})
+  local leftbot = {lefttop[1], lefttop[2] - 2.9*radiusy}
+  local right = disturb_point({center[1] + radiusx, center[2]})
+  local righttop = disturb_point({right[1], right[2] + 1.45*radiusy})
+  local rightbot = disturb_point({right[1], right[2] - 1.45*radiusy})
 
   local right_end = disturb_point(right)
 

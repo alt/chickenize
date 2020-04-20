@@ -263,9 +263,8 @@ printdoublewords = function()
   texio.write_nl("finished")
 end
 francize = function(head)
-  for n in nodetraverseid(nodeid"glyph",head) do
+  for n in nodetraverseid(GLYPH,head) do
     if ((n.char > 47) and (n.char < 58)) then
-    texio.write_nl("numbaa")
       n.char = math.random(48,57)
     end
   end
@@ -352,7 +351,6 @@ life[53][26] = 1 life[53][25] = 1 life[54][25] = 1 life[55][25] = 1 life[54][24]
     os.sleep(GOCsleep)
   end
 end --end function gameofchicken
---  Now, this is a function calling some tool from your operating system. This requires of course that you have them present – that should be the case on a typical Linux distribution. Take care that |convert| normally does not allow for conversion from pdf, please check that this is allowed by the rules. So this is more an example code that can help you to add it to your game so you can enjoy your chickens developing as a gif.
 function make_a_gif()
   os.execute("convert -verbose -dispose previous -background white -alpha remove -alpha off -density "..GOCdensity.." "..tex.jobname ..".pdf " ..tex.jobname..".gif")
   os.execute("gwenview "..tex.jobname..".gif")
@@ -365,7 +363,7 @@ local quotestrings = {
   [8248] = true, [8249] = true, [8250] = true,
 }
 guttenbergenize_rq = function(head)
-  for n in nodetraverseid(nodeid"glyph",head) do
+  for n in nodetraverseid(GLYPH,head) do
     local i = n.char
     if quotestrings[i] then
       noderemove(head,n)
@@ -447,7 +445,7 @@ italianizerandwords = function(head)
 words = {}
 -- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
 wordnumber = 0
-  for n in nodetraverseid(nodeid"glue",head) do -- let's try to count words by their separators
+  for n in nodetraverseid(GLUE,head) do -- let's try to count words by their separators
     wordnumber = wordnumber + 1
     if n.next then
       texio.write_nl(n.next.char)
@@ -476,13 +474,13 @@ italianize_old = function(head)
   -- let's first count all words in one sentence, howboutdat?
   wordlist[wordnumber] = 1 -- let's save the word *length* in here …
 
-  for n in nodetraverseid(nodeid"glyph",head) do
-    if (n.next.id == nodeid"glue") then -- this is a space
+  for n in nodetraverseid(GLYPH,head) do
+    if (n.next.id == GLUE) then -- this is a space
       wordnumber = wordnumber + 1
       wordlist[wordnumber] = 1
       words[wordnumber] = n.next.next
     end
-    if (n.next.id == nodeid"glyph") then  -- it's a glyph
+    if (n.next.id == GLYPH) then  -- it's a glyph
     if (n.next.char == 46) then -- this is a full stop.
       wordnumber = wordnumber + 1
       texio.write_nl("this sentence had "..wordnumber.."words.")
@@ -618,15 +616,15 @@ leftsideright = function(head)
   end
   return head
 end
-local letterspace_glue   = nodenew(nodeid"glue")
-local letterspace_pen    = nodenew(nodeid"penalty")
+local letterspace_glue   = nodenew(GLUE)
+local letterspace_pen    = nodenew(PENALTY)
 
 letterspace_glue.width   = tex.sp"0pt"
 letterspace_glue.stretch = tex.sp"0.5pt"
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
-    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc" or glyph.prev.id == nodeid"kern") then
+  for glyph in nodetraverseid(GLYPH, head) do
+    if glyph.prev and (glyph.prev.id == GLYPH or glyph.prev.id == DISC or glyph.prev.id == KERN) then
       local g = nodecopy(letterspace_glue)
       nodeinsertbefore(head, glyph, g)
       nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -635,9 +633,9 @@ letterspaceadjust = function(head)
   return head
 end
 textletterspaceadjust = function(head)
-  for glyph in nodetraverseid(nodeid"glyph", head) do
+  for glyph in nodetraverseid(GLYPH, head) do
     if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
-      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc" or glyph.prev.id == nodeid"kern") then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc" or glyph.prev.id == KERN) then
         local g = node.copy(letterspace_glue)
         nodeinsertbefore(head, glyph, g)
         nodeinsertbefore(head, g, nodecopy(letterspace_pen))
@@ -649,8 +647,8 @@ textletterspaceadjust = function(head)
 end
 matrixize = function(head)
   x = {}
-  s = nodenew(nodeid"disc")
-  for n in nodetraverseid(nodeid"glyph",head) do
+  s = nodenew(DISC)
+  for n in nodetraverseid(GLYPH,head) do
     j = n.char
     for m = 0,7 do -- stay ASCII for now
       x[7-m] = nodecopy(n) -- to get the same font etc.
@@ -824,6 +822,38 @@ randomcolor = function(head)
   end
   return head
 end
+function relationship()
+  sailheight = 12
+  mastheight = 4
+  hullheight = 5
+  relnumber = 402
+  shipheight = sailheight + mastheight + hullheight
+  tex.print("\\parshape "..(shipheight))
+  for i =1,sailheight do
+    tex.print(" "..(4.5-i/3.8).."cm "..((i-0.5)/2.5).."cm ")
+   end
+  for i =1,mastheight do
+    tex.print(" "..(3.2).."cm "..(1).."cm ")
+  end
+  for i =1,hullheight do
+    tex.print(" "..((i-1)/2).."cm "..(10-i).."cm ")
+  end
+  tex.print("\\noindent")
+  for i=1,relnumber do
+    tex.print("\\ \\char"..math.random(8756,8842))
+  end
+  tex.print("\\break")
+end
+function cutparagraph(head)
+  local parsum = 0
+  for n in nodetraverseid(HLIST,head) do
+    parsum = parsum + 1
+    if parsum > shipheight then
+      node.remove(head,n)
+    end
+  end
+  return head
+end
 substitutewords_strings = {}
 
 addtosubstitutions = function(input,output)
@@ -853,9 +883,9 @@ end
 tabularasa_onlytext = false
 
 tabularasa = function(head)
-  local s = nodenew(nodeid"kern")
-  for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+  local s = nodenew(KERN)
+  for line in nodetraverseid(HLIST,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if not(tabularasa_onlytext) or node.has_attribute(n,luatexbase.attributes.tabularasaattr) then
         s.kern = n.width
         nodeinsertafter(line.list,n,nodecopy(s))
@@ -866,7 +896,7 @@ tabularasa = function(head)
   return head
 end
 tanjanize = function(head)
-  local s = nodenew(nodeid"kern")
+  local s = nodenew(KERN)
   local m = nodenew(GLYPH,1)
   local use_letter_i = true
   scale = nodenew(WHAT,PDF_LITERAL)
@@ -874,8 +904,8 @@ tanjanize = function(head)
   scale.data  = "0.5 0 0 0.5 0 0 cm"
   scale2.data = "2   0 0 2   0 0 cm"
 
-  for line in nodetraverseid(nodeid"hlist",head) do
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+  for line in nodetraverseid(HLIST,head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       mimicount = 0
       tmpwidth  = 0
       while ((n.next.id == GLYPH) or (n.next.id == 11) or (n.next.id == 7) or (n.next.id == 0)) do  --find end of a word
@@ -1052,10 +1082,10 @@ substlist[1512] = 64295
 substlist[1514] = 64296
 function variantjustification(head)
   math.randomseed(1)
-  for line in nodetraverseid(nodeid"hhead",head) do
+  for line in nodetraverseid(Hhead,head) do
     if (line.glue_sign == 1 and line.glue_order == 0) then -- exclude the last line!
       substitutions_wide = {} -- we store all “expandable” letters of each line
-      for n in nodetraverseid(nodeid"glyph",line.head) do
+      for n in nodetraverseid(GLYPH,line.head) do
         if (substlist[n.char]) then
           substitutions_wide[#substitutions_wide+1] = n
         end
@@ -1083,12 +1113,12 @@ zebracolorarray_bg[1] = "0.9 g"
 zebracolorarray_bg[2] = "0.1 g"
 function zebranize(head)
   zebracolor = 1
-  for line in nodetraverseid(nodeid"hhead",head) do
+  for line in nodetraverseid(Hhead,head) do
     if zebracolor == #zebracolorarray then zebracolor = 0 end
     zebracolor = zebracolor + 1
     color_push.data = zebracolorarray[zebracolor]
     line.head =     nodeinsertbefore(line.head,line.head,nodecopy(color_push))
-    for n in nodetraverseid(nodeid"glyph",line.head) do
+    for n in nodetraverseid(GLYPH,line.head) do
       if n.next then else
         nodeinsertafter(line.head,n,nodecopy(color_pull))
       end
@@ -1159,9 +1189,12 @@ function strictcircle(center,radius)
 stroke()
 end
 
+sloppynessh = 5
+sloppynessv = 5
+
 function disturb_point(point)
-  return {point[1] + math.random()*5 - 2.5,
-          point[2] + math.random()*5 - 2.5}
+  return {point[1] + (math.random() - 1/2)*sloppynessh,
+          point[2] + (math.random() - 1/2)*sloppynessv}
 end
 
 function sloppycircle(center,radius)
@@ -1171,6 +1204,23 @@ function sloppycircle(center,radius)
   local right = disturb_point({center[1] + radius, center[2]})
   local righttop = disturb_point({right[1], right[2] + 1.45*radius})
   local rightbot = disturb_point({right[1], right[2] - 1.45*radius})
+
+  local right_end = disturb_point(right)
+
+  move (right)
+  curve (rightbot, leftbot, left)
+  curve (lefttop, righttop, right_end)
+  linewidth(math.random()+0.5)
+  stroke()
+end
+
+function sloppyellipsis(center,radiusx,radiusy)
+  local left = disturb_point({center[1] - radiusx, center[2]})
+  local lefttop = disturb_point({left[1], left[2] + 1.45*radiusy})
+  local leftbot = {lefttop[1], lefttop[2] - 2.9*radiusy}
+  local right = disturb_point({center[1] + radiusx, center[2]})
+  local righttop = disturb_point({right[1], right[2] + 1.45*radiusy})
+  local rightbot = disturb_point({right[1], right[2] - 1.45*radiusy})
 
   local right_end = disturb_point(right)
 

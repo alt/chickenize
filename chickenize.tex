@@ -184,7 +184,7 @@ GOCrule_spawn = {3}
 GOCrule_antilive = {2,3}
 GOCrule_antispawn = {3}
 GOCcellcode = "\\scalebox{0.03}{\\drawchicken}"
-GOCanticellcode = "O"
+GOCcellcode = "\\scalebox{0.03}{\\drawcov}"
 GOCx = 100
 GOCy = 100
 GOCiter = 150
@@ -337,6 +337,12 @@ end
 \def\unrandomuclc{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","randomuclc")}}
 
+\def\relationship{%
+  \directlua{luatexbase.add_to_callback("post_linebreak_filter",cutparagraph,"cut paragraph")
+    relationship()
+  }
+}
+
 \let\rongorongonize\boustrophedoninverse
 \let\unrongorongonize\unboustrophedoninverse
 
@@ -471,6 +477,35 @@ end
     sloppyline(chickenleg[2][1],chickenleg[2][2]) sloppyline(chickenleg[2][2],chickenleg[2][3])
     sloppyline(beak_front,beak_top) sloppyline(beak_front,beak_bottom)
     sloppyline(wing_front,wing_bottom) sloppyline(wing_back,wing_bottom)
+  }
+}
+\long\def\drawcov{
+  \luadraw{90}{
+    covbody = {200,50}
+    covbody_rad = 50
+
+    covcrown_rad = 5
+    crownno = 13
+    for i=1,crownno do
+      crownpos = {covbody[1]+1.4*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+1.4*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      crownconnect = {covbody[1]+covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+covbody_rad*math.cos(2*math.pi/crownno*i)}
+     sloppycircle(crownpos,covcrown_rad)
+     sloppyline(crownpos,crownconnect)
+   end
+
+    covcrown_rad = 6
+    crownno = 8
+    for i=1,crownno do
+      crownpos = {covbody[1]+0.8*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+0.8*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      crownconnect = {covbody[1]+0.5*covbody_rad*math.sin(2*math.pi/crownno*i),covbody[2]+0.5*covbody_rad*math.cos(2*math.pi/crownno*i)}
+      sloppycircle(crownpos,covcrown_rad)
+      sloppyline(crownpos,crownconnect)
+    end
+
+    covcrown_rad = 8
+    sloppycircle(covbody,covcrown_rad)
+    sloppycircle(covbody,covbody_rad)
+    sloppyline(covbody,covbody)
   }
 }
 %% 
