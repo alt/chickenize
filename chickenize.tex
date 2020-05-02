@@ -508,6 +508,64 @@ end
     sloppyline(covbody,covbody)
   }
 }
+\long\def\drawhorse{
+  \luadraw{90}{
+    horsebod = {100,-40}
+    sloppyellipsis(horsebod,50,20)
+    horsehead = {20,0}
+    sloppyellipsis(horsehead,25,15)
+    sloppyline({35,-10},{50,-40})
+    sloppyline({45,5},{80,-25})
+    sloppyline({60,-50},{60,-90})
+    sloppyline({70,-50},{70,-90})
+    sloppyline({130,-50},{130,-90})
+    sloppyline({140,-50},{140,-90})
+    sloppyline({150,-40},{160,-60})
+    sloppyline({150,-38},{160,-58})
+    sloppyline({150,-42},{160,-62})
+    sloppyline({-5,-10},{10,-5})
+    sloppyellipsis({30,5},5,2)  %% it's an eye, aye?
+    sloppyline({27,15},{34,25})
+    sloppyline({34,25},{37,13})
+  }
+}
+\long\def\drawfathorse{
+  \luadraw{90}{
+    horsebod = {100,-40}
+    sloppyellipsis(horsebod,50,40)
+    horsehead = {20,0}
+    sloppyellipsis(horsehead,25,15)
+    sloppyline({35,-10},{50,-40})
+    sloppyline({45,5},{70,-15})
+    sloppyline({60,-70},{60,-90})
+    sloppyline({70,-70},{70,-90})
+    sloppyline({130,-70},{130,-90})
+    sloppyline({140,-70},{140,-90})
+    sloppyline({150,-40},{160,-60})
+    sloppyline({150,-38},{160,-58})
+    sloppyline({150,-42},{160,-62})
+    sloppyline({-5,-10},{10,-5})
+    sloppyellipsis({30,5},5,2)  %% it's an eye, aye?
+    sloppyline({27,15},{34,25})
+    sloppyline({34,25},{37,13})
+  }
+}
+\long\def\drawunicorn{
+\color{pink!90!black}
+  \drawhorse
+  \luadraw{0}{
+    sloppyline({15,30},{15,60})
+    sloppyline({15,60},{25,30})
+  }
+}
+\long\def\drawfatunicorn{
+\color{pink!90!black}
+  \drawfathorse
+  \luadraw{0}{
+    sloppyline({15,30},{15,60})
+    sloppyline({15,60},{25,30})
+  }
+}
 %% 
 %%
 %% End of file `chickenize.tex'.

@@ -1179,6 +1179,8 @@ function close ()
   pdf_print("h")
 end
 
+drawwidth = 1
+
 function linewidth (w)
   pdf_print(w,"w")
 end
@@ -1223,7 +1225,7 @@ function sloppycircle(center,radius)
   move (right)
   curve (rightbot, leftbot, left)
   curve (lefttop, righttop, right_end)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 
@@ -1240,7 +1242,7 @@ function sloppyellipsis(center,radiusx,radiusy)
   move (right)
   curve (rightbot, leftbot, left)
   curve (lefttop, righttop, right_end)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 
@@ -1250,7 +1252,7 @@ function sloppyline(start,stop)
   start = disturb_point(start)
   stop = disturb_point(stop)
   move(start) curve(start_line,stop_line,stop)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 -- 

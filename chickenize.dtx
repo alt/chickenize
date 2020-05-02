@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.9a}
+\centerline{v0.2.10}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -180,6 +180,7 @@ A small and incomplete overview of the functionalities offered by this package.\
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken” (or user-adjustable words)\\
 \hyperref[sec:drawchicken]{drawchicken} & draws a nice chicken with random, “hand-sketch”-type lines\\
 \hyperref[sec:drawcov]{drawcov} & draws a corona virus\\
+\hyperref[sec:drawchicken]{drawhorse} & draws a horse\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
 \hyperref[sec:italianize]{italianize} & Mamma mia!! \\
@@ -278,10 +279,11 @@ The following list tries to kind of keep track of the options and variables. The
 \item[\opt{chickenstring} = \arg{table}] The string that is printed when using |\chickenize|. In fact, |chickenstring| is a table which allows for some more random action. To specify the default string, say |chickenstring[1] = 'chicken'|. For more than one animal, just step the index:\\
  |chickenstring[2] = 'rabbit'|. All existing table entries will be used randomly. Remember that we are dealing with Lua strings here, so use |' '| to mark them. (|" "| can cause problems with |babel|.)
 \item[\opt{chickenizefraction} = \arg{float} \default{1}] Gives the fraction of words that get replaced by the |chickenstring|. The default means that every word is substituted. However, with a value of, say, |0.0001|, only one word in ten thousand will be |chickenstring|. |chickenizefraction| must be specified \emph{after} |\begin{document}|. No idea, why …
-\item[\opt{chickencount} = \arg{true}] Activates the counting of substituted words and prints the number at the end of the terminal output.
-\item[\opt{colorstretchnumbers} = \arg{true} \default{0}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
+\item[\opt{chickencount} = \arg{bool}  \default{true}] Activates the counting of substituted words and prints the number at the end of the terminal output.
+\item[\opt{colorstretchnumbers} = \arg{bool} \default{false}] If true, the amount of stretching or shrinking of each line is printed into the margin as a green, red or black number.
 \item[\opt{chickenkernamount} = \arg{int}] The amount the kerning is set to when using |\kernmanipulate|.
 \item[\opt{chickenkerninvert} = \arg{bool}] If set to true, the kerning is inverted (to be used with |\kernmanipulate|.
+\item[\opt{drawwidth} = \arg{float} \default{1}] Defines the widths of the sloppy drawings of chickens, horses, etc.
 \item[\opt{leettable} = \arg{table}] From this table, the substitution for 1337 is taken. If you want to add or change an entry, you have to provide the unicode numbers of the characters, e.\,g. |leettable[101] = 50| replaces every |e| (|101|) with the number |3| (|50|).
 \item[\opt{uclcratio} = \arg{float} \default{0.5}] Gives the fraction of uppercases to lowercases in the |\randomuclc| mode. A higher number (up to 1) gives more uppercase letters. Guess what a lower number does.
 \item[\opt{randomcolor\_grey} = \arg{bool} \default{false}] For a printer-friendly version, this offers a grey scale instead of an rgb value for |\randomcolor|.
@@ -943,6 +945,72 @@ end
   }
 }
 %    \end{macrocode}
+% \subsection{drawhorse}\label{sec:drawhorse}
+% Well … guess what this does.
+%    \begin{macrocode}
+\long\def\drawhorse{
+  \luadraw{90}{
+    horsebod = {100,-40}
+    sloppyellipsis(horsebod,50,20)
+    horsehead = {20,0}
+    sloppyellipsis(horsehead,25,15)
+    sloppyline({35,-10},{50,-40})
+    sloppyline({45,5},{80,-25})
+    sloppyline({60,-50},{60,-90})
+    sloppyline({70,-50},{70,-90})
+    sloppyline({130,-50},{130,-90})
+    sloppyline({140,-50},{140,-90})
+    sloppyline({150,-40},{160,-60})
+    sloppyline({150,-38},{160,-58})
+    sloppyline({150,-42},{160,-62})
+    sloppyline({-5,-10},{10,-5})
+    sloppyellipsis({30,5},5,2)  %% it's an eye, aye?
+    sloppyline({27,15},{34,25})
+    sloppyline({34,25},{37,13})    
+  }
+}
+%    \end{macrocode}
+% There's also a version with a bit more … meat to the bones:
+%    \begin{macrocode}
+\long\def\drawfathorse{
+  \luadraw{90}{
+    horsebod = {100,-40}
+    sloppyellipsis(horsebod,50,40)
+    horsehead = {20,0}
+    sloppyellipsis(horsehead,25,15)
+    sloppyline({35,-10},{50,-40})
+    sloppyline({45,5},{70,-15})
+    sloppyline({60,-70},{60,-90})
+    sloppyline({70,-70},{70,-90})
+    sloppyline({130,-70},{130,-90})
+    sloppyline({140,-70},{140,-90})
+    sloppyline({150,-40},{160,-60})
+    sloppyline({150,-38},{160,-58})
+    sloppyline({150,-42},{160,-62})
+    sloppyline({-5,-10},{10,-5})
+    sloppyellipsis({30,5},5,2)  %% it's an eye, aye?
+    sloppyline({27,15},{34,25})
+    sloppyline({34,25},{37,13})    
+  }
+}
+% intentioally not documented:
+\long\def\drawunicorn{
+\color{pink!90!black}
+  \drawhorse
+  \luadraw{0}{
+    sloppyline({15,30},{15,60})
+    sloppyline({15,60},{25,30})
+  }  
+}
+\long\def\drawfatunicorn{
+\color{pink!90!black}
+  \drawfathorse
+  \luadraw{0}{
+    sloppyline({15,30},{15,60})
+    sloppyline({15,60},{25,30})
+  }  
+}
+%    \end{macrocode}
 % \iffalse
 %</tex>
 %<*package>
@@ -953,7 +1021,7 @@ end
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2020/05/02 v0.2.9a chickenize package]
+  [2020/05/02 v0.2.10 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -2450,6 +2518,11 @@ function close ()
   pdf_print("h")
 end
 
+%    \end{macrocode}
+% By setting |drawwidth| to something different than 1 you can adjust the thickness of the strokes. Any stroke done with the |sloppy| functions will by varied between |0.5 drawwidth| and |1.5 drawwidth|.
+%    \begin{macrocode}
+drawwidth = 1
+
 function linewidth (w)
   pdf_print(w,"w")
 end
@@ -2494,7 +2567,7 @@ function sloppycircle(center,radius)
   move (right)
   curve (rightbot, leftbot, left)
   curve (lefttop, righttop, right_end)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 
@@ -2511,7 +2584,7 @@ function sloppyellipsis(center,radiusx,radiusy)
   move (right)
   curve (rightbot, leftbot, left)
   curve (lefttop, righttop, right_end)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 
@@ -2521,7 +2594,7 @@ function sloppyline(start,stop)
   start = disturb_point(start)
   stop = disturb_point(stop)
   move(start) curve(start_line,stop_line,stop)
-  linewidth(math.random()+0.5)
+  linewidth(drawwidth*(math.random()+0.5))
   stroke()
 end
 %    \end{macrocode}
