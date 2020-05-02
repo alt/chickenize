@@ -79,7 +79,7 @@ ance status ‘maintained’.
   hyperref,
   longtable,
   microtype,
-  scrpage2,
+  scrlayer-scrpage,
   tabu
 }
 \hypersetup{
@@ -116,7 +116,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.9}
+\centerline{v0.2.9a}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -179,6 +179,7 @@ A small and incomplete overview of the functionalities offered by this package.\
 \cmidrule(lr){1-2}
 \hyperref[sec:chickenize]{chickenize} & replaces every word with “chicken” (or user-adjustable words)\\
 \hyperref[sec:drawchicken]{drawchicken} & draws a nice chicken with random, “hand-sketch”-type lines\\
+\hyperref[sec:drawcov]{drawcov} & draws a corona virus\\
 \hyperref[sec:guttenbergenize]{guttenbergenize} & deletes every quote and footnotes\\
 \hyperref[sec:hammertime]{hammertime} & U can't touch this!\\
 \hyperref[sec:italianize]{italianize} & Mamma mia!! \\
@@ -952,7 +953,7 @@ end
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2020/04/20 v0.2.9 chickenize package]
+  [2020/05/02 v0.2.9a chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -2418,18 +2419,31 @@ function pdf_print (...)
   pdf.print("\n")
 end
 
-function move (p)
-  pdf_print(p[1],p[2],"m")
+function move (p1,p2)
+  if (p2) then
+    pdf_print(p1,p2,"m")
+  else
+    pdf_print(p1[1],p1[2],"m")
+  end
 end
 
-function line (p)
-  pdf_print(p[1],p[2],"l")
+function line(p1,p2)
+  if (p2) then
+    pdf_print(p1,p2,"l")
+  else
+    pdf_print(p1[1],p1[2],"l")
+  end
 end
 
-function curve(p1,p2,p3)
+function curve(p11,p12,p21,p22,p31,p32)
+  if (p22) then
+    p1,p2,p3 = {p11,p12},{p21,p22},{p31,p32}
+  else
+    p1,p2,p3 = p11,p12,p21
+  end
   pdf_print(p1[1], p1[2],
-            p2[1], p2[2],
-            p3[1], p3[2], "c")
+              p2[1], p2[2],
+              p3[1], p3[2], "c")
 end
 
 function close ()

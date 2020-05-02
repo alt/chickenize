@@ -1148,18 +1148,31 @@ function pdf_print (...)
   pdf.print("\n")
 end
 
-function move (p)
-  pdf_print(p[1],p[2],"m")
+function move (p1,p2)
+  if (p2) then
+    pdf_print(p1,p2,"m")
+  else
+    pdf_print(p1[1],p1[2],"m")
+  end
 end
 
-function line (p)
-  pdf_print(p[1],p[2],"l")
+function line(p1,p2)
+  if (p2) then
+    pdf_print(p1,p2,"l")
+  else
+    pdf_print(p1[1],p1[2],"l")
+  end
 end
 
-function curve(p1,p2,p3)
+function curve(p11,p12,p21,p22,p31,p32)
+  if (p22) then
+    p1,p2,p3 = {p11,p12},{p21,p22},{p31,p32}
+  else
+    p1,p2,p3 = p11,p12,p21
+  end
   pdf_print(p1[1], p1[2],
-            p2[1], p2[2],
-            p3[1], p3[2], "c")
+              p2[1], p2[2],
+              p3[1], p3[2], "c")
 end
 
 function close ()
