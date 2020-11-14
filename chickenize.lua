@@ -443,26 +443,30 @@ italianize = function(head)
 end
 italianizerandwords = function(head)
 words = {}
--- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
 wordnumber = 0
+-- head.next.next is the very first word. However, let's try to get the first word after the first space correct.
   for n in nodetraverseid(GLUE,head) do -- let's try to count words by their separators
     wordnumber = wordnumber + 1
     if n.next then
-      texio.write_nl(n.next.char)
       words[wordnumber] = {}
       words[wordnumber][1] = node.copy(n.next)
 
       glyphnumber = 1
       myglyph = n.next
-        while myglyph.next do
-          node.tail(words[wordnumber][1]).next = node.copy(myglyph.next)
-          myglyph = myglyph.next
-        end
+      while myglyph.next do
+        node.tail(words[wordnumber][1]).next = node.copy(myglyph.next)
+        myglyph = myglyph.next
       end
     end
-myinsertnode = head.next.next -- first letter
-node.tail(words[1][1]).next = myinsertnode.next
-myinsertnode.next = words[1][1]
+  print(#words)
+  if #words > 0 then
+  print("lengs is: ")
+  print(#words[#words])
+  end
+  end
+--myinsertnode = head.next.next -- first letter
+--node.tail(words[1][1]).next = myinsertnode.next
+--myinsertnode.next = words[1][1]
 
   return head
 end

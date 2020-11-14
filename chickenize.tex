@@ -235,10 +235,10 @@ end
 \let\hendlnize\chickenize     % homage to Hendl/Chicken
 \let\unhendlnize\unchickenize % may the soldering strength always be with him
 
-\def\italianizerandword{
-  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianizerandword,"italianizerandword")}}
-\def\unitalianizerandword{
-  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianizerandword")}}
+\def\italianizerandwords{
+  \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianizerandwords,"italianizerandwords")}}
+\def\unitalianizerandwords{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","italianizerandwords")}}
 
 \def\italianize{
   \directlua{luatexbase.add_to_callback("pre_linebreak_filter",italianize,"italianize")}}
@@ -554,16 +554,16 @@ end
 \color{pink!90!black}
   \drawhorse
   \luadraw{0}{
-    sloppyline({15,30},{15,60})
-    sloppyline({15,60},{25,30})
+    sloppyline({15,20},{15,50})
+    sloppyline({15,50},{25,20})
   }
 }
 \long\def\drawfatunicorn{
 \color{pink!90!black}
   \drawfathorse
   \luadraw{0}{
-    sloppyline({15,30},{15,60})
-    sloppyline({15,60},{25,30})
+    sloppyline({15,20},{15,50})
+    sloppyline({15,50},{25,20})
   }
 }
 %% 
