@@ -8,7 +8,7 @@
 --  
 --  EXPERIMENTAL CODE
 --  
---  This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
+--  This package is copyright © 2021 Arno L. Trautmann. It may be distributed and/or
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
@@ -47,7 +47,8 @@ chicken_pagenumbers = true
 chickenstring = {}
 chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 0.5 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
+chickenizefraction = 0.5 -- set this to a small value to fool somebody,
+-- or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
 local match = unicode.utf8.match
@@ -233,7 +234,7 @@ printglyphnumber = function()
 end
 countwords = function(head)
   for glyph in nodetraverseid(GLYPH,head) do
-    if (glyph.next.id == 10) then
+    if (glyph.next.id == GLUE) then
       wordnumber = wordnumber + 1
     end
   end
@@ -498,29 +499,6 @@ italianize_old = function(head)
       wordlist[wordnumber] = wordlist[wordnumber] + 1 -- the current word got 1 glyph longer
       end
     end
-  end
-  return head
-end
-
-hammertimedelay = 1.2
-local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
-hammertime = function(head)
-  if hammerfirst then
-    texiowrite_nl(htime_separator)
-    texiowrite_nl("============STOP!=============\n")
-    texiowrite_nl(htime_separator .. "\n\n\n")
-    os.sleep (hammertimedelay*1.5)
-    texiowrite_nl(htime_separator .. "\n")
-    texiowrite_nl("==========HAMMERTIME==========\n")
-    texiowrite_nl(htime_separator .. "\n\n")
-    os.sleep (hammertimedelay)
-    hammerfirst = false
-  else
-    os.sleep (hammertimedelay)
-    texiowrite_nl(htime_separator)
-    texiowrite_nl("======U can't touch this!=====\n")
-    texiowrite_nl(htime_separator .. "\n\n")
-    os.sleep (hammertimedelay*0.5)
   end
   return head
 end
@@ -826,13 +804,20 @@ randomcolor = function(head)
   end
   return head
 end
-function relationship()
   sailheight = 12
   mastheight = 4
   hullheight = 5
   relnumber = 402
+function relationship()
+--%% check if there's a problem with any character in the current font
+  f = font.getfont(font.current())
+  fullfont = 1
+  for i = 8756,8842 do
+    if not(f.characters[i]) then texio.write_nl((i).." not available") fullfont = 0 end
+  end
+--%% store the result of the check for later, then go on to construct the ship:
   shipheight = sailheight + mastheight + hullheight
-  tex.print("\\parshape "..(shipheight))
+  tex.print("\\parshape "..(shipheight)) --%% prepare the paragraph shape ...
   for i =1,sailheight do
     tex.print(" "..(4.5-i/3.8).."cm "..((i-0.5)/2.5).."cm ")
    end
@@ -842,7 +827,7 @@ function relationship()
   for i =1,hullheight do
     tex.print(" "..((i-1)/2).."cm "..(10-i).."cm ")
   end
-  tex.print("\\noindent")
+  tex.print("\\noindent") --%% ... up to here, then insert relations
   for i=1,relnumber do
     tex.print("\\ \\char"..math.random(8756,8842))
   end
@@ -857,6 +842,20 @@ function cutparagraph(head)
     end
   end
   return head
+end
+function missingcharstext()
+  if (fullfont == 0) then
+  local separator     = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("CAREFUL!!")
+  texiowrite_nl("\\relationship needs special characters (unicode points 8756 to 8842)")
+  texiowrite_nl("Your font does not support all of them!")
+  texiowrite_nl("consider using another one, e.g. the XITS font supplied with TeXlive.")
+  texiowrite_nl(separator .. "\n")
+  end
 end
 substitutewords_strings = {}
 

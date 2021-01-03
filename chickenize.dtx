@@ -19,7 +19,7 @@ arno dot trautmann at gmx dot de
 
 Hope you have fun with this package!
 
-This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2021 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -37,7 +37,7 @@ ance status ‘maintained’.
 
 EXPERIMENTAL CODE
 
-This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2021 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL mainten-
 ance status ‘maintained’.
@@ -117,7 +117,7 @@ chickenize
 
 \unrainbowcolor
 
-\centerline{v0.2.10}
+\centerline{v0.3}
 \centerline{\hspace*{2cm} Arno L. Trautmann {\Large \ALT}}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
@@ -140,7 +140,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 
 \small\noindent
 \fbox{\parbox{.97\textwidth}{
-This package is copyright © 2020 Arno L. Trautmann. It may be distributed and/or
+This package is copyright © 2021 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
 of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
 \vspace*{1cm}
@@ -763,6 +763,7 @@ end
 
 \def\relationship{%
   \directlua{luatexbase.add_to_callback("post_linebreak_filter",cutparagraph,"cut paragraph")
+    luatexbase.add_to_callback("stop_run",missingcharstext,"charsmissing")
     relationship()
   }
 }
@@ -1023,7 +1024,7 @@ end
 % Some code might be implemented to manipulate figures for full chickenization. However, I will \emph{not} load any packages at this place, as loading of expl3 or TikZ or whatever takes too much time for such a tiny package like this one. If you require any of the features presented here, you have to load the packages on your own. Maybe this will change.
 %    \begin{macrocode}
 \ProvidesPackage{chickenize}%
-  [2020/05/02 v0.2.10 chickenize package]
+  [2021/01/03 v0.3 chickenize package]
 \input{chickenize}
 %    \end{macrocode}
 % \subsection{Free Compliments}
@@ -1097,7 +1098,8 @@ chicken_pagenumbers = true
 chickenstring = {}
 chickenstring[1] = "chicken" -- chickenstring is a table, please remeber this!
 
-chickenizefraction = 0.5 -- set this to a small value to fool somebody, or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
+chickenizefraction = 0.5 -- set this to a small value to fool somebody,
+-- or to see if your text has been read carefully. This is also a great way to lay easter eggs for your own class / package …
 chicken_substitutions = 0 -- value to count the substituted chickens. Makes sense for testing your proofreaders.
 
 local match = unicode.utf8.match
@@ -1324,7 +1326,7 @@ end
 %    \begin{macrocode}
 countwords = function(head)
   for glyph in nodetraverseid(GLYPH,head) do
-    if (glyph.next.id == 10) then
+    if (glyph.next.id == GLUE) then
       wordnumber = wordnumber + 1
     end
   end
@@ -1650,34 +1652,6 @@ italianize_old = function(head)
   return head
 end
 %    \end{macrocode}
-
-% \subsection{hammertime}\label{sec:hammertime}
-% This is a completely useless function. It just prints STOP! – HAMMERTIME at the beginnig of the first paragraph after |\hammertime|, and “U can't touch this” for every following one. As the function writes to the terminal, you have to be sure that your terminal is line-buffered and not block-buffered. Compare the explanation by Taco on the Lua\TeX\ mailing list.\footnote{\url{http://tug.org/pipermail/luatex/2011-November/003355.html}}
-%    \begin{macrocode}
-hammertimedelay = 1.2
-local htime_separator = string.rep("=", 30) .. "\n" -- slightly inconsistent with the “nicetext”
-hammertime = function(head)
-  if hammerfirst then
-    texiowrite_nl(htime_separator)
-    texiowrite_nl("============STOP!=============\n")
-    texiowrite_nl(htime_separator .. "\n\n\n")
-    os.sleep (hammertimedelay*1.5)
-    texiowrite_nl(htime_separator .. "\n")
-    texiowrite_nl("==========HAMMERTIME==========\n")
-    texiowrite_nl(htime_separator .. "\n\n")
-    os.sleep (hammertimedelay)
-    hammerfirst = false
-  else
-    os.sleep (hammertimedelay)
-    texiowrite_nl(htime_separator)
-    texiowrite_nl("======U can't touch this!=====\n")
-    texiowrite_nl(htime_separator .. "\n\n")
-    os.sleep (hammertimedelay*0.5)
-  end
-  return head
-end
-%    \end{macrocode}
-
 
 % \subsection{itsame}\label{sec:itsame}
 % The (very first, very basic, very stupid) code to draw a small mario. You need to input luadraw.tex or do luadraw.lua for the rectangle function.
@@ -2059,20 +2033,23 @@ randomcolor = function(head)
   return head
 end
 %    \end{macrocode}
-% \subsection{randomerror}\label{sec:randomerror}
-%    \begin{macrocode}
-% 
-%    \end{macrocode}
 % \subsection{relationship}\label{sec:relationship}
-% It literally is what is says: A ship made of relations. Or a boat, rather. There are four parameters, |sailheight|, |mastheight|, |hullheight|, and |relnumber| which you can adjust. 
+% It literally is what is says: A ship made of relations. Or a boat, rather. There are four parameters, |sailheight|, |mastheight|, |hullheight|, and |relnumber| which you can adjust.
 %    \begin{macrocode}
-function relationship()
   sailheight = 12
   mastheight = 4
   hullheight = 5
   relnumber = 402
+function relationship()
+--%% check if there's a problem with any character in the current font
+  f = font.getfont(font.current())
+  fullfont = 1
+  for i = 8756,8842 do
+    if not(f.characters[i]) then texio.write_nl((i).." not available") fullfont = 0 end
+  end
+--%% store the result of the check for later, then go on to construct the ship:
   shipheight = sailheight + mastheight + hullheight
-  tex.print("\\parshape "..(shipheight))
+  tex.print("\\parshape "..(shipheight)) --%% prepare the paragraph shape ...
   for i =1,sailheight do
     tex.print(" "..(4.5-i/3.8).."cm "..((i-0.5)/2.5).."cm ")
    end
@@ -2082,7 +2059,7 @@ function relationship()
   for i =1,hullheight do
     tex.print(" "..((i-1)/2).."cm "..(10-i).."cm ")
   end
-  tex.print("\\noindent")
+  tex.print("\\noindent") --%% ... up to here, then insert relations
   for i=1,relnumber do
     tex.print("\\ \\char"..math.random(8756,8842))
   end
@@ -2100,6 +2077,23 @@ function cutparagraph(head)
     end
   end
   return head
+end
+%    \end{macrocode}
+% And finally a helper function to inform our dear users that they have to use a font that actually can display all the necessary symbols.
+%    \begin{macrocode}
+function missingcharstext()
+  if (fullfont == 0) then
+  local separator     = string.rep("=", 28)
+local texiowrite_nl = texio.write_nl
+  texiowrite_nl("Output written on "..tex.jobname..".pdf ("..status.total_pages.." chicken,".." eggs).")
+  texiowrite_nl(" ")
+  texiowrite_nl(separator)
+  texiowrite_nl("CAREFUL!!")
+  texiowrite_nl("\\relationship needs special characters (unicode points 8756 to 8842)")
+  texiowrite_nl("Your font does not support all of them!")
+  texiowrite_nl("consider using another one, e.g. the XITS font supplied with TeXlive.")
+  texiowrite_nl(separator .. "\n")
+  end
 end
 %    \end{macrocode}
 % \subsection{rickroll}\label{sec:rickroll}
