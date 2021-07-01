@@ -352,6 +352,11 @@ end
 \def\unscorpionize{
   \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","scorpionize_color")}}
 
+\def\shownodes#1{
+  \directlua{
+  shownodes_var = "#1"
+  luatexbase.add_to_callback("#1",shownodes,"shownodes")}}
+
 \def\spankmonkey{    %% to be implemented
   \directlua{}}
 \def\unspankmonkey{

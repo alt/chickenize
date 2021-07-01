@@ -12,13 +12,13 @@
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
-
 local nodeid   = node.id
 local nodecopy = node.copy
 local nodenew  = node.new
 local nodetail = node.tail
 local nodeslide = node.slide
 local noderemove = node.remove
+local nodetraverse = node.traverse
 local nodetraverseid = node.traverse_id
 local nodeinsertafter = node.insert_after
 local nodeinsertbefore = node.insert_before
@@ -138,6 +138,49 @@ nicetext = function()
     texiowrite_nl("There were "..chicken_substitutions.." substitutions made.")
     texiowrite_nl(separator)
   end
+end
+
+printnodes = function(head)
+  for i in nodetraverse(head) do
+    texio.write_nl(i.id)
+    if i.id == 0 then
+      printnodes(i.head)
+    end
+  end
+  return head
+end
+
+shownodes = function(head)
+-- start assuming we are in post_linebreak_filter for simplicity
+-- then we need a function that goes through all hlists recursively
+  printnodes(head)
+
+--[[
+  if (shownodes_var == "pre_linebreak_filter") then
+    texio.write_nl("-start par-")
+    for i in nodetraverse(head) do
+      texio.write_nl(i.id)
+      if i.id == 0 then
+        texio.write_nl("yo")
+        for i in nodetraverse(i.head) do
+          texio.write_nl("yo" .. i.id)
+        end
+        texio.write_nl("bye")
+      end
+    end
+    texio.write_nl("-end-\n")
+  end
+  if shownodes_var == "post_linebreak_filter" then
+    texio.write_nl("-start par-")
+    for l in nodetraverse(head) do
+      texio.write_nl("-start line-")
+      for i in nodetraverse(l.head) do
+        texio.write_nl(i.id)
+      end
+      texio.write_nl("-end line-")
+    end
+  end--]]
+  return head
 end
 boustrophedon = function(head)
   rot = node.new(WHAT,PDF_LITERAL)
@@ -793,17 +836,22 @@ end
 randomcolor = function(head)
   for line in nodetraverseid(0,head) do
     for i in nodetraverseid(GLYPH,line.head) do
-      if not(randomcolor_onlytext) or
+--[[      if not(randomcolor_onlytext) or
          (node.has_attribute(i,luatexbase.attributes.randcolorattr))
-      then
+      then--]]
         color_push.data = randomcolorstring()  -- color or grey string
         line.head = nodeinsertbefore(line.head,i,nodecopy(color_push))
         nodeinsertafter(line.head,i,nodecopy(color_pop))
-      end
+--      end
     end
   end
   return head
 end
+
+pushcolor = function(head)
+  return head
+end
+
   sailheight = 12
   mastheight = 4
   hullheight = 5
@@ -1067,7 +1115,6 @@ texio.write_nl(exp_factor)
   end
   return head
 end
-
 function scorpionize_color(head)
   color_push.data = ".35 .55 .75 rg"
   nodeinsertafter(head,head,nodecopy(color_push))
