@@ -834,8 +834,12 @@ randomcolorstring = function()
   end
 end
 randomcolor = function(head)
+  for line in nodetraverse(head) do
+    texio.write_nl(line.id)
+--    texio.write_nl(line.next.id)
+  end
+  texio.write_nl("stahp")
   for line in nodetraverseid(0,head) do
---    for i in nodetraverseid(GLYPH,line.head) do
     for i in nodetraverse(line.head) do
       if i.id == GLYPH then
 --[[      if not(randomcolor_onlytext) or
@@ -846,9 +850,9 @@ randomcolor = function(head)
         nodeinsertafter(line.head,i,nodecopy(color_pop))
 --      end
 end
+
 if i.next then
 if i.next.id == HLIST then
-  texio.write_nl("hemlo")
   texio.write_nl(i.id)
   i.next = donix(i.next)
 end
@@ -858,11 +862,11 @@ end
   return head
 end
 
+--[[ the code should be recursive normally – transverse an hlist and if there's an hlist in the hlist, transverse that one and return it colored. Math does not seem to open a new hlist, so for now we just make one-depth iteration. Ugly but fulfils the need for now.]]--
 donix = function(line)
     texio.write_nl(line.id)
     for j in nodetraverse(line.head) do
       line.head = nodeinsertbefore(line.head,j,nodecopy(color_push))
---      nodeinsertafter(line.head,j,nodecopy(color_pop))
     end
 
   return line
